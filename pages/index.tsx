@@ -9,6 +9,7 @@ import {
   getTopStories,
   getPostsByTagSlug,
   getPostUrl,
+  setCategoryCache,
 } from '../lib/wordpress';
 import { WPPost } from '../types/wordpress';
 import { WPCategory } from '../types/wordpress';
@@ -149,7 +150,7 @@ export default function Home({
                       const cleanExcerpt = cleanHtmlContent(post.excerpt?.rendered || '');
                       const postDate = new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                       return (
-                        <Link key={post.id} href={getPostUrl(post)} className="block group">
+                         <Link key={post.id} href={getPostUrl(post, categories)} className="block group">
                           <div className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 h-full flex flex-col border border-gray-100">
                             <div className="w-full h-56 relative bg-gray-100 overflow-hidden flex-shrink-0">
                               {(post as any).featured_media_url ? (
@@ -205,6 +206,8 @@ export default function Home({
 
         <SportsSection posts={sportsPosts} categories={categories} isLast={true} />
 
+        <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent my-10 sm:my-12 lg:my-14" />
+
         <SpotlightSection posts={spotlightPosts} categories={categories} />
 
         <CombinedSection
@@ -245,6 +248,8 @@ export const getStaticProps: GetStaticProps = async () => {
       getTags(),
       getPostsByTagSlug('pin', 1),
     ]);
+
+    setCategoryCache(categories);
 
     const getCategoryIdByName = (categoryName: string): number => {
       const category = categories.find(

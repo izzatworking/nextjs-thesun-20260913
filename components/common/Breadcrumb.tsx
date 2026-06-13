@@ -153,6 +153,34 @@ export default function Breadcrumb({ items = [], currentPage, categories = [], c
           });
         }
       }
+    } else if (pathname.startsWith('/[...slug]')) {
+      // Handle catch-all post pages e.g. /news/some-article
+      const slugArray = query.slug as string[] | undefined;
+      
+      if (slugArray && slugArray.length >= 2) {
+        // Last segment is post slug, rest is category path
+        const postSlug = slugArray[slugArray.length - 1];
+        const categoryPath = slugArray.slice(0, -1);
+        
+        // Build category breadcrumbs from the path
+        for (let i = 0; i < categoryPath.length; i++) {
+          const segment = categoryPath[i];
+          const category = findCategoryBySlug(segment);
+          const href = '/' + categoryPath.slice(0, i + 1).join('/');
+          
+          breadcrumbs.push({
+            label: category ? category.name : (segment.charAt(0).toUpperCase() + segment.slice(1)),
+            href
+          });
+        }
+        
+        // Add post title
+        breadcrumbs.push({
+          label: postSlug.split('-').map(word => 
+            word.charAt(0).toUpperCase() + word.slice(1)
+          ).join(' '),
+        });
+      }
     } else if (pathname.startsWith('/posts/') || pathname.startsWith('/post/')) {
       const postSlug = query.slug as string;
       if (postSlug) {
@@ -239,24 +267,26 @@ export default function Breadcrumb({ items = [], currentPage, categories = [], c
   }
 
   return (
-    <nav className="bg-gray-50 border-b border-gray-200 py-3">
+    <nav className="bg-gray-50 border-b border-gray-200 py-2.5">
       <div className="container-optimized">
-        <ol className="flex items-center space-x-2 text-sm">
+        <ol className="flex items-center text-xs sm:text-sm">
           {breadcrumbItems.map((item, index) => (
             <li key={index} className="flex items-center">
               {index > 0 && (
-                <span className="mx-2 text-gray-400">/</span>
+                <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 mx-1.5 sm:mx-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
               )}
               
                {item.href ? (
                 <Link 
                   href={item.href}
-                  className="text-blue-600 hover:text-blue-800 hover:underline transition-colors font-medium"
+                  className="text-gray-500 hover:text-red-600 transition-colors"
                 >
                   {item.label}
                 </Link>
               ) : (
-                <span className="text-gray-700 font-semibold">
+                <span className="text-gray-900 font-medium">
                   {item.label}
                 </span>
               )}

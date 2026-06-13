@@ -6,8 +6,10 @@ import {
   getPostsByCategoryWithChildren,
   extractFeaturedMedia,
   getOriginalCategorySlug,
-  getShortenedCategorySlug
-, getPostUrl } from '../../lib/wordpress';
+  getShortenedCategorySlug,
+  getPostUrl,
+  setCategoryCache
+} from '../../lib/wordpress';
 import { 
   WPPost, 
   WPPostWithMedia,
@@ -278,15 +280,15 @@ export default function CategoryPage({
                          </span>
                       </div>
                       
-                       <Link href={getPostUrl(mainFeaturedPost)}>
-                         <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-4 leading-tight cursor-pointer hover:text-red-600 transition-colors duration-300"
-                             dangerouslySetInnerHTML={{ 
-                               __html: cleanHtmlContent(mainFeaturedPost.title.rendered) 
-                             }} />
-                       </Link>
-                       
-                       <Link
-                         href={getPostUrl(mainFeaturedPost)}
+                       <Link href={getPostUrl(mainFeaturedPost, allCategories)}>
+                          <h3 className="text-xl md:text-2xl font-bold text-slate-900 mb-4 leading-tight cursor-pointer hover:text-red-600 transition-colors duration-300"
+                              dangerouslySetInnerHTML={{ 
+                                __html: cleanHtmlContent(mainFeaturedPost.title.rendered) 
+                              }} />
+                        </Link>
+                        
+                        <Link
+                          href={getPostUrl(mainFeaturedPost, allCategories)}
                          className="inline-flex items-center bg-slate-900 hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 text-sm md:text-base"
                        >
                         Read Full Story
@@ -330,8 +332,8 @@ export default function CategoryPage({
                              </span>
                           </div>
                           
-                           <Link href={getPostUrl(post)}>
-                            <h4 className="text-sm font-semibold text-slate-900 mb-2 leading-tight cursor-pointer hover:text-red-600 transition-colors duration-300 line-clamp-2"
+                           <Link href={getPostUrl(post, allCategories)}>
+                             <h4 className="text-sm font-semibold text-slate-900 mb-2 leading-tight cursor-pointer hover:text-red-600 transition-colors duration-300 line-clamp-2"
                                 dangerouslySetInnerHTML={{ 
                                   __html: cleanHtmlContent(post.title.rendered) 
                                 }} />
@@ -376,7 +378,7 @@ export default function CategoryPage({
                   {moreStories.map((post) => (
                     <article key={post.id} className="bg-white rounded-xl border border-slate-200 overflow-hidden hover:shadow-lg transition-all duration-300">
                        {post.featured_media_url && (
-                         <Link href={getPostUrl(post)}>
+                         <Link href={getPostUrl(post, allCategories)}>
                            <div className="article-image h-48 overflow-hidden cursor-pointer relative">
                             <NetworkImage
                               src={post.featured_media_url}
@@ -399,7 +401,7 @@ export default function CategoryPage({
                            </span>
                         </div>
                         
-                         <Link href={getPostUrl(post)}>
+                         <Link href={getPostUrl(post, allCategories)}>
                            <h4 className="article-title text-lg font-bold text-slate-900 mb-3 leading-tight cursor-pointer hover:text-red-600 transition-colors duration-300"
                                dangerouslySetInnerHTML={{ 
                                  __html: cleanHtmlContent(post.title.rendered) 
@@ -415,7 +417,7 @@ export default function CategoryPage({
                          </div>
                         
                         <Link 
-                          href={`${getPostUrl(post)}`}
+                          href={`${getPostUrl(post, allCategories)}`}
                           className="text-slate-700 hover:text-red-600 font-medium text-sm transition-colors duration-300 inline-flex items-center"
                         >
                           Read More
@@ -572,6 +574,8 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       allPostsData = await getPostsByCategory(category.id, 50);
     }
     
+    setCategoryCache(allCategories);
+
     // Extract media untuk semua posts
     const allPosts: WPPostWithMedia[] = allPostsData.map(post => extractFeaturedMedia(post));
     

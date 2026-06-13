@@ -28,7 +28,7 @@ export default function Header({ categories = [], isSidebarOpen: externalIsOpen,
   const [isPaused, setIsPaused] = useState(false);
   const [breakingNews, setBreakingNews] = useState<BreakingNewsType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [showWorldCup, setShowWorldCup] = useState(true);
+  const [showWorldCup, setShowWorldCup] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
@@ -427,8 +427,7 @@ export default function Header({ categories = [], isSidebarOpen: externalIsOpen,
   };
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-slate-900 via-slate-800 to-indigo-900 text-white shadow-xl transition-transform duration-300 ${headerVisible ? 'translate-y-0' : '-translate-y-full'}`}>
-      {showWorldCup && <WorldCup2026Animation />}
+    <header className={`fixed top-0 left-0 right-0 z-50 bg-white text-gray-800 shadow-sm transition-transform duration-300 ${headerVisible ? 'translate-y-0' : '-translate-y-full'}`}>
       
       <div className="relative z-20">
         <BreakingNews
@@ -462,7 +461,7 @@ export default function Header({ categories = [], isSidebarOpen: externalIsOpen,
               
               <Link href="/" className="inline-block flex-shrink-0">
                 <img 
-                  src="/images/THESUN5.png"
+                  src="/images/thesun.png"
                   alt="THE SUN MALAYSIA"
                   className="h-20 sm:h-24 md:h-28 lg:h-36 w-auto cursor-pointer hover:opacity-90 transition-opacity"
                   onError={(e) => {

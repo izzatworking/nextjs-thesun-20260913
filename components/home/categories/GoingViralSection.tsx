@@ -32,7 +32,7 @@ export default function GoingViralSection({ posts, categories, isLast = false }:
   }
 
   return (
-    <div className="bg-gradient-to-br from-gray-900 via-blue-900 to-black rounded-3xl p-8 mb-16 shadow-2xl">
+    <div className="bg-gradient-to-b from-[#63B8EB] via-[#63B8EB]/70 to-white rounded-3xl p-8 mb-16 shadow-2xl">
       {/* Section Header dengan gaya viral/meme - Kekalkan warna oren */}
       <div className="mb-8 text-center">
         <div className="inline-block bg-gradient-to-r from-orange-500 to-red-600 px-8 py-4 rounded-full mb-4 shadow-xl">
@@ -43,7 +43,7 @@ export default function GoingViralSection({ posts, categories, isLast = false }:
             {sectionName}
           </h2>
         </div>
-        <p className="text-gray-300 text-lg font-medium">Trending topics everyone is talking about</p>
+        <p className="text-blue-900/70 text-lg font-medium">Trending topics everyone is talking about</p>
         <div className="w-32 h-1 bg-gradient-to-r from-orange-500 to-red-500 rounded-full mx-auto mt-4"></div>
       </div>
 
@@ -51,7 +51,7 @@ export default function GoingViralSection({ posts, categories, isLast = false }:
       <div className="mb-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {posts.slice(0, 6).map((post, index) => (
-            <div key={post.id} className="bg-gray-800/50 backdrop-blur-md rounded-xl shadow-2xl overflow-hidden hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.8)] transition-all duration-300 hover:-translate-y-2 group border border-gray-700/50">
+            <div key={post.id} className="bg-white/90 backdrop-blur-md rounded-xl shadow-2xl overflow-hidden hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.3)] transition-all duration-300 hover:-translate-y-2 group border border-white/50">
               {/* Viral Badge - Kekalkan warna oren/merah */}
               <div className="absolute top-4 right-4 z-10">
                 <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white text-xs px-4 py-2 rounded-full font-bold flex items-center shadow-lg">
@@ -76,16 +76,16 @@ export default function GoingViralSection({ posts, categories, isLast = false }:
                 </div>
               )}
               
-              <div className="p-6 bg-gradient-to-b from-gray-900/80 to-gray-900">
+              <div className="p-6 bg-gradient-to-b from-white to-blue-50">
                 <div className="mb-4">
-                  <span className="text-gray-400 text-xs font-medium">
+                  <span className="text-gray-500 text-xs font-medium">
                     {formatRelativeTime(post.date)}
                   </span>
                 </div>
                 
                 <Link href={`${getPostUrl(post)}`}>
                   <h4 
-                    className="font-bold text-white text-lg hover:text-orange-300 transition-colors cursor-pointer line-clamp-2 mb-4 leading-tight"
+                    className="font-bold text-gray-900 text-lg hover:text-blue-600 transition-colors cursor-pointer line-clamp-2 mb-4 leading-tight"
                     dangerouslySetInnerHTML={{ __html: cleanTextContent(post.title.rendered) }} 
                   />
                 </Link>
@@ -113,7 +113,7 @@ export default function GoingViralSection({ posts, categories, isLast = false }:
 
       {/* Line break - gradient gelap */}
       {!isLast && (
-        <div className="h-px bg-gradient-to-r from-transparent via-gray-700 to-transparent mt-8"></div>
+        <div className="h-px bg-gradient-to-r from-transparent via-blue-300 to-transparent mt-8"></div>
       )}
     </div>
   );

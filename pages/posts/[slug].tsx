@@ -1,6 +1,6 @@
 // pages/posts/[slug].tsx - Redirect to category-based URL
 import { GetStaticProps, GetStaticPaths } from 'next';
-import { getPost, getPosts, getCategoryById, generatePostUrl } from '../../lib/wordpress';
+import { getPost, getPosts, getCategoryById, getCategories, generatePostUrl, setCategoryCache } from '../../lib/wordpress';
 import { WPPostWithMedia } from '../../types/wordpress';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
@@ -63,7 +63,10 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   }
 
   try {
-    const post = await getPost(slug);
+    const [post, categories] = await Promise.all([
+      getPost(slug),
+      getCategories(),
+    ]);
     
     if (!post) {
       return {
@@ -71,8 +74,10 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       };
     }
 
+    setCategoryCache(categories);
+
     // Generate the correct category-based URL
-    const redirectUrl = generatePostUrl(post);
+    const redirectUrl = generatePostUrl(post, categories);
     
     return {
       props: {

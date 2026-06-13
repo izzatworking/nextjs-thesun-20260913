@@ -1,5 +1,5 @@
 import { GetStaticProps, GetStaticPaths } from 'next';
-import { getCategories, getPosts, getPostUrl } from '../../lib/wordpress';
+import { getCategories, getPosts, getPostUrl, setCategoryCache } from '../../lib/wordpress';
 import { WPAuthor, WPPostWithMedia, WPCategory } from '../../types/wordpress';
 import Layout from '../../components/layout/Layout';
 import Link from 'next/link';
@@ -132,7 +132,7 @@ export default function AuthorProfilePage({ author, posts, categories, latestPos
                   const excerpt = post.excerpt?.rendered ? cleanTextContent(post.excerpt.rendered) : '';
                   const img = (post as any).featured_media_url || '';
                   return (
-                    <Link key={post.id} href={getPostUrl(post)} className="group block">
+                    <Link key={post.id} href={getPostUrl(post, categories)} className="group block">
                       <article className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg hover:border-gray-200 transition-all duration-300 h-full">
                         <div className="aspect-[16/10] bg-gray-50 overflow-hidden">
                           {img ? (
@@ -227,6 +227,7 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
     }
 
     const [categories, latestPosts] = await Promise.all([getCategories(), getPosts(6)]);
+    setCategoryCache(categories);
 
     return {
       props: { author, posts: posts || [], categories: categories || [], latestPosts: latestPosts || [] },

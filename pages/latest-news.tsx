@@ -1,6 +1,6 @@
 import { GetStaticProps } from 'next';
 import Link from 'next/link';
-import { getPosts, getCategories, getPostUrl } from '../lib/wordpress';
+import { getPosts, getCategories, getPostUrl, setCategoryCache } from '../lib/wordpress';
 import { WPPostWithMedia, WPCategory } from '../types/wordpress';
 import Layout from '../components/layout/Layout';
 import { cleanTextContent } from '../components/home/utils/contentCleaner';
@@ -47,7 +47,7 @@ export default function LatestNewsPage({ posts, categories }: LatestNewsPageProp
               <article key={post.id} className="group relative pl-10 sm:pl-14">
                 <div className="absolute left-[7px] sm:left-[11px] top-1.5 w-[17px] h-[17px] sm:w-[19px] sm:h-[19px] rounded-full bg-white border-[3px] border-red-500 z-10 group-hover:scale-125 transition-transform duration-300 shadow-sm" />
 
-                <Link href={getPostUrl(post)} className="flex gap-4 sm:gap-6">
+                <Link href={getPostUrl(post, categories)} className="flex gap-4 sm:gap-6">
                   <div className="w-28 h-20 sm:w-40 sm:h-28 shrink-0 rounded-xl overflow-hidden bg-gray-100">
                     {post.featured_media_url ? (
                       <img
@@ -93,6 +93,7 @@ export default function LatestNewsPage({ posts, categories }: LatestNewsPageProp
 
 export const getStaticProps: GetStaticProps = async () => {
   const categories = await getCategories();
+  setCategoryCache(categories);
   const posts = await getPosts(20);
 
   return {

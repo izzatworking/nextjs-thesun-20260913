@@ -30,6 +30,37 @@ import type {
 
 const WORDPRESS_API_URL = process.env.NEXT_PUBLIC_WORDPRESS_REST_URL || 'https://thesun.my/wp-json/wp/v2';
 
+let cachedCategories: WPCategory[] | null = null;
+
+export function setCategoryCache(categories: WPCategory[]): void {
+  cachedCategories = categories;
+}
+
+export function getCategoryCache(): WPCategory[] | null {
+  return cachedCategories;
+}
+
+function resolvePostCategoryPath(post: WPPostWithMedia | WPPost, allCategories?: WPCategory[]): string {
+  const postCategoryIds = (post as WPPost).categories || [];
+  const categories = allCategories || cachedCategories;
+  if (categories && postCategoryIds.length > 0) {
+    const postCategories = categories.filter(cat => postCategoryIds.includes(cat.id));
+    if (postCategories.length > 0) {
+      const sorted = sortCategoriesByHierarchy(postCategories);
+      return sorted.map(cat => getShortenedCategorySlug(cat.slug)).join('/');
+    }
+  }
+  if ((post as WPPostWithMedia)._embedded?.['wp:term']?.[0]) {
+    const categoryTerms = (post as WPPostWithMedia)._embedded!['wp:term']![0] as WPCategory[];
+    const postCategories = categoryTerms.filter(cat => postCategoryIds.includes(cat.id));
+    if (postCategories.length > 0) {
+      const sorted = sortCategoriesByHierarchy(postCategories);
+      return sorted.map(cat => getShortenedCategorySlug(cat.slug)).join('/');
+    }
+  }
+  return 'news';
+}
+
 function processRESTPost(post: WPPost): WPPostWithMedia {
   const categories = Array.isArray(post.categories)
     ? post.categories.map(cat => typeof cat === 'object' ? (cat as WPCategory).id : cat)
@@ -811,25 +842,9 @@ export async function getChildCategories(parentId: number): Promise<WPCategory[]
     return [];
   }
 }
-export function generatePostUrl(post: WPPostWithMedia): string {
+export function generatePostUrl(post: WPPostWithMedia, allCategories?: WPCategory[]): string {
   if (!post) return '/';
-  let categoryPath = 'news';
-  if (post._embedded?.['wp:term']?.[0]) {
-    const categoryTerms = post._embedded['wp:term'][0] as WPCategory[];
-    const postCategoryIds = post.categories || [];
-    const postCategories = categoryTerms.filter(cat =>
-      postCategoryIds.includes(cat.id)
-    );
-    if (postCategories.length > 0) {
-      const sortedCategories = sortCategoriesByHierarchy(postCategories);
-      const categorySlugs = sortedCategories.map(cat =>
-        getShortenedCategorySlug(cat.slug)
-      );
-      categoryPath = categorySlugs.join('/');
-    }
-  } else if (post.categories && post.categories.length > 0) {
-    categoryPath = 'news';
-  }
+  const categoryPath = resolvePostCategoryPath(post, allCategories);
   const cleanCategoryPath = cleanCategoryPathForUrl(categoryPath);
   const cleanPostSlug = post.slug.toLowerCase().replace(/[^\w\-]/g, '').trim();
   return `/${cleanCategoryPath}/${cleanPostSlug}`;
@@ -862,26 +877,9 @@ function cleanCategoryPathForUrl(path: string): string {
     .replace(/^\/+|\/+$/g, '') || 'news';
 }
 
-export function getPostUrl(post: WPPostWithMedia | WPPost): string {
+export function getPostUrl(post: WPPostWithMedia | WPPost, allCategories?: WPCategory[]): string {
   if (!post) return '/';
-  const postWithMedia = post as WPPostWithMedia;
-  let categoryPath = 'news';
-  if (postWithMedia._embedded?.['wp:term']?.[0]) {
-    const categoryTerms = postWithMedia._embedded['wp:term'][0] as WPCategory[];
-    const postCategoryIds = post.categories || [];
-    const postCategories = categoryTerms.filter(cat =>
-      postCategoryIds.includes(cat.id)
-    );
-    if (postCategories.length > 0) {
-      const sortedCategories = sortCategoriesByHierarchy(postCategories);
-      const categorySlugs = sortedCategories.map(cat =>
-        getShortenedCategorySlug(cat.slug)
-      );
-      categoryPath = categorySlugs.join('/');
-    }
-  } else if (post.categories && post.categories.length > 0) {
-    categoryPath = 'news';
-  }
+  const categoryPath = resolvePostCategoryPath(post, allCategories);
   const cleanCategoryPath = cleanCategoryPathForUrl(categoryPath);
   const cleanPostSlug = post.slug.toLowerCase().replace(/[^\w\-]/g, '').trim();
   const url = `/${cleanCategoryPath}/${cleanPostSlug}`;
@@ -893,7 +891,7 @@ export function getPostUrl(post: WPPostWithMedia | WPPost): string {
       cleanCategoryPath,
       cleanPostSlug,
       finalUrl: url,
-      hasEmbedded: !!postWithMedia._embedded,
+      hasEmbedded: !!(post as WPPostWithMedia)._embedded,
       categories: post.categories
     });
   }

@@ -14,7 +14,8 @@ import {
   getCategoryHierarchy,
   generatePostUrl,
   getOriginalCategorySlug,
-  getShortenedCategorySlug
+  getShortenedCategorySlug,
+  setCategoryCache
 } from '@/lib/wordpress';
 import { cleanSlug, cleanCategorySlug } from '@/utils/slugCleaner';
 import he from 'he';
@@ -31,7 +32,7 @@ import NetworkImage from '@/components/common/NetworkImage';
 import { TimeAgo } from '@/components/common/TimeAgo';
 import { AdWidget } from '@/components/ads/AdWidget';
 import Link from 'next/link';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 
 interface PostProps {
   post: WPPostWithMedia;
@@ -122,12 +123,12 @@ const AuthorSection = ({ post }: { post: WPPostWithMedia }) => {
     return (
       <div className="flex items-center">
         <div className="flex items-center">
-          <div className="w-14 h-14 rounded-full bg-gradient-to-r from-red-500 to-orange-500 flex items-center justify-center mr-4 border-2 border-white shadow-lg">
-            <span className="text-white font-bold text-xl">S</span>
+          <div className="w-8 h-8 rounded-full bg-gradient-to-r from-red-500 to-orange-500 flex items-center justify-center mr-2 border border-white shadow">
+            <span className="text-white font-bold text-xs">S</span>
           </div>
           <div>
-            <span className="font-bold text-xl text-gray-900">The Sun Webdesk</span>
-            <p className="text-base text-gray-600">Editorial Team</p>
+            <span className="font-semibold text-sm text-gray-900">The Sun Webdesk</span>
+            <p className="text-xs text-gray-500">Editorial Team</p>
           </div>
         </div>
       </div>
@@ -137,7 +138,7 @@ const AuthorSection = ({ post }: { post: WPPostWithMedia }) => {
   if (typeof author === 'string') {
     return (
       <div className="flex items-center">
-        <span className="font-bold text-xl text-gray-900">The Sun Webdesk</span>
+        <span className="font-semibold text-sm text-gray-900">The Sun Webdesk</span>
       </div>
     );
   }
@@ -148,10 +149,10 @@ const AuthorSection = ({ post }: { post: WPPostWithMedia }) => {
     <div className="flex items-center">
       {authorSlug ? (
         <Link href={`/author/${authorSlug}`} className="hover:opacity-80 transition-opacity">
-          <span className="font-bold text-xl text-gray-900 hover:text-red-600 transition-colors">{displayName}</span>
+          <span className="font-semibold text-sm text-gray-900 hover:text-red-600 transition-colors">{displayName}</span>
         </Link>
       ) : (
-        <span className="font-bold text-xl text-gray-900">{displayName}</span>
+        <span className="font-semibold text-sm text-gray-900">{displayName}</span>
       )}
     </div>
   );
@@ -160,39 +161,42 @@ const AuthorSection = ({ post }: { post: WPPostWithMedia }) => {
 // Component untuk Latest Stories
 const LatestStories = ({ posts }: { posts: WPPostWithMedia[] }) => {
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-3 border-b-2 border-red-600">
-        Latest Stories
-      </h2>
-      <div className="space-y-6">
+    <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+      <div className="px-5 py-4 border-b border-gray-100">
+        <h2 className="text-sm font-bold text-gray-900 tracking-wide uppercase flex items-center gap-2">
+          <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+          Latest Stories
+        </h2>
+      </div>
+      <div className="divide-y divide-gray-50">
         {posts.slice(0, 5).map((post, index) => {
           return (
-            <div key={post.id} className="flex gap-4 pb-6 border-b border-gray-200 last:border-b-0">
-              <div className="flex-shrink-0 w-24 h-20">
+            <div key={post.id} className="flex gap-3 px-5 py-4 hover:bg-gray-50 transition-colors">
+              <div className="flex-shrink-0 w-20 h-16">
                 {post.featured_media_url ? (
                   <NetworkImage
                     src={post.featured_media_url}
                     alt={post.featured_media_alt || cleanTextContent(post.title.rendered)}
-                    width={96}
-                    height={80}
-                    className="w-full h-full object-cover rounded-lg"
+                    width={80}
+                    height={64}
+                    className="w-full h-full object-cover rounded-md"
                   />
                 ) : (
-                  <div className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center">
-                    <span className="text-gray-500 text-xs">No Image</span>
+                  <div className="w-full h-full bg-gray-100 rounded-md flex items-center justify-center">
+                    <span className="text-gray-400 text-[10px]">No Image</span>
                   </div>
                 )}
               </div>
 
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-gray-900 text-base leading-tight mb-2 line-clamp-2 hover:text-red-600 transition-colors">
+                <h3 className="font-medium text-gray-900 text-sm leading-snug line-clamp-2 hover:text-red-600 transition-colors">
                    <Link href={generatePostUrl(post)}>
-                    {cleanTextContent(post.title.rendered)}
-                  </Link>
-                </h3>
+                     {cleanTextContent(post.title.rendered)}
+                   </Link>
+                 </h3>
 
-                <div className="flex items-center text-xs text-gray-500">
-                  <TimeAgo dateString={post.date} />
+                 <div className="flex items-center text-[11px] text-gray-400 mt-1.5">
+                   <TimeAgo dateString={post.date} />
                 </div>
               </div>
             </div>
@@ -211,30 +215,33 @@ const PopularCategories = ({ categories }: { categories: WPCategory[] }) => {
   );
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 mt-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-3 border-b-2 border-red-600">
-        Popular Categories
-      </h2>
-      <div className="grid grid-cols-2 gap-4">
-        {popularCategories.map((category) => (
-          <Link
-            key={category.id}
-            href={`/category/${category.slug}`}
-            className="group flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-blue-50 to-blue-100 hover:from-red-50 hover:to-red-100 transition-all duration-300 border border-blue-200 hover:border-red-300"
-          >
-            <span className="font-semibold text-gray-900 group-hover:text-red-600 transition-colors">
-              {cleanTextContent(category.name)}
-            </span>
-            <svg
-              className="w-4 h-4 text-gray-400 group-hover:text-red-500 transform group-hover:translate-x-1 transition-all duration-300"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+    <div className="bg-white rounded-xl border border-gray-100 overflow-hidden mt-6">
+      <div className="px-5 py-4 border-b border-gray-100">
+        <h2 className="text-sm font-bold text-gray-900 tracking-wide uppercase flex items-center gap-2">
+          <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+          Popular Categories
+        </h2>
+      </div>
+      <div className="p-4">
+        <div className="flex flex-wrap gap-2">
+          {popularCategories.map((category) => (
+            <Link
+              key={category.id}
+              href={`/category/${category.slug}`}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-gray-50 hover:bg-red-50 text-gray-700 hover:text-red-600 text-xs font-medium transition-colors border border-gray-100 hover:border-red-200"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
-        ))}
+              <span>{cleanTextContent(category.name)}</span>
+              <svg
+                className="w-3 h-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -243,10 +250,12 @@ const PopularCategories = ({ categories }: { categories: WPCategory[] }) => {
 // Component untuk More Stories
 const MoreStoriesSection = ({
   initialPosts,
-  currentPostId
+  currentPostId,
+  categories
 }: {
   initialPosts: WPPostWithMedia[],
-  currentPostId: number
+  currentPostId: number,
+  categories: WPCategory[]
 }) => {
   const [posts, setPosts] = useState<WPPostWithMedia[]>(initialPosts.filter(p => p.id !== currentPostId).slice(0, 8));
   const [visibleCount, setVisibleCount] = useState(8);
@@ -279,21 +288,19 @@ const MoreStoriesSection = ({
   const hasMore = visibleCount < initialPosts.filter(p => p.id !== currentPostId).length;
 
   return (
-    <div className="w-full py-12 bg-gray-50 mt-12">
+    <div className="w-full py-10 bg-gray-50 mt-10">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between mb-8">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">More Stories You Might Like</h2>
-            <p className="text-gray-600">Discover more articles from our collection</p>
-          </div>
+        <div className="flex items-center gap-3 mb-6">
+          <span className="w-1 h-5 bg-red-500 rounded-full"></span>
+          <h2 className="text-lg font-bold text-gray-900">More Stories You Might Like</h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {posts.map((post) => {
             return (
-              <article key={post.id} className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow h-full">
+              <article key={post.id} className="bg-white rounded-lg border border-gray-100 overflow-hidden hover:border-gray-200 hover:shadow-sm transition-all h-full">
                 {post.featured_media_url && (
-                  <div className="w-full h-48 relative">
+                  <div className="w-full h-40 relative">
                     <NetworkImage
                       src={post.featured_media_url}
                       alt={post.featured_media_alt || cleanTextContent(post.title.rendered)}
@@ -304,20 +311,20 @@ const MoreStoriesSection = ({
                   </div>
                 )}
 
-                <div className="p-5">
-                  <h3 className="font-bold text-gray-900 text-xl mb-3 leading-tight hover:text-red-600 transition-colors line-clamp-2">
-                    <Link href={generatePostUrl(post)}>
+                <div className="p-3.5">
+                  <h3 className="font-semibold text-gray-900 text-sm leading-snug hover:text-red-600 transition-colors line-clamp-2">
+                    <Link href={generatePostUrl(post, categories)}>
                       {cleanTextContent(post.title.rendered)}
                     </Link>
                   </h3>
 
-                  <div className="flex items-center text-base text-gray-500 mb-3">
+                  <div className="flex items-center text-xs text-gray-400 mt-2">
                     <TimeAgo dateString={post.date} />
                   </div>
 
                   {post.excerpt?.rendered && (
                     <div
-                      className="text-gray-600 text-lg leading-relaxed line-clamp-3 content-font"
+                      className="text-gray-600 text-sm leading-relaxed line-clamp-3 content-font"
                       dangerouslySetInnerHTML={{
                         __html: cleanHtmlContent(
                           post.excerpt.rendered.replace(/<[^>]*>/g, '').substring(0, 150) + '...'
@@ -333,11 +340,11 @@ const MoreStoriesSection = ({
 
         {/* Load More Button */}
         {hasMore && !allPostsLoaded && (
-          <div className="mt-12 text-center">
+          <div className="mt-8 text-center">
             <button
               onClick={loadMore}
               disabled={loading}
-              className="w-full max-w-[300px] mx-auto px-8 py-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+              className="w-full max-w-[200px] mx-auto px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium text-sm rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5"
             >
               {loading ? (
                 <>
@@ -349,8 +356,8 @@ const MoreStoriesSection = ({
                 </>
               ) : (
                 <>
-                  <span>Load More Articles</span>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <span>Load More</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </>
@@ -360,8 +367,8 @@ const MoreStoriesSection = ({
         )}
 
         {allPostsLoaded && (
-          <div className="text-center mt-12 pt-6 border-t border-gray-300">
-            <p className="text-gray-600">You&apos;ve reached the end of the articles</p>
+          <div className="text-center mt-8 pt-4 border-t border-gray-200">
+            <p className="text-gray-500 text-sm">You&apos;ve reached the end of the articles</p>
           </div>
         )}
       </div>
@@ -369,7 +376,7 @@ const MoreStoriesSection = ({
   );
 };
 
-// Social Share Component
+// Social Share Component - minimal and modern
 const SocialShare = ({ title, post }: { title: string, post: WPPostWithMedia }) => {
   const articlePath = generatePostUrl(post);
   const articleUrl = `https://thesun.my${articlePath}`;
@@ -379,7 +386,6 @@ const SocialShare = ({ title, post }: { title: string, post: WPPostWithMedia }) 
 
   const shareLinks = {
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
-    instagram: `https://www.instagram.com/thesun.my/`,
     twitter: `https://x.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}&via=theSundaily`,
     whatsapp: `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`,
     telegram: `https://t.me/share/url?url=${encodedUrl}&text=${encodedTitle}`,
@@ -387,32 +393,17 @@ const SocialShare = ({ title, post }: { title: string, post: WPPostWithMedia }) 
   };
 
   return (
-    <div className="flex items-center gap-3">
-      <span className="text-gray-600 font-medium">Share:</span>
-      <div className="flex items-center gap-2">
+    <div className="flex items-center flex-shrink-0">
+      <div className="flex items-center gap-0.5 sm:gap-1">
         <a
           href={shareLinks.facebook}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-8 h-8 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded-full transition-colors"
+          className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-full transition-colors"
           aria-label="Share on Facebook"
-          title="Share on Facebook"
         >
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-          </svg>
-        </a>
-
-        <a
-          href={shareLinks.instagram}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="w-8 h-8 flex items-center justify-center bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-full transition-colors"
-          aria-label="Follow on Instagram"
-          title="Follow on Instagram"
-        >
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM5.838 12a6.162 6.162 0 1112.324 0 6.162 6.162 0 01-12.324 0zM12 16a4 4 0 110-8 4 4 0 010 8zm4.965-10.405a1.44 1.44 0 112.881.001 1.44 1.44 0 01-2.881-.001z"/>
           </svg>
         </a>
 
@@ -420,11 +411,10 @@ const SocialShare = ({ title, post }: { title: string, post: WPPostWithMedia }) 
           href={shareLinks.twitter}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-8 h-8 flex items-center justify-center bg-gray-900 hover:bg-gray-800 text-white rounded-full transition-colors"
+          className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-gray-700 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
           aria-label="Share on X"
-          title="Share on X"
         >
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
           </svg>
         </a>
@@ -433,11 +423,10 @@ const SocialShare = ({ title, post }: { title: string, post: WPPostWithMedia }) 
           href={shareLinks.whatsapp}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-8 h-8 flex items-center justify-center bg-green-500 hover:bg-green-600 text-white rounded-full transition-colors"
+          className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-green-500 hover:text-green-600 bg-green-50 hover:bg-green-100 rounded-full transition-colors"
           aria-label="Share on WhatsApp"
-          title="Share on WhatsApp"
         >
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.76.982.998-3.675-.236-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.9 6.994c-.004 5.45-4.436 9.88-9.885 9.88m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.333.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.333 11.893-11.893 0-3.18-1.24-6.162-3.495-8.411"/>
           </svg>
         </a>
@@ -446,11 +435,10 @@ const SocialShare = ({ title, post }: { title: string, post: WPPostWithMedia }) 
           href={shareLinks.telegram}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-8 h-8 flex items-center justify-center bg-blue-500 hover:bg-blue-600 text-white rounded-full transition-colors"
+          className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-blue-500 hover:text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-full transition-colors"
           aria-label="Share on Telegram"
-          title="Share on Telegram"
         >
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.064-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
           </svg>
         </a>
@@ -459,11 +447,10 @@ const SocialShare = ({ title, post }: { title: string, post: WPPostWithMedia }) 
           href={shareLinks.email}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-8 h-8 flex items-center justify-center bg-gray-600 hover:bg-gray-700 text-white rounded-full transition-colors"
+          className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
           aria-label="Share via Email"
-          title="Share via Email"
         >
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+          <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
           </svg>
         </a>
@@ -493,24 +480,22 @@ const PostTags = ({ tags, allTags }: { tags: number[], allTags: WPTag[] }) => {
   if (postTags.length === 0) return null;
 
   return (
-    <div className="mt-12 pt-8 border-t border-gray-200">
-      <div className="flex items-center gap-2 mb-4">
-        <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div className="mt-8 pt-6 border-t border-gray-100">
+      <div className="flex items-center gap-2 mb-3">
+        <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
         </svg>
-        <h3 className="text-lg font-bold text-gray-900">Tags</h3>
+        <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Tags</h3>
       </div>
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-2">
         {postTags.map((tag) => (
           <Link
             key={tag.id}
             href={`/tag/${tag.slug}`}
-            className="group relative inline-flex items-center bg-gradient-to-r from-gray-50 to-gray-100 hover:from-red-50 hover:to-orange-50 border-2 border-gray-200 hover:border-red-300 text-gray-700 hover:text-red-600 text-sm font-medium px-4 py-2 rounded-full transition-all duration-300 hover:shadow-md"
+            className="group relative inline-flex items-center px-3 py-1.5 text-xs font-medium text-gray-600 border border-gray-200 rounded-md overflow-hidden transition-all duration-300"
           >
-            <span>{cleanTextContent(tag.name)}</span>
-            
-            {/* Hover effect overlay */}
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-red-500 to-orange-500 opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
+            <span className="relative z-10 group-hover:text-red-600 transition-colors duration-300">{cleanTextContent(tag.name)}</span>
+            <div className="absolute inset-0 bg-gradient-to-r from-red-50 via-red-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           </Link>
         ))}
       </div>
@@ -527,34 +512,9 @@ export default function Post({
   currentCategory
 }: PostProps) {
   const [content, setContent] = useState('');
-  const [showShareDropdown, setShowShareDropdown] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const shareDropdownRef = useRef<HTMLDivElement>(null);
   
-  const articlePath = generatePostUrl(post);
+  const articlePath = generatePostUrl(post, categories);
   const articleUrl = `https://thesun.my${articlePath}`;
-  
-  const handleCopyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(articleUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy:', err);
-    }
-  };
-  
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (shareDropdownRef.current && !shareDropdownRef.current.contains(event.target as Node)) {
-        setShowShareDropdown(false);
-      }
-    };
-    
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   useEffect(() => {
     if (post.content.rendered) {
@@ -563,7 +523,7 @@ export default function Post({
 
       processedContent = processedContent.replace(
         /<img/g,
-        '<img class="max-w-[800px] w-full h-auto rounded-lg shadow-md my-6 mx-auto"'
+        '<img class="max-w-[800px] w-full h-auto rounded-lg my-4 mx-auto"'
       );
       
       // Add styling for image captions (figcaption elements)
@@ -604,34 +564,34 @@ export default function Post({
 
       processedContent = processedContent.replace(
         /<p>/g,
-        '<p class="text-gray-700 leading-relaxed mb-6 text-2xl max-w-4xl mx-auto content-font">'
+        '<p class="text-gray-700 leading-relaxed mb-4 text-sm max-w-4xl mx-auto content-font">'
       );
 
       processedContent = processedContent.replace(
         /<h1>/g,
-        '<h1 class="text-5xl font-bold text-gray-900 mt-10 mb-6 max-w-4xl mx-auto">'
+        '<h1 class="text-xl md:text-2xl font-bold text-gray-900 mt-6 mb-3 max-w-4xl mx-auto">'
       );
       processedContent = processedContent.replace(
         /<h2>/g,
-        '<h2 class="text-5xl font-bold text-gray-900 mt-10 mb-6 max-w-4xl mx-auto">'
+        '<h2 class="text-xl md:text-2xl font-bold text-gray-900 mt-6 mb-3 max-w-4xl mx-auto">'
       );
       processedContent = processedContent.replace(
         /<h3>/g,
-        '<h3 class="text-3xl font-bold text-gray-900 mt-6 mb-3 max-w-4xl mx-auto">'
+        '<h3 class="text-lg font-bold text-gray-900 mt-5 mb-2 max-w-4xl mx-auto">'
       );
 
       processedContent = processedContent.replace(
         /<ul>/g,
-        '<ul class="list-disc list-inside mb-6 text-gray-700 text-2xl max-w-4xl mx-auto content-font">'
+        '<ul class="list-disc list-inside mb-4 text-gray-700 text-sm max-w-4xl mx-auto content-font">'
       );
       processedContent = processedContent.replace(
         /<ol>/g,
-        '<ol class="list-decimal list-inside mb-6 text-gray-700 text-2xl max-w-4xl mx-auto content-font">'
+        '<ol class="list-decimal list-inside mb-4 text-gray-700 text-sm max-w-4xl mx-auto content-font">'
       );
 
       processedContent = processedContent.replace(
         /<blockquote>/g,
-        '<blockquote class="border-l-4 border-red-500 pl-4 italic text-gray-600 my-6 text-2xl max-w-4xl mx-auto content-font">'
+        '<blockquote class="border-l-4 border-red-500 pl-4 italic text-gray-600 my-5 text-sm max-w-4xl mx-auto content-font">'
       );
 
       // Check if author is AFP, Reuters, or Bernama and add suffix to content
@@ -670,7 +630,7 @@ export default function Post({
                               processedContent.substring(lastParagraphIndex);
           } else {
             // If no </p> tag found, append suffix at the end
-            processedContent += `<p class="text-gray-700 leading-relaxed mb-6 text-xl max-w-4xl mx-auto content-font">${authorSuffix}</p>`;
+            processedContent += `<p class="text-gray-700 leading-relaxed mb-4 text-sm max-w-4xl mx-auto content-font">${authorSuffix}</p>`;
           }
         }
       }
@@ -687,232 +647,127 @@ export default function Post({
       title={`${cleanTitle} | The Sun Malaysia`}
       description={cleanTextContent(post.excerpt.rendered) || 'Read this article on The Sun Malaysia'}
     >
-      <div className="min-h-screen bg-white py-8">
+      <div className="min-h-screen bg-white">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex flex-col lg:flex-row gap-8">
             <div className="lg:w-3/4">
-                 <article className="bg-white rounded-xl shadow-lg overflow-hidden">
-                   <div className="p-8 max-w-4xl mx-auto">
-                     {/* 1. Category Tags */}
-                     {post.categories && post.categories.length > 0 && (
-                       <div className="mb-4">
-                         <div className="flex flex-wrap gap-2">
-                           {post.categories.map((categoryId: number, index: number) => {
-                             const category = categories.find(cat => cat.id === categoryId);
-                             return (
-                               <Link
-                                 key={index}
-                                 href={`/category/${category?.slug || 'news'}`}
-                                 className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white text-xl px-6 py-2 rounded-full font-bold shadow-lg hover:shadow-xl transition-all duration-300"
-                               >
-                                 {category ? cleanTextContent(category.name) : 'Uncategorized'}
-                               </Link>
-                             );
-                           })}
-                         </div>
-                       </div>
-                     )}
-                     
-                     {/* 2. Title - Selepas category */}
-                     <h1 className="text-5xl font-bold text-gray-900 mb-8 leading-tight">
-                       {cleanTitle}
-                     </h1>
-                   </div>
+              <article className="bg-white overflow-hidden">
+                <div className="max-w-4xl mx-auto pt-8 px-4 md:px-0">
+                  {/* 1. Category Tags - Parent/Child hierarchy */}
+                  {post.categories && post.categories.length > 0 && (
+                    <div className="mb-5">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        {post.categories.map((categoryId: number, index: number) => {
+                          const category = categories.find(cat => cat.id === categoryId);
+                          if (!category) return null;
 
-                {/* 2. Featured Image - Selepas title */}
+                          const parentCategory = category.parent && category.parent > 0
+                            ? categories.find(cat => cat.id === category.parent)
+                            : null;
+
+                          return (
+                            <div key={index} className="flex items-center gap-1.5">
+                              {index > 0 && (
+                                <span className="text-gray-300 mx-0.5">|</span>
+                              )}
+                              {parentCategory && (
+                                <>
+                                  <Link
+                                    href={`/category/${parentCategory.slug}`}
+                                    className="text-[11px] font-medium text-gray-400 hover:text-red-500 uppercase tracking-wider transition-colors"
+                                  >
+                                    {cleanTextContent(parentCategory.name)}
+                                  </Link>
+                                  <svg className="w-3 h-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                  </svg>
+                                </>
+                              )}
+                              <Link
+                                href={`/category/${category.slug || 'news'}`}
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-red-600 hover:bg-red-700 text-white text-[11px] font-semibold uppercase tracking-wider rounded-md transition-colors"
+                              >
+                                {cleanTextContent(category.name)}
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                </svg>
+                              </Link>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 2. Title + Share inline */}
+                  <div className="flex flex-col md:flex-row md:items-start md:justify-between md:gap-4">
+                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight md:flex-1 mb-3 md:mb-0">
+                      {cleanTitle}
+                    </h1>
+                    <div className="flex-shrink-0 self-start md:self-auto md:pt-1.5">
+                      <SocialShare title={cleanTitle} post={post} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Featured Image */}
                 {post.featured_media_url && (
-                  <div className="w-full max-w-[1200px] mx-auto px-8 pb-8">
+                  <div className="w-full max-w-[1200px] mx-auto px-4 md:px-0 mt-6">
                     <NetworkImage
                       src={post.featured_media_url}
                       alt={post.featured_media_alt || cleanTitle}
                       width={1200}
                       height={post.featured_media_height || 675}
-                      className="w-full h-auto max-h-[600px] object-contain mx-auto rounded-lg shadow-lg"
+                      className="w-full h-auto max-h-[500px] object-contain mx-auto rounded-lg"
                       priority={true}
                       sizes="(max-width: 768px) 100vw, 1200px"
                     />
-                    {/* Image Caption */}
                     {post.featured_media_caption && (
                       <div 
-                        className="text-center text-sm text-gray-500 mt-2 italic"
+                        className="text-center text-xs text-gray-500 mt-1 italic"
                         dangerouslySetInnerHTML={{ __html: post.featured_media_caption }}
                       />
                     )}
                   </div>
                 )}
 
-                <div className="p-8 max-w-4xl mx-auto">
-                    {/* 3. Author + Date + Share Row */}
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 pb-6 border-b border-gray-200">
-                      {/* Author on the left */}
-                      <div className="flex-1">
-                        <AuthorSection post={post} />
-                      </div>
-                      
-                      {/* Date and Share on the right */}
-                      <div className="flex items-center space-x-4">
-                        {/* Date */}
-                        <div className="flex items-center space-x-2 text-gray-600 bg-gray-50 px-4 py-3 rounded-lg">
-                          <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                          <span className="font-bold text-lg"><TimeAgo dateString={post.date} format="full" /></span>
-                        </div>
-                        
-                        {/* Share Button */}
-                        <div className="relative" ref={shareDropdownRef}>
-                          <button
-                            onClick={() => setShowShareDropdown(!showShareDropdown)}
-                            className="w-8 h-8 flex items-center justify-center bg-gray-800 hover:bg-gray-900 text-white rounded-lg transition-colors duration-300 shadow hover:shadow-md"
-                            aria-label="Share options"
-                            title="Share options"
-                          >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                            </svg>
-                          </button>
-                          
-                          {/* Dropdown Menu */}
-                          {showShareDropdown && (
-                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl z-50 border border-gray-200">
-                              <div className="py-1">
-                                {/* Facebook */}
-                                <a
-                                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(articleUrl)}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                                  onClick={() => setShowShareDropdown(false)}
-                                >
-                                  <div className="w-5 h-5 flex items-center justify-center mr-3 text-blue-600">
-                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                                    </svg>
-                                  </div>
-                                  <span>Facebook</span>
-                                </a>
-                                
-                                {/* X (Twitter) */}
-                                <a
-                                   href={`https://x.com/intent/tweet?text=${encodeURIComponent(cleanTitle)}&url=${encodeURIComponent(articleUrl)}&via=thesun.my`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                                  onClick={() => setShowShareDropdown(false)}
-                                >
-                                  <div className="w-5 h-5 flex items-center justify-center mr-3 text-gray-900">
-                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                                    </svg>
-                                  </div>
-                                  <span>X (Twitter)</span>
-                                </a>
-                                
-                                {/* WhatsApp */}
-                                <a
-                                  href={`https://wa.me/?text=${encodeURIComponent(cleanTitle + ' - ' + articleUrl)}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                                  onClick={() => setShowShareDropdown(false)}
-                                >
-                                  <div className="w-5 h-5 flex items-center justify-center mr-3 text-green-500">
-                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.76.982.998-3.675-.236-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.9 6.994c-.004 5.45-4.436 9.88-9.885 9.88m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.333.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.333 11.893-11.893 0-3.18-1.24-6.162-3.495-8.411"/>
-                                    </svg>
-                                  </div>
-                                  <span>WhatsApp</span>
-                                </a>
-                                
-                                {/* Telegram */}
-                                <a
-                                  href={`https://t.me/share/url?url=${encodeURIComponent(articleUrl)}&text=${encodeURIComponent(cleanTitle)}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                                  onClick={() => setShowShareDropdown(false)}
-                                >
-                                  <div className="w-5 h-5 flex items-center justify-center mr-3 text-blue-500">
-                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                      <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.064-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-                                    </svg>
-                                  </div>
-                                  <span>Telegram</span>
-                                </a>
-                                
-                                {/* Email */}
-                                <a
-                                  href={`mailto:?subject=${encodeURIComponent(cleanTitle)}&body=${encodeURIComponent('Check out this article: ' + articleUrl)}`}
-                                  className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                                  onClick={() => setShowShareDropdown(false)}
-                                >
-                                  <div className="w-5 h-5 flex items-center justify-center mr-3 text-gray-600">
-                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                      <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
-                                    </svg>
-                                  </div>
-                                  <span>Email</span>
-                                </a>
-                                
-                                {/* Divider */}
-                                <div className="border-t border-gray-200 my-1"></div>
-                                
-                                {/* Copy Link */}
-                                <button
-                                  onClick={() => {
-                                    handleCopyLink();
-                                    setShowShareDropdown(false);
-                                  }}
-                                  className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
-                                >
-                                  <div className="w-5 h-5 flex items-center justify-center mr-3 text-gray-600">
-                                    {copied ? (
-                                      <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                      </svg>
-                                    ) : (
-                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                    </svg>
-                                    )}
-                                  </div>
-                                  <span>{copied ? 'Copied!' : 'Copy Link'}</span>
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                <div className="max-w-4xl mx-auto px-4 md:px-0 mt-6">
+                  {/* 4. Byline + Date row */}
+                  <div className="flex flex-wrap items-center gap-3 mb-6 pb-4 border-b border-gray-200">
+                    <AuthorSection post={post} />
+                    <span className="text-gray-300">|</span>
+                    <div className="flex items-center text-gray-500">
+                      <svg className="w-3.5 h-3.5 text-red-500 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span className="text-xs font-medium"><TimeAgo dateString={post.date} format="full" /></span>
                     </div>
-                    
+                  </div>
 
-
-                     {/* 5. Content */}
-                    {content && (
-                      <div
-                        className="prose prose-2xl max-w-none content-font 
-                          prose-p:text-3xl prose-p:leading-[1.8] prose-p:tracking-wide prose-p:mb-8
-                          prose-h3:text-3xl prose-h3:leading-normal prose-h3:tracking-normal prose-h3:mb-4 prose-h3:mt-7
-                          prose-h4:text-2xl prose-h4:leading-normal prose-h4:tracking-wide prose-h4:mb-3 prose-h4:mt-6
-                          prose-h5:text-xl prose-h5:leading-relaxed prose-h5:tracking-wide prose-h5:mb-3 prose-h5:mt-5
-                          prose-h6:text-lg prose-h6:leading-relaxed prose-h6:tracking-wide prose-h6:mb-2 prose-h6:mt-4
-                          prose-ul:text-3xl prose-ul:leading-relaxed prose-ul:tracking-wide prose-ul:mb-6
-                          prose-ol:text-3xl prose-ol:leading-relaxed prose-ol:tracking-wide prose-ol:mb-6
-                          prose-li:mb-3 prose-li:tracking-wide
-                          prose-blockquote:text-2xl prose-blockquote:leading-loose prose-blockquote:tracking-wide prose-blockquote:my-8
-                          prose-figcaption:text-base prose-figcaption:leading-relaxed prose-figcaption:tracking-wider"
-                        dangerouslySetInnerHTML={{ __html: content }}
-                      />
-                    )}
+                  {/* 5. Content */}
+                  {content && (
+                    <div
+                      className="prose max-w-none content-font 
+                        prose-p:text-sm prose-p:leading-relaxed prose-p:mb-4
+                        prose-h3:text-lg prose-h3:leading-normal prose-h3:mb-2 prose-h3:mt-5
+                        prose-h4:text-base prose-h4:leading-normal prose-h4:mb-2 prose-h4:mt-4
+                        prose-h5:text-sm prose-h5:leading-relaxed prose-h5:mb-1.5 prose-h5:mt-3
+                        prose-h6:text-xs prose-h6:leading-relaxed prose-h6:mb-1.5 prose-h6:mt-2.5
+                        prose-ul:text-sm prose-ul:leading-relaxed prose-ul:mb-4
+                        prose-ol:text-sm prose-ol:leading-relaxed prose-ol:mb-4
+                        prose-li:mb-1
+                        prose-blockquote:text-sm prose-blockquote:leading-relaxed prose-blockquote:my-5
+                        prose-figcaption:text-xs prose-figcaption:leading-relaxed"
+                      dangerouslySetInnerHTML={{ __html: content }}
+                    />
+                  )}
 
                   {/* 6. Tags */}
                   {post.tags && post.tags.length > 0 && (
                     <PostTags tags={post.tags} allTags={allTags} />
                   )}
-                  
-                  {/* Taboola Mid Article Widget - Below Tags */}
-                  <div className="mt-12 pt-8 border-t border-gray-200">
-                    <AdWidget type="taboola" containerId="taboola-mid-article-thumbnails" />
+
+                  <div className="mt-8 pt-6 border-t border-gray-200">
                   </div>
                 </div>
               </article>
@@ -921,16 +776,10 @@ export default function Post({
             <div className="lg:w-1/4">
               <LatestStories posts={latestPosts} />
               <PopularCategories categories={categories} />
-              
-              {/* Ad Widget 1 - Below Popular Categories */}
               <div className="mt-6 bg-white rounded-lg shadow-lg p-4">
-                <AdWidget type="mgwidget" widgetId="1884419" />
               </div>
-              
-              {/* Ad Widget 2 - Below Ad Widget 1 */}
               <div className="mt-6 bg-white rounded-lg shadow-lg p-4">
                 <div id="mg-ad-placeholder-2"></div>
-                {/* Additional ad placeholder */}
               </div>
             </div>
           </div>
@@ -940,6 +789,7 @@ export default function Post({
           <MoreStoriesSection
             initialPosts={initialMorePosts}
             currentPostId={post.id}
+            categories={categories}
           />
         )}
        </div>
@@ -1039,6 +889,8 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       getCategories(),
       getPosts(50),
     ]);
+
+    setCategoryCache(categories);
     
     // Fetch tags specific to this post
     const postTagIds = post.tags || [];

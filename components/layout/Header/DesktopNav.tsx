@@ -77,23 +77,18 @@ export default function DesktopNav({
         >
            <button
             onClick={() => toggleDropdown(item.id)}
-              className={`flex items-center font-medium transition-all duration-200 py-1 px-1.5 lg:px-2 rounded-lg border ${
+              className={`flex items-center font-medium py-1 px-1.5 lg:px-2 rounded-lg border ${
                 isActive 
-                  ? 'text-white bg-slate-800 border-slate-600 shadow-lg' 
-                  : 'text-white hover:text-blue-300 border-transparent hover:bg-slate-800 hover:border-slate-600'
-              } text-sm relative z-10 transform-gpu`}
+                  ? 'text-gray-900 bg-gray-100 border-red-400' 
+                  : 'text-gray-700 hover:text-gray-900 border-transparent hover:border-red-400'
+              } text-sm relative z-10`}
           >
             <span className="relative whitespace-nowrap">
               {item.name}
-              {item.hot && (
-                <span className="ml-1 text-xs bg-red-500 text-white px-1 py-0.5 rounded-full animate-pulse">
-                  HOT
-                </span>
-              )}
             </span>
             <svg 
-              className={`ml-1 w-3 h-3 transition-transform duration-200 ${
-                isActive ? 'rotate-180 text-blue-400' : 'text-gray-400'
+              className={`ml-1 w-3 h-3 ${
+                isActive ? 'rotate-180 text-gray-500' : 'text-gray-400'
               }`}
               fill="none" 
               stroke="currentColor" 
@@ -103,8 +98,8 @@ export default function DesktopNav({
             </svg>
             
             {/* Hover indicator line */}
-            <span className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 w-6 h-0.5 bg-blue-400 transition-all duration-200 ${
-              isActive ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0 group-hover:opacity-100 group-hover:scale-x-100'
+            <span className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-red-500 ${
+              isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
             }`} />
           </button>
 
@@ -113,7 +108,7 @@ export default function DesktopNav({
               ref={el => {
                 if (el) dropdownRefs.current[item.id] = el;
               }}
-              className="absolute top-full left-0 mt-1 w-56 bg-slate-800 border border-slate-600 rounded-lg shadow-2xl z-[9999] overflow-hidden"
+              className="absolute top-full left-0 mt-1 w-56 bg-white border border-gray-200 rounded-lg shadow-2xl z-[9999] overflow-hidden"
               style={{
                 maxHeight: dropdownHeight > 250 ? '250px' : 'auto',
                 transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -133,14 +128,14 @@ export default function DesktopNav({
                   {/* All items link */}
                   <Link
                     href={item.slug.startsWith('/') ? item.slug : `/category/${item.slug}`}
-                    className="group/all block px-4 py-3 text-white hover:bg-slate-700 transition-all duration-200 rounded-lg mb-2 border-b border-slate-600 bg-gradient-to-r from-slate-700 to-slate-800 hover:from-blue-900 hover:to-slate-800"
+                    className="group/all block px-4 py-3 text-gray-700 hover:bg-gray-100 transition-all duration-200 rounded-lg mb-2 border-b border-gray-200 bg-white hover:bg-gray-50"
                     onClick={() => setActiveDropdown(null)}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-bold group-hover/all:text-blue-300 transition-colors duration-200">
+                      <span className="font-bold group-hover/all:text-gray-700 transition-colors duration-200">
                         All {item.name}
                       </span>
-                      <svg className="w-4 h-4 text-blue-400 group-hover/all:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-gray-500 group-hover/all:translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     </div>
@@ -154,17 +149,17 @@ export default function DesktopNav({
                         <Link
                           key={subItem.id}
                           href={subHref}
-                          className="group/sub block px-4 py-3 text-slate-300 hover:text-white hover:bg-slate-700 transition-all duration-200 rounded-lg hover:shadow-md transform-gpu hover:scale-[1.02]"
+                          className="group/sub block px-4 py-3 text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200 rounded-lg transform-gpu hover:scale-[1.02]"
                           onClick={() => setActiveDropdown(null)}
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center min-w-0">
-                              <div className="flex-shrink-0 w-1.5 h-1.5 bg-blue-400 rounded-full mr-3 group-hover/sub:scale-125 transition-transform duration-200"></div>
+                              <div className="flex-shrink-0 w-1.5 h-1.5 bg-gray-400 rounded-full mr-3 group-hover/sub:scale-125 transition-transform duration-200"></div>
                               <span className="text-sm truncate group-hover/sub:translate-x-1 transition-transform duration-200">
                                 {subItem.name}
                               </span>
                             </div>
-                            <svg className="flex-shrink-0 w-3 h-3 text-slate-500 group-hover/sub:text-green-400 group-hover/sub:translate-x-1 transition-all duration-200 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="flex-shrink-0 w-3 h-3 text-gray-400 group-hover/sub:text-gray-600 group-hover/sub:translate-x-1 transition-all duration-200 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                             </svg>
                           </div>
@@ -177,8 +172,8 @@ export default function DesktopNav({
               
                {/* Show indicator if there are many items */}
               {dropdownHeight > 250 && (
-                <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-slate-800 to-transparent pointer-events-none flex items-center justify-center">
-                  <div className="w-5 h-0.5 bg-blue-400/30 rounded-full"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-white to-transparent pointer-events-none flex items-center justify-center">
+                  <div className="w-5 h-0.5 bg-gray-400/30 rounded-full"></div>
                 </div>
               )}
             </div>
@@ -190,22 +185,17 @@ export default function DesktopNav({
     return (
          <Link
             href={item.slug.startsWith('/') ? item.slug : item.name === 'Home' ? '/' : `/category/${item.slug}`}
-              className="group relative flex items-center text-white hover:text-blue-300 font-medium transition-all duration-200 py-1 px-1.5 lg:px-2 rounded-lg hover:bg-slate-800 border border-transparent hover:border-slate-600 text-sm transform-gpu"
+              className="group relative flex items-center text-gray-700 hover:text-gray-900 py-1 px-1.5 lg:px-2 rounded-lg border border-transparent hover:border-red-400 text-sm"
             key={item.id}
             onMouseEnter={() => handleMouseEnter(item.id)}
             onMouseLeave={handleMouseLeave}
           >
             <span className="whitespace-nowrap">
               {item.name}
-              {item.hot && (
-                <span className="ml-1 text-xs bg-red-500 text-white px-1 py-0.5 rounded-full animate-pulse">
-                  HOT
-                </span>
-              )}
             </span>
             
             {/* Hover indicator line */}
-            <span className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-6 h-0.5 bg-blue-400 transition-all duration-200 opacity-0 scale-x-0 group-hover:opacity-100 group-hover:scale-x-100" />
+            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-red-500 opacity-0 group-hover:opacity-100" />
           </Link>
     );
   };
@@ -223,16 +213,16 @@ export default function DesktopNav({
       >
          <button
           onClick={() => toggleDropdown(item.id)}
-           className={`flex items-center font-medium transition-all duration-200 py-1 px-1.5 lg:px-2 rounded-lg border ${
-             isActive 
-               ? 'text-white bg-slate-800 border-slate-600 shadow-lg' 
-               : 'text-white hover:text-blue-300 border-transparent hover:bg-slate-800 hover:border-slate-600'
-           } text-xs relative z-10 transform-gpu`}
+className={`flex items-center font-medium py-1 px-1.5 lg:px-2 rounded-lg border ${
+              isActive 
+                ? 'text-gray-900 bg-gray-100 border-red-400' 
+                : 'text-gray-700 hover:text-gray-900 border-transparent hover:border-red-400'
+            } text-xs relative z-10`}
         >
           <span className="whitespace-nowrap">{item.name}</span>
           <svg 
-            className={`ml-1 w-3 h-3 transition-transform duration-200 ${
-              isActive ? 'rotate-180 text-blue-400' : 'text-gray-400'
+            className={`ml-1 w-3 h-3 ${
+              isActive ? 'rotate-180 text-gray-500' : 'text-gray-400'
             }`}
             fill="none" 
             stroke="currentColor" 
@@ -242,8 +232,8 @@ export default function DesktopNav({
           </svg>
           
           {/* Hover indicator line */}
-          <span className={`absolute bottom-0 left-1/2 transform -translate-x-1/2 w-6 h-0.5 bg-green-400 transition-all duration-200 ${
-            isActive ? 'opacity-100 scale-x-100' : 'opacity-0 scale-x-0 group-hover:opacity-100 group-hover:scale-x-100'
+          <span className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-red-500 ${
+            isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
           }`} />
         </button>
 
@@ -252,7 +242,7 @@ export default function DesktopNav({
               ref={el => {
                 if (el) dropdownRefs.current[item.id] = el;
               }}
-              className="absolute top-full left-0 mt-1 w-52 bg-slate-800 border border-slate-600 rounded-lg shadow-2xl z-[9999] overflow-hidden"
+              className="absolute top-full left-0 mt-1 w-52 bg-white border border-gray-200 rounded-lg shadow-2xl z-[9999] overflow-hidden"
               style={{
                 maxHeight: dropdownHeight > 250 ? '250px' : 'auto',
                 transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -275,19 +265,19 @@ export default function DesktopNav({
                     <Link
                       key={subItem.id}
                       href={subHref}
-                      className="group/item block px-4 py-3 text-slate-300 hover:text-white hover:bg-slate-700 transition-all duration-200 rounded-lg hover:shadow-md transform-gpu hover:scale-[1.02]"
+                      className="group/item block px-4 py-3 text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200 rounded-lg transform-gpu hover:scale-[1.02]"
                       onClick={() => setActiveDropdown(null)}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center min-w-0">
-                          <div className="flex-shrink-0 w-1.5 h-1.5 bg-green-400 rounded-full mr-3 group-hover/item:scale-125 transition-transform duration-200"></div>
+                          <div className="flex-shrink-0 w-1.5 h-1.5 bg-gray-400 rounded-full mr-3 group-hover/item:scale-125 transition-transform duration-200"></div>
                           <span className="text-sm truncate group-hover/item:translate-x-1 transition-transform duration-200">
                             {subItem.name}
                           </span>
                         </div>
-                        <svg className="flex-shrink-0 w-3 h-3 text-slate-500 group-hover/item:text-green-400 group-hover/item:translate-x-1 transition-all duration-200 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
+<svg className="flex-shrink-0 w-3 h-3 text-gray-400 group-hover/item:text-gray-600 group-hover/item:translate-x-1 transition-all duration-200 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
                       </div>
                     </Link>
                   );
@@ -297,8 +287,8 @@ export default function DesktopNav({
             
                {/* Show indicator if there are many items */}
               {dropdownHeight > 250 && (
-                <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-slate-800 to-transparent pointer-events-none flex items-center justify-center">
-                  <div className="w-5 h-0.5 bg-green-400/30 rounded-full"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-white to-transparent pointer-events-none flex items-center justify-center">
+                  <div className="w-5 h-0.5 bg-gray-400/30 rounded-full"></div>
                 </div>
               )}
           </div>

@@ -1,10 +1,11 @@
 import { GetStaticProps } from 'next';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { getPostsByCategory, getCategories, getPostUrl } from '../lib/wordpress';
+import { getPostsByCategory, getCategories, getPostUrl, setCategoryCache } from '../lib/wordpress';
 import { getWCFixtures, getWCStandings } from '../lib/football';
 import { WPPostWithMedia, WPCategory } from '../types/wordpress';
 import Layout from '../components/layout/Layout';
+import { FixturesResultsBanner } from '../components/ads/FixturesResultsBanner';
 
 function cleanText(text: string): string {
   if (!text) return '';
@@ -29,9 +30,9 @@ interface WCPageProps {
   standings: any[];
 }
 
-function StoryCard({ post }: { post: WPPostWithMedia }) {
+function StoryCard({ post, categories }: { post: WPPostWithMedia, categories: WPCategory[] }) {
   return (
-    <Link href={getPostUrl(post)} className="group block">
+    <Link href={getPostUrl(post, categories)} className="group block">
       <div className="relative overflow-hidden rounded-xl bg-white/5 border border-blue-500/20 hover:border-blue-400/40 transition-all duration-500">
         <div className="aspect-[16/10] overflow-hidden">
           {post.featured_media_url ? (
@@ -110,6 +111,7 @@ export default function WCPage({ sportsPosts, categories, fixtures, standings }:
       description="FIFA World Cup 2026 — latest news, results, fixtures, and countdown"
       categories={categories}
     >
+      <FixturesResultsBanner fixtures={fixtures} />
       <div className="min-h-screen bg-gradient-to-b from-slate-900 via-blue-950 to-slate-900">
         {/* === HEADER STRIP === */}
         <div className="bg-gradient-to-r from-blue-600 via-blue-500 to-sky-500 py-3">
@@ -135,7 +137,7 @@ export default function WCPage({ sportsPosts, categories, fixtures, standings }:
               {/* Left — News */}
               <div className="lg:col-span-2 space-y-4">
               {row1Posts.map((post) => (
-                <Link key={post.id} href={getPostUrl(post)} className="group block">
+                <Link key={post.id} href={getPostUrl(post, categories)} className="group block">
                   <div className="relative overflow-hidden rounded-xl bg-white/5 border border-blue-500/20 hover:border-blue-400/40 transition-all duration-500">
                     <div className="aspect-[21/9] sm:aspect-[3/1] overflow-hidden">
                       {post.featured_media_url ? (
@@ -171,12 +173,12 @@ export default function WCPage({ sportsPosts, categories, fixtures, standings }:
               ))}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {row2Posts.map((post) => (
-                  <StoryCard key={post.id} post={post} />
+                  <StoryCard key={post.id} post={post} categories={categories} />
                 ))}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {row3Posts.map((post) => (
-                  <StoryCard key={post.id} post={post} />
+                  <StoryCard key={post.id} post={post} categories={categories} />
                 ))}
               </div>
             </div>
@@ -295,6 +297,7 @@ export default function WCPage({ sportsPosts, categories, fixtures, standings }:
 
 export const getStaticProps: GetStaticProps = async () => {
   const categories = await getCategories();
+  setCategoryCache(categories);
   const sportsCat = categories.find((c) => c.slug === 'sports' || c.name.toLowerCase() === 'sports');
   const sportsPosts = sportsCat ? await getPostsByCategory(sportsCat.id, 10) : [];
   const fixtures = await getWCFixtures();

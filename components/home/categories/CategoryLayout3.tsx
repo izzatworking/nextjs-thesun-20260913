@@ -37,36 +37,36 @@ export default function CategoryLayout3({
   return (
     <section className="relative overflow-hidden rounded-3xl py-12 px-4 lg:px-8 my-12"
       style={{
-        background: 'linear-gradient(135deg, #fce4ec 0%, #f8bbd0 25%, #f48fb1 50%, #f06292 75%, #ec407a 100%)'
+        background: 'linear-gradient(180deg, #83F2B9 0%, #83F2B9 40%, #ffffff 100%)'
       }}
     >
       {/* Decorative blobs */}
-      <div className="absolute -top-20 -left-20 w-72 h-72 bg-pink-300/30 rounded-full blur-3xl"></div>
-      <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-purple-400/30 rounded-full blur-3xl"></div>
-      <div className="absolute top-1/3 right-1/4 w-48 h-48 bg-purple-300/25 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-1/4 left-1/3 w-56 h-56 bg-pink-400/20 rounded-full blur-3xl"></div>
+      <div className="absolute -top-20 -left-20 w-72 h-72 bg-emerald-300/30 rounded-full blur-3xl"></div>
+      <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-teal-400/30 rounded-full blur-3xl"></div>
+      <div className="absolute top-1/3 right-1/4 w-48 h-48 bg-green-300/25 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-1/4 left-1/3 w-56 h-56 bg-emerald-400/20 rounded-full blur-3xl"></div>
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
 
       {/* Floating elements for Gen Z vibe */}
-      <div className="absolute top-8 left-12 text-white/30 text-2xl">✦</div>
-      <div className="absolute bottom-8 right-16 text-white/30 text-2xl">✦</div>
-      <div className="absolute top-20 right-32 text-white/20 text-xl">♥</div>
-      <div className="absolute bottom-16 left-20 text-white/20 text-xl">♥</div>
-      <div className="absolute top-1/3 left-1/4 text-purple-300/40 text-3xl">✦</div>
-      <div className="absolute bottom-1/3 right-1/4 text-purple-300/35 text-2xl">✦</div>
+      <div className="absolute top-8 left-12 text-emerald-700/30 text-2xl">✦</div>
+      <div className="absolute bottom-8 right-16 text-emerald-700/30 text-2xl">✦</div>
+      <div className="absolute top-20 right-32 text-emerald-700/20 text-xl">♥</div>
+      <div className="absolute bottom-16 left-20 text-emerald-700/20 text-xl">♥</div>
+      <div className="absolute top-1/3 left-1/4 text-teal-600/40 text-3xl">✦</div>
+      <div className="absolute bottom-1/3 right-1/4 text-teal-600/35 text-2xl">✦</div>
 
       <div className="relative z-10">
         {/* Section Header */}
         <div className="mb-10 text-center">
-          <div className="inline-flex items-center gap-2 bg-white/30 backdrop-blur-sm px-6 py-2 rounded-full mb-4">
-            <span className="w-2 h-2 bg-pink-600 rounded-full"></span>
-            <span className="text-white font-semibold uppercase tracking-widest text-sm">Your Daily Dose of Chill</span>
+          <div className="inline-flex items-center gap-2 bg-white/40 backdrop-blur-sm px-6 py-2 rounded-full mb-4">
+            <span className="w-2 h-2 bg-emerald-600 rounded-full"></span>
+            <span className="text-emerald-900 font-semibold uppercase tracking-widest text-sm">Your Daily Dose of Chill</span>
           </div>
-          <h2 className="text-5xl font-black text-white mb-2 tracking-tight drop-shadow-lg">
+          <h2 className="text-5xl font-black text-emerald-900 mb-2 tracking-tight drop-shadow-lg">
             {name}
           </h2>
-          <p className="text-white/80 text-lg font-medium">Curated stories for the modern lifestyle — fashion, wellness, and beyond</p>
-          <div className="w-32 h-1.5 bg-white/60 rounded-full mx-auto mt-4"></div>
+          <p className="text-emerald-800/80 text-lg font-medium">Curated stories for the modern lifestyle — fashion, wellness, and beyond</p>
+          <div className="w-32 h-1.5 bg-emerald-400/60 rounded-full mx-auto mt-4"></div>
         </div>
 
         {/* Magazine Layout with glassmorphism cards */}
@@ -89,11 +89,11 @@ export default function CategoryLayout3({
 
                 <div className="p-8">
                   <div className="flex items-center space-x-4 mb-4">
-                    <span className="bg-pink-100 text-pink-800 text-xs px-3 py-1 rounded-full font-medium">{getPostCategoryName(featuredPost, categories)}</span>
+                    <span className="bg-emerald-100 text-emerald-800 text-xs px-3 py-1 rounded-full font-medium">{getPostCategoryName(featuredPost, categories)}</span>
                   </div>
 
                   <Link href={`${getPostUrl(featuredPost)}`}>
-                    <h3 className="text-3xl font-bold text-gray-900 mb-4 hover:text-pink-600 transition-colors cursor-pointer" dangerouslySetInnerHTML={{ __html: cleanTextContent(featuredPost.title.rendered) }} />
+                    <h3 className="text-3xl font-bold text-gray-900 mb-4 hover:text-emerald-600 transition-colors cursor-pointer" dangerouslySetInnerHTML={{ __html: cleanTextContent(featuredPost.title.rendered) }} />
                   </Link>
 
                   {featuredPost.excerpt?.rendered && (
@@ -114,10 +114,10 @@ export default function CategoryLayout3({
                   )}
                   <div className="p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="bg-pink-100 text-pink-800 text-xs px-2 py-1 rounded-full font-medium">{getPostCategoryName(post, categories)}</span>
+                      <span className="bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded-full font-medium">{getPostCategoryName(post, categories)}</span>
                     </div>
                     <Link href={`${getPostUrl(post)}`}>
-                      <h4 className="font-semibold text-gray-900 text-sm hover:text-purple-600 transition-colors cursor-pointer line-clamp-2" dangerouslySetInnerHTML={{ __html: cleanTextContent(post.title.rendered) }} />
+                      <h4 className="font-semibold text-gray-900 text-sm hover:text-emerald-600 transition-colors cursor-pointer line-clamp-2" dangerouslySetInnerHTML={{ __html: cleanTextContent(post.title.rendered) }} />
                     </Link>
                   </div>
                 </div>
@@ -136,10 +136,10 @@ export default function CategoryLayout3({
                 )}
                 <div className="p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="bg-pink-100 text-pink-800 text-xs px-2 py-1 rounded-full font-medium">{getPostCategoryName(post, categories)}</span>
+                    <span className="bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded-full font-medium">{getPostCategoryName(post, categories)}</span>
                   </div>
                   <Link href={`${getPostUrl(post)}`}>
-                    <h4 className="font-semibold text-gray-900 text-sm hover:text-pink-600 transition-colors cursor-pointer line-clamp-2" dangerouslySetInnerHTML={{ __html: cleanTextContent(post.title.rendered) }} />
+                    <h4 className="font-semibold text-gray-900 text-sm hover:text-emerald-600 transition-colors cursor-pointer line-clamp-2" dangerouslySetInnerHTML={{ __html: cleanTextContent(post.title.rendered) }} />
                   </Link>
                 </div>
               </div>
@@ -148,7 +148,7 @@ export default function CategoryLayout3({
 
           {/* View All Button */}
           <div className="text-center mt-10">
-            <Link href={`/category/${slug}`} className="inline-flex items-center gap-2 px-8 py-4 bg-white text-pink-600 rounded-full font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 border-2 border-white/80">
+            <Link href={`/category/${slug}`} className="inline-flex items-center gap-2 px-8 py-4 bg-emerald-600 text-white rounded-full font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 border-2 border-emerald-400/80">
               <span>Explore More {name}</span>
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -158,7 +158,7 @@ export default function CategoryLayout3({
         </div>
       </div>
 
-      {!isLast && <div className="border-t border-white/30 my-12"></div>}
+      {!isLast && <div className="border-t border-emerald-300/30 my-12"></div>}
     </section>
   );
 }

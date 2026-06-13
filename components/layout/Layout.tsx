@@ -87,7 +87,7 @@ const Layout: React.FC<LayoutProps> = ({
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
       </Head>
 
-      <div className="min-h-screen bg-gradient-to-tr from-blue-100 via-white to-purple-100">
+      <div className="min-h-screen" style={{background: 'linear-gradient(to bottom, #307EDB, #307EDB 1%, #ffffff 16%, #ffffff)'}}>
         <div className="relative z-50">
           <Header categories={categories} isSidebarOpen={isSidebarOpen} onSidebarToggle={toggleSidebar} />
         </div>
@@ -100,16 +100,6 @@ const Layout: React.FC<LayoutProps> = ({
 
         <div className="h-[180px] lg:h-[220px]"></div>
 
-        <div className="max-w-[1200px] mx-auto px-1 sm:px-2">
-          <CountdownBanner
-            targetDate={new Date('2026-06-11T23:59:59')}
-            backgroundImage="/images/banner-wc-cd.png"
-            link="https://thesun.my"
-          />
-        </div>
-
-        <AdFullBanner className="max-w-[1200px] mx-auto px-1 sm:px-2 my-4" />
-
         <WCPopup />
 
         <main className={`relative z-10 mt-0 ${!hideContentBackground ? 'py-6 md:py-8' : ''}`}>
@@ -119,22 +109,8 @@ const Layout: React.FC<LayoutProps> = ({
             </div>
           ) : (
             <div className="container mx-auto px-1 sm:px-2">
-              <div className="bg-gradient-to-br from-white via-white to-blue-50 rounded-2xl shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-20 h-20">
-                  <div className="absolute top-2 left-2 w-4 h-4 border-t-2 border-l-2 border-red-500 rounded-tl-lg"></div>
-                </div>
-                <div className="absolute top-0 right-0 w-20 h-20">
-                  <div className="absolute top-2 right-2 w-4 h-4 border-t-2 border-r-2 border-red-500 rounded-tr-lg"></div>
-                </div>
-                <div className="p-2 sm:p-3">
-                  {children}
-                </div>
-                <div className="absolute bottom-0 left-0 w-20 h-20">
-                  <div className="absolute bottom-2 left-2 w-4 h-4 border-b-2 border-l-2 border-slate-300 rounded-bl-lg"></div>
-                </div>
-                <div className="absolute bottom-0 right-0 w-20 h-20">
-                  <div className="absolute bottom-2 right-2 w-4 h-4 border-b-2 border-r-2 border-slate-300 rounded-br-lg"></div>
-                </div>
+              <div className="bg-white">
+                {children}
               </div>
             </div>
           )}

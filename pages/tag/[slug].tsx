@@ -1,6 +1,6 @@
 // pages/tag/[slug].tsx
 import { GetStaticProps, GetStaticPaths } from 'next';
-import { getPostsByTagSlug, getTags, getCategories, getPostUrl } from '../../lib/wordpress';
+import { getPostsByTagSlug, getTags, getCategories, getPostUrl, setCategoryCache } from '../../lib/wordpress';
 import { WPPostWithMedia, WPCategory, WPTag } from '../../types/wordpress';
 import Layout from '../../components/layout/Layout';
 import Breadcrumb from '../../components/common/Breadcrumb';
@@ -126,7 +126,7 @@ export default function TagPage({ tag, posts, categories, allTags }: TagPageProp
                       </div>
                       
                       {/* Title */}
-                      <Link href={getPostUrl(post)}>
+                      <Link href={getPostUrl(post, categories)}>
                         <h2 
                           className="text-lg font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-red-600 transition-colors"
                           dangerouslySetInnerHTML={{ __html: post.title.rendered }}
@@ -145,7 +145,7 @@ export default function TagPage({ tag, posts, categories, allTags }: TagPageProp
                       
                       {/* Read More */}
                       <Link 
-                         href={getPostUrl(post)}
+                         href={getPostUrl(post, categories)}
                         className="inline-flex items-center text-sm font-medium text-red-600 hover:text-red-700 group/link"
                       >
                         Read More
@@ -283,6 +283,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       ]);
       categories = catsData || [];
       allTags = tagsData || [];
+      setCategoryCache(categories);
     } catch (err) {
       console.error('Error fetching categories/tags:', err);
     }

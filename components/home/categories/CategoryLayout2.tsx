@@ -1,5 +1,4 @@
 import { getPostUrl } from '../../../lib/wordpress';
-// components/home/categories/CategoryLayout2.tsx
 import Link from 'next/link';
 import { WPPostWithMedia, WPCategory } from '../../../types/wordpress';
 import { cleanTextContent } from '../utils/contentCleaner';
@@ -14,22 +13,20 @@ interface CategoryLayout2Props {
   isLast?: boolean;
 }
 
-export default function CategoryLayout2({ 
-  name, 
-  slug, 
-  posts, 
-  categories, 
-  isLast = false 
+export default function CategoryLayout2({
+  name,
+  slug,
+  posts,
+  categories,
+  isLast = false
 }: CategoryLayout2Props) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [direction, setDirection] = useState<'left' | 'right'>('right');
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-  const postsPerView = 3;
+  const postsPerView = 5;
 
-  const totalSlides = Math.ceil(posts.length / postsPerView);
+  const totalSlides = Math.ceil(Math.min(posts.length, 20) / postsPerView);
 
   const nextSlide = useCallback(() => {
-    setDirection('right');
     setCurrentIndex((prevIndex) =>
       prevIndex === totalSlides - 1 ? 0 : prevIndex + 1
     );
@@ -37,11 +34,7 @@ export default function CategoryLayout2({
 
   useEffect(() => {
     if (!isAutoPlaying) return;
-
-    const interval = setInterval(() => {
-      nextSlide();
-    }, 5000);
-
+    const interval = setInterval(() => nextSlide(), 5000);
     return () => clearInterval(interval);
   }, [isAutoPlaying, nextSlide]);
 
@@ -49,256 +42,164 @@ export default function CategoryLayout2({
 
   const getPostCategoryName = (post: WPPostWithMedia, allCategories: WPCategory[]): string => {
     if (!post.categories || post.categories.length === 0) return 'Uncategorized';
-    
-    const categoryId = typeof post.categories[0] === 'number' 
-      ? post.categories[0] 
+    const categoryId = typeof post.categories[0] === 'number'
+      ? post.categories[0]
       : (post.categories[0] as any).id;
-    
     const category = allCategories.find(cat => cat.id === categoryId);
     return category ? cleanTextContent(category.name) : 'Uncategorized';
   };
 
   const prevSlide = () => {
-    setDirection('left');
-    setCurrentIndex((prevIndex) => 
+    setCurrentIndex((prevIndex) =>
       prevIndex === 0 ? totalSlides - 1 : prevIndex - 1
     );
   };
 
   const goToSlide = (index: number) => {
-    setDirection(index > currentIndex ? 'right' : 'left');
     setCurrentIndex(index);
   };
 
-  const visiblePosts = posts.slice(
+  const limitedPosts = posts.slice(0, 20);
+  const visiblePosts = limitedPosts.slice(
     currentIndex * postsPerView,
     (currentIndex + 1) * postsPerView
   );
 
   return (
-    <div>
-      {/* Section Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900">
+    <div className="relative">
+      <div className="flex flex-col xs:flex-row xs:items-end justify-between gap-3 xs:gap-0 mb-4 sm:mb-6">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="w-1 sm:w-1.5 h-5 sm:h-8 bg-gradient-to-b from-orange-500 to-red-600 rounded-full shrink-0" />
+            <h2 className="text-lg sm:text-2xl md:text-3xl font-black tracking-tight text-gray-900 uppercase truncate">
               {name}
             </h2>
-            <p className="text-gray-600 text-sm mt-1">Stay updated with the latest</p>
           </div>
-          
-          <div className="flex items-center space-x-4">
-            {/* Auto play toggle */}
+          <p className="hidden xs:block text-gray-500 text-[10px] sm:text-sm mt-0.5 sm:mt-1 ml-3 sm:ml-5">Trending stories & highlights</p>
+        </div>
+
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          <div className="hidden md:flex items-center gap-1.5">
+            {Array.from({ length: totalSlides }).map((_, index) => (
+              <button
+                key={index}
+                onClick={() => goToSlide(index)}
+                className={`transition-all duration-300 ${
+                  index === currentIndex
+                    ? 'w-5 md:w-6 h-1.5 md:h-2 bg-orange-500 rounded-full'
+                    : 'w-1.5 md:w-2 h-1.5 md:h-2 bg-gray-300 hover:bg-gray-400 rounded-full'
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+
+          <div className="flex gap-0.5 sm:gap-1">
             <button
-              onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-              className={`p-2 rounded-full ${isAutoPlaying ? 'text-blue-600 bg-blue-50' : 'text-gray-500 bg-gray-100'}`}
-              aria-label={isAutoPlaying ? 'Pause auto-slide' : 'Play auto-slide'}
+              onClick={prevSlide}
+              className="w-7 h-7 sm:w-8 sm:h-9 flex items-center justify-center bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-95"
+              aria-label="Previous"
             >
-              {isAutoPlaying ? (
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-              ) : (
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
-                </svg>
-              )}
+              <svg className="w-3 h-3 sm:w-4 sm:h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+              </svg>
             </button>
-            
-            <Link 
-              href={`/category/${slug}`}
-              className="text-blue-600 hover:text-blue-700 font-semibold text-sm px-4 py-2 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
-            >
-              View All →
-            </Link>
-          </div>
-        </div>
-        
-        {/* Progress bar */}
-        <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-500 ease-out"
-            style={{ 
-              width: `${((currentIndex + 1) / totalSlides) * 100}%` 
-            }}
-          ></div>
-        </div>
-      </div>
-
-      {/* Carousel Container */}
-      <div className="mb-16 relative">
-        {/* Navigation Buttons */}
-        <button
-          onClick={prevSlide}
-          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center opacity-80 hover:opacity-100 transition-all duration-300 hover:bg-gray-50 hover:shadow-xl hover:-translate-x-5"
-          aria-label="Previous slide"
-        >
-          <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        
-        <button
-          onClick={nextSlide}
-          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center opacity-80 hover:opacity-100 transition-all duration-300 hover:bg-gray-50 hover:shadow-xl hover:translate-x-5"
-          aria-label="Next slide"
-        >
-          <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-
-        {/* Carousel Content dengan slide animation */}
-        <div className="relative overflow-hidden">
-          <div 
-            className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-transform duration-500 ease-out`}
-            style={{
-              transform: `translateX(${direction === 'right' ? '10px' : '-10px'})`,
-              opacity: 0
-            }}
-            key={`slide-out-${currentIndex}`}
-          />
-          
-          <div 
-            className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-all duration-500 ease-out absolute top-0 left-0 w-full`}
-            style={{
-              transform: direction === 'right' 
-                ? 'translateX(100%)' 
-                : 'translateX(-100%)'
-            }}
-            key={`slide-in-${currentIndex}`}
-          >
-            {visiblePosts.map((post) => (
-              <div 
-                key={post.id}
-                className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col hover:shadow-2xl transition-shadow duration-300"
-              >
-                {post.featured_media_url && (
-                  <div className="w-full h-56 relative overflow-hidden">
-                    <img 
-                      src={post.featured_media_url} 
-                      alt={cleanTextContent(post.featured_media_alt || post.title.rendered)}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                    />
-                    {/* Category Badge */}
-                    <div className="absolute top-3 left-3">
-                      <span className="bg-black/70 text-white text-xs px-3 py-1.5 rounded-full font-medium">
-                        {getPostCategoryName(post, categories)}
-                      </span>
-                    </div>
-                  </div>
-                )}
-                
-                <div className="p-5 flex-1 flex flex-col">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="text-gray-500 text-sm flex items-center">
-                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      {formatRelativeTime(post.date)}
-                    </div>
-                  </div>
-                  
-                  <Link href={`${getPostUrl(post)}`}>
-                    <h4 
-                      className="font-bold text-gray-900 text-lg hover:text-blue-600 transition-colors cursor-pointer leading-tight line-clamp-2 mb-3 flex-1"
-                      dangerouslySetInnerHTML={{ __html: cleanTextContent(post.title.rendered) }} 
-                    />
-                  </Link>
-                  
-                  {/* Author Info */}
-                  <div className="flex items-center text-xs text-gray-500 mt-4 pt-4 border-t border-gray-100">
-                    <svg className="w-4 h-4 text-gray-400 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                    <span className="truncate">{post.authors?.[0]?.display_name || 'Sun Media'}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          <div 
-            className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 transition-transform duration-500 ease-out`}
-            style={{
-              transform: 'translateX(0)',
-              opacity: 1
-            }}
-            key={`slide-active-${currentIndex}`}
-          >
-            {visiblePosts.map((post) => (
-              <div 
-                key={post.id}
-                className="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col hover:shadow-2xl transition-shadow duration-300"
-              >
-                {post.featured_media_url && (
-                  <div className="w-full h-56 relative overflow-hidden">
-                    <img 
-                      src={post.featured_media_url} 
-                      alt={cleanTextContent(post.featured_media_alt || post.title.rendered)}
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                    />
-                    {/* Category Badge */}
-                    <div className="absolute top-3 left-3">
-                      <span className="bg-black/70 text-white text-xs px-3 py-1.5 rounded-full font-medium">
-                        {getPostCategoryName(post, categories)}
-                      </span>
-                    </div>
-                  </div>
-                )}
-                
-                <div className="p-5 flex-1 flex flex-col">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="text-gray-500 text-sm flex items-center">
-                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      {formatRelativeTime(post.date)}
-                    </div>
-                  </div>
-                  
-                  <Link href={`${getPostUrl(post)}`}>
-                    <h4 
-                      className="font-bold text-gray-900 text-lg hover:text-blue-600 transition-colors cursor-pointer leading-tight line-clamp-2 mb-3 flex-1"
-                      dangerouslySetInnerHTML={{ __html: cleanTextContent(post.title.rendered) }} 
-                    />
-                  </Link>
-                  
-                  {/* Author Info */}
-                  <div className="flex items-center text-xs text-gray-500 mt-4 pt-4 border-t border-gray-100">
-                    <svg className="w-4 h-4 text-gray-400 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                    <span className="truncate">{post.authors?.[0]?.display_name || 'Sun Media'}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Dots Navigation */}
-        <div className="flex justify-center items-center space-x-2 mt-8">
-          {Array.from({ length: totalSlides }).map((_, index) => (
             <button
-              key={index}
-              onClick={() => goToSlide(index)}
-              className={`
-                transition-all duration-300 ease-out
-                ${index === currentIndex 
-                  ? 'w-8 h-2 bg-gradient-to-r from-blue-500 to-green-500 rounded-full' 
-                  : 'w-2 h-2 bg-gray-300 hover:bg-gray-400 rounded-full'
-                }
-              `}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
+              onClick={nextSlide}
+              className="w-7 h-7 sm:w-8 sm:h-9 flex items-center justify-center bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all active:scale-95"
+              aria-label="Next"
+            >
+              <svg className="w-3 h-3 sm:w-4 sm:h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+
+          <Link
+            href={`/category/${slug}`}
+            className="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-white bg-gradient-to-r from-orange-500 to-red-600 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg hover:from-orange-600 hover:to-red-700 transition-all active:scale-95 shadow-md"
+          >
+            <span className="hidden xs:inline">All</span> Stories
+            <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
         </div>
       </div>
 
-      {/* Line break */}
+      <div className="relative">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 xs:gap-3 sm:gap-4">
+          {visiblePosts.map((post, index) => {
+            const isFirst = index === 0;
+            return (
+              <Link
+                key={post.id}
+                href={`${getPostUrl(post)}`}
+                className={`group relative overflow-hidden rounded-lg xs:rounded-xl bg-gray-900 ${
+                  isFirst ? 'col-span-2 row-span-2 md:col-span-2 md:row-span-2' : 'col-span-1'
+                } ${isFirst ? 'min-h-[300px] xs:min-h-[340px] sm:min-h-[400px] md:min-h-[460px]' : 'min-h-[130px] xs:min-h-[150px] sm:min-h-[190px] md:min-h-[220px]'}`}
+              >
+                {post.featured_media_url && (
+                  <img
+                    src={post.featured_media_url}
+                    alt={cleanTextContent(post.featured_media_alt || post.title.rendered)}
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                )}
+                <div className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent ${isFirst ? 'via-black/30' : 'via-black/20'}`} />
+
+                <div className={`relative flex flex-col justify-end h-full ${isFirst ? 'p-3 xs:p-4 sm:p-5 md:p-6' : 'p-2.5 xs:p-3 sm:p-4'}`}>
+                  <div className="flex items-center gap-1.5 xs:gap-2 mb-1 xs:mb-2">
+                    <span className="bg-orange-500 text-white text-[9px] xs:text-[10px] sm:text-xs font-bold px-1.5 xs:px-2 sm:px-2.5 py-0.5 xs:py-1 rounded sm:rounded-md uppercase tracking-wider">
+                      {getPostCategoryName(post, categories)}
+                    </span>
+                  </div>
+
+                  <h3
+                    className={`font-extrabold text-white leading-tight ${
+                      isFirst
+                        ? 'text-xs xs:text-sm sm:text-lg md:text-xl lg:text-2xl'
+                        : 'text-[10px] xs:text-xs sm:text-sm md:text-base'
+                    }`}
+                  >
+                    {cleanTextContent(post.title.rendered)}
+                  </h3>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="flex md:hidden justify-center mt-3 xs:mt-4 sm:mt-5 gap-1 xs:gap-1.5">
+        {Array.from({ length: totalSlides }).map((_, index) => (
+          <button
+            key={index}
+            onClick={() => goToSlide(index)}
+            className={`transition-all duration-300 ${
+              index === currentIndex
+                ? 'w-4 xs:w-5 h-1.5 xs:h-2 bg-orange-500 rounded-full'
+                : 'w-1.5 xs:w-2 h-1.5 xs:h-2 bg-gray-300 rounded-full'
+            }`}
+            aria-label={`Go to slide ${index + 1}`}
+          />
+        ))}
+      </div>
+
+      <div className="flex sm:hidden justify-center mt-3 xs:mt-4">
+        <Link
+          href={`/category/${slug}`}
+          className="inline-flex items-center gap-1 text-xs xs:text-sm font-semibold text-white bg-gradient-to-r from-orange-500 to-red-600 px-4 xs:px-5 py-2 xs:py-2.5 rounded-lg xs:rounded-xl hover:from-orange-600 hover:to-red-700 transition-all active:scale-95 shadow-md"
+        >
+          All Stories
+          <svg className="w-3 h-3 xs:w-3.5 xs:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+          </svg>
+        </Link>
+      </div>
+
       {!isLast && (
-        <div className="border-t border-gray-300 my-12"></div>
+        <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent my-8 xs:my-10 sm:my-12" />
       )}
     </div>
   );
