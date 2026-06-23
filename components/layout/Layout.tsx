@@ -1,11 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
 import Header from './Header/';
 import Sidebar from './Header/Sidebar';
 import Footer from './Footer';
-import WCPopup from '../common/WCPopup';
-import { CountdownBanner } from '../ads/CountdownBanner';
-import { AdFullBanner } from '../ads/AdSlots';
 import { WPCategory } from '../../types/wordpress';
 import { CategoryItem } from './Header/types';
 
@@ -28,6 +25,31 @@ const Layout: React.FC<LayoutProps> = ({
 }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
+  const [showToTop, setShowToTop] = useState(false);
+  const scrollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 400) {
+        if (!scrollTimer.current) {
+          scrollTimer.current = setTimeout(() => {
+            setShowToTop(true);
+          }, 1000);
+        }
+      } else {
+        if (scrollTimer.current) {
+          clearTimeout(scrollTimer.current);
+          scrollTimer.current = null;
+        }
+        setShowToTop(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimer.current) clearTimeout(scrollTimer.current);
+    };
+  }, []);
 
   const mainNavItems: CategoryItem[] = [
     { name: 'Home', slug: '/', id: 0, hot: false },
@@ -87,7 +109,7 @@ const Layout: React.FC<LayoutProps> = ({
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
       </Head>
 
-      <div className="min-h-screen" style={{background: 'linear-gradient(to bottom, #307EDB, #307EDB 1%, #ffffff 16%, #ffffff)'}}>
+      <div className="min-h-screen" style={{background: 'linear-gradient(to bottom, #52BEFF, #52BEFF 250px, #ffffff 400px, #ffffff)'}}>
         <div className="relative z-50">
           <Header categories={categories} isSidebarOpen={isSidebarOpen} onSidebarToggle={toggleSidebar} />
         </div>
@@ -98,9 +120,7 @@ const Layout: React.FC<LayoutProps> = ({
           mainNavItems={mainNavItems}
         />
 
-        <div className="h-[180px] lg:h-[220px]"></div>
-
-        <WCPopup />
+        <div className="h-[160px] lg:h-[200px]"></div>
 
         <main className={`relative z-10 mt-0 ${!hideContentBackground ? 'py-6 md:py-8' : ''}`}>
           {hideContentBackground ? (
@@ -122,7 +142,9 @@ const Layout: React.FC<LayoutProps> = ({
 
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-6 right-6 z-50 p-3 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+          className={`fixed bottom-6 right-6 z-50 p-3 bg-red-600 text-white rounded-full shadow-lg transition-all duration-300 hover:bg-red-700 focus:outline-none ${
+            showToTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'
+          }`}
           aria-label="Back to top"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

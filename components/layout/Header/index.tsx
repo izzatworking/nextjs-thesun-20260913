@@ -4,14 +4,10 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import BreakingNews from './BreakingNews';
 import DesktopNav from './DesktopNav';
-import MobileSidebar from './MobileSidebar';
-import DesktopCanvasModal from './DesktopCanvasModal';
 import SearchModal from './SearchModal';
 import type { CategoryItem, BreakingNews as BreakingNewsType } from './types';
 import type { WPCategory } from '../../../types/wordpress';
 import { getPostUrl } from '../../../lib/wordpress';
-
-import WorldCup2026Animation from './worldcup2026animation';
 
 interface HeaderProps {
   categories?: WPCategory[];
@@ -33,7 +29,6 @@ export default function Header({ categories = [], isSidebarOpen: externalIsOpen,
   const [headerVisible, setHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
   const dropdownContainerRef = useRef<HTMLDivElement>(null);
-  const marqueeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -427,7 +422,7 @@ export default function Header({ categories = [], isSidebarOpen: externalIsOpen,
   };
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 bg-white text-gray-800 shadow-sm transition-transform duration-300 ${headerVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+    <header className={`fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100 transition-all duration-300 ${headerVisible ? 'translate-y-0' : '-translate-y-full'}`}>
       
       <div className="relative z-20">
         <BreakingNews
@@ -435,35 +430,40 @@ export default function Header({ categories = [], isSidebarOpen: externalIsOpen,
           isLoading={isLoading}
           isPaused={isPaused}
           onHover={handleBreakingNewsHover}
-          marqueeRef={marqueeRef}
+          marqueeRef={undefined as any}
         />
         
         <div className="w-full">
-          <div className="flex items-center justify-between px-2 lg:px-4">
-            <div className="flex items-center gap-2 lg:gap-4 flex-shrink-0">
-              <button
-                onClick={toggleSidebar}
-                className="p-1.5 rounded-lg hover:bg-slate-800 transition-colors duration-200 group"
-                aria-label="Toggle menu"
-              >
-                <div className="w-5 h-4 flex flex-col justify-between">
-                  <span className={`w-full h-0.5 bg-white rounded-full transition-all duration-300 ${
-                    isSidebarOpen ? 'rotate-45 translate-y-1.5' : ''
-                  }`}></span>
-                  <span className={`w-full h-0.5 bg-white rounded-full transition-all duration-300 ${
-                    isSidebarOpen ? 'opacity-0' : ''
-                  }`}></span>
-                  <span className={`w-full h-0.5 bg-white rounded-full transition-all duration-300 ${
-                    isSidebarOpen ? '-rotate-45 -translate-y-1.5' : ''
-                  }`}></span>
-                </div>
-              </button>
-              
-              <Link href="/" className="inline-block flex-shrink-0">
+          {/* Top row: hamburger + logo + actions */}
+          <div className="flex items-center justify-between px-4 lg:px-6 h-24 lg:h-28">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <button
+                  onClick={toggleSidebar}
+                  className="group flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+                  aria-label="Toggle menu"
+                >
+                  <div className="w-5 h-3.5 flex flex-col justify-between">
+                    <span className={`block w-full h-[2px] bg-gray-600 rounded-full transition-all duration-200 origin-center ${
+                      isSidebarOpen ? 'rotate-45 translate-y-[6px]' : ''
+                    }`}></span>
+                    <span className={`block w-full h-[2px] bg-gray-600 rounded-full transition-all duration-200 ${
+                      isSidebarOpen ? 'opacity-0 scale-x-0' : ''
+                    }`}></span>
+                    <span className={`block w-[70%] h-[2px] bg-gray-600 rounded-full transition-all duration-200 origin-center ${
+                      isSidebarOpen ? 'w-full -rotate-45 -translate-y-[6px]' : 'group-hover:w-full'
+                    }`}></span>
+                  </div>
+                  <span className="hidden lg:block text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {isSidebarOpen ? 'Close' : 'Menu'}
+                  </span>
+                </button>
+              </div>
+              <Link href="/" className="flex-shrink-0">
                 <img 
                   src="/images/thesun.png"
                   alt="THE SUN MALAYSIA"
-                  className="h-20 sm:h-24 md:h-28 lg:h-36 w-auto cursor-pointer hover:opacity-90 transition-opacity"
+                  className="h-20 sm:h-24 md:h-28 lg:h-32 w-auto"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                     e.currentTarget.nextElementSibling?.classList.remove('hidden');
@@ -485,44 +485,28 @@ export default function Header({ categories = [], isSidebarOpen: externalIsOpen,
               dropdownContainerRef={dropdownContainerRef}
             />
 
-            <div className="flex items-center gap-1 sm:gap-2 lg:gap-4 flex-shrink-0">
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => setSearchOpen(true)}
-                className="p-2 rounded-lg hover:bg-slate-800/50 transition-all duration-300 text-white/70 hover:text-white"
+                className="p-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-400 hover:text-gray-600"
                 aria-label="Search"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </button>
-              <div className="text-right hidden lg:block">
-                <div className="text-xs font-medium" suppressHydrationWarning>
-                  {currentDate || 'Loading...'}
+              <div className="text-right hidden lg:block border-l border-gray-100 pl-3">
+                <div className="text-xs font-medium text-gray-800" suppressHydrationWarning>
+                  {currentDate || ''}
                 </div>
-                <div className="text-blue-200 text-xs" suppressHydrationWarning>
-                  {currentTime || 'Loading...'}
+                <div className="text-[11px] text-gray-400" suppressHydrationWarning>
+                  {currentTime || ''}
                 </div>
               </div>
-              <button
-                onClick={() => setShowWorldCup(!showWorldCup)}
-                className="p-1 rounded-lg hover:bg-slate-800/50 transition-all duration-300"
-                aria-label={showWorldCup ? "Disable World Cup animation" : "Enable World Cup animation"}
-                title={showWorldCup ? "World Cup 2026: ON" : "World Cup 2026: OFF"}
-              >
-                <div className={`w-3.5 h-3.5 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 transition-all duration-300 ${
-                  showWorldCup ? 'shadow-[0_0_6px_rgba(251,191,36,0.8)] scale-110' : 'opacity-40'
-                }`}></div>
-              </button>
             </div>
           </div>
         </div>
       </div>
-
-      <DesktopCanvasModal 
-        isOpen={isSidebarOpen}
-        onClose={closeSidebar}
-        canvasCategories={canvasCategories}
-      />
 
       <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
     </header>

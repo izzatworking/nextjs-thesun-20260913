@@ -808,8 +808,8 @@
 }
 
 .prose strong {
-  font-size: 1.5rem !important;
-  font-family: 'Roboto Condensed', sans-serif !important;
+  font-size: 1.125rem !important;
+  font-family: 'Poppins', sans-serif !important;
 }
 
 .prose p {
@@ -820,12 +820,13 @@
 }
 
 .prose strong {
-  font-size: 1.5rem !important;
-  font-family: 'Alumni Sans', sans-serif !important;
+  font-size: 1.125rem !important;
+  font-family: 'Poppins', sans-serif !important;
 }
 
 .prose strong {
-  font-size: 1.875rem !important;
+  font-size: 1.25rem !important;
+  font-family: 'Poppins', sans-serif !important;
 }
 
 .prose a {

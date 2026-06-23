@@ -653,7 +653,7 @@ export default function Post({
             <div className="lg:w-3/4">
               <article className="bg-white overflow-hidden">
                 <div className="max-w-4xl mx-auto pt-8 px-4 md:px-0">
-                  {/* 1. Category Tags - Parent/Child hierarchy */}
+                  {/* 1. Category Tags */}
                   {post.categories && post.categories.length > 0 && (
                     <div className="mb-5">
                       <div className="flex flex-wrap items-center gap-1.5">

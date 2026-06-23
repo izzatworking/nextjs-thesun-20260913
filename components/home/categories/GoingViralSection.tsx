@@ -35,7 +35,7 @@ export default function GoingViralSection({ posts, categories, isLast = false }:
     <div className="bg-gradient-to-b from-[#63B8EB] via-[#63B8EB]/70 to-white rounded-3xl p-8 mb-16 shadow-2xl">
       {/* Section Header dengan gaya viral/meme - Kekalkan warna oren */}
       <div className="mb-8 text-center">
-        <div className="inline-block bg-gradient-to-r from-orange-500 to-red-600 px-8 py-4 rounded-full mb-4 shadow-xl">
+        <div className="inline-block bg-gradient-to-r from-[#5266FF] to-[#52FFEB] px-8 py-4 rounded-full mb-4 shadow-xl">
           <h2 className="text-3xl font-bold text-white flex items-center justify-center">
             <svg className="w-8 h-8 mr-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
               <path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clipRule="evenodd" />
@@ -44,7 +44,7 @@ export default function GoingViralSection({ posts, categories, isLast = false }:
           </h2>
         </div>
         <p className="text-blue-900/70 text-lg font-medium">Trending topics everyone is talking about</p>
-        <div className="w-32 h-1 bg-gradient-to-r from-orange-500 to-red-500 rounded-full mx-auto mt-4"></div>
+        <div className="w-32 h-1 bg-gradient-to-r from-[#5266FF] to-[#52FFEB] rounded-full mx-auto mt-4"></div>
       </div>
 
       {/* Viral Grid - Compact dengan icon viral */}
@@ -54,7 +54,7 @@ export default function GoingViralSection({ posts, categories, isLast = false }:
             <div key={post.id} className="bg-white/90 backdrop-blur-md rounded-xl shadow-2xl overflow-hidden hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.3)] transition-all duration-300 hover:-translate-y-2 group border border-white/50">
               {/* Viral Badge - Kekalkan warna oren/merah */}
               <div className="absolute top-4 right-4 z-10">
-                <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white text-xs px-4 py-2 rounded-full font-bold flex items-center shadow-lg">
+                <div className="bg-gradient-to-r from-[#5266FF] to-[#52FFEB] text-white text-xs px-4 py-2 rounded-full font-bold flex items-center shadow-lg">
                   <svg className="w-3 h-3 mr-1.5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                     <path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clipRule="evenodd" />
                   </svg>
@@ -72,7 +72,7 @@ export default function GoingViralSection({ posts, categories, isLast = false }:
                   {/* Overlay gradient gelap */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
                   {/* Glow effect */}
-                  <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/10 to-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div className="absolute inset-0 bg-gradient-to-tr from-[#5266FF]/10 to-[#52FFEB]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                 </div>
               )}
               
@@ -98,7 +98,7 @@ export default function GoingViralSection({ posts, categories, isLast = false }:
         <div className="text-center mt-12">
           <Link 
             href={`/category/${sectionSlug}`}
-            className="inline-flex items-center px-12 py-5 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-xl font-bold hover:from-orange-700 hover:to-red-700 transition-all duration-300 hover:shadow-[0_20px_60px_-10px_rgba(249,115,22,0.5)] transform hover:scale-105 shadow-xl border border-orange-500/30"
+            className="inline-flex items-center px-12 py-5 bg-gradient-to-r from-[#5266FF] to-[#52FFEB] text-white rounded-xl font-bold hover:from-[#3B4FE8] hover:to-[#3BE8D4] transition-all duration-300 hover:shadow-[0_20px_60px_-10px_rgba(82,102,255,0.5)] transform hover:scale-105 shadow-xl border border-[#5266FF]/30"
           >
             <svg className="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
