@@ -14,6 +14,6 @@
   ],
   "regions": ["sin1"],
   "env": {
-    "NEXT_PUBLIC_SITE_URL": "https://thesun-nextjs.vercel.app"
+    "NEXT_PUBLIC_SITE_URL": "https://thesun-next.vercel.app"
   }
 }
