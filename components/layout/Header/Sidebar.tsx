@@ -26,60 +26,7 @@ export default function Sidebar({ isOpen, onClose, mainNavItems }: SidebarProps)
         onClick={onClose}
       />
 
-      <div className={`
-        fixed inset-0 z-[110] 
-        hidden lg:flex items-center justify-center
-        transition-all duration-300
-        ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}
-      `}>
-        <div className={`
-          w-[90vw] max-w-4xl
-          bg-white rounded-lg shadow-xl overflow-hidden
-          transform transition-all duration-300
-          ${isOpen ? 'scale-100' : 'scale-[0.96]'}
-        `}>
-          <div className="flex items-center justify-between px-5 h-12 border-b border-gray-50">
-            <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">Navigation</span>
-            <button onClick={onClose} className="p-1 hover:bg-gray-50 rounded transition-colors">
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          <div className="p-5">
-            <div className="flex flex-wrap gap-1.5">
-              {mainNavItems.map((item) => (
-                <div key={item.id}>
-                  {item.external ? (
-                    <a href={item.slug} target="_blank" rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 px-3 h-8 rounded-md border border-yellow-200 bg-yellow-50 text-yellow-800 text-xs font-medium hover:bg-yellow-100 transition-colors"
-                    >
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                      {item.name}
-                    </a>
-                  ) : item.slug.startsWith('/') ? (
-                    <Link href={item.slug} onClick={onClose}
-                      className="inline-flex items-center px-3 h-8 rounded-md bg-gray-50 text-gray-700 text-xs font-medium hover:bg-gray-100 border border-gray-100 hover:border-gray-200 transition-colors"
-                    >
-                      {item.name}
-                    </Link>
-                  ) : (
-                    <Link href={`/category/${item.slug}`} onClick={onClose}
-                      className="inline-flex items-center gap-1.5 px-3 h-8 rounded-md bg-gray-50 text-gray-700 text-xs font-medium hover:bg-red-50 hover:text-red-600 border border-gray-100 hover:border-red-200 transition-colors"
-                    >
-                      {item.hot && <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>}
-                      {item.name}
-                    </Link>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Desktop modal is now handled by DesktopCanvasModal */}
 
       <div className={`
         fixed top-0 left-0 h-full w-72 bg-white z-[110] transform transition-transform duration-300 ease-out

@@ -129,36 +129,36 @@ export default function CategoryPage({
 
         {/* Featured Hero Card */}
         {mainPost && (
-          <div className="mb-6 md:mb-10">
-            <article className="group relative bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+          <div className="mb-8 md:mb-12">
+            <article className="group relative bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300">
               <div className="flex flex-col lg:flex-row">
                 <div className="lg:w-3/5 relative">
                   <Link href={getPostUrl(mainPost, allCategories)}>
-                    <div className="aspect-[16/9] md:aspect-[2/1] lg:aspect-auto lg:h-full relative min-h-[200px] md:min-h-[300px] lg:min-h-[280px]">
+                    <div className="aspect-[16/9] md:aspect-[2/1] lg:aspect-auto lg:h-full relative min-h-[200px] md:min-h-[320px] lg:min-h-[300px]">
                       {mainPost.featured_media_url ? (
-                        <NetworkImage src={mainPost.featured_media_url} alt={mainPost.featured_media_alt || cleanHtmlContent(mainPost.title.rendered)} fill className="object-cover group-hover:scale-[1.03] transition-transform duration-500" sizes="(max-width: 1024px) 100vw, 60vw" />
+                        <NetworkImage src={mainPost.featured_media_url} alt={mainPost.featured_media_alt || cleanHtmlContent(mainPost.title.rendered)} fill className="object-cover group-hover:scale-[1.03] transition-transform duration-700" sizes="(max-width: 1024px) 100vw, 60vw" />
                       ) : (
-                        <div className="w-full h-full bg-gray-100 flex items-center justify-center"><span className="text-gray-400 text-xs">No image</span></div>
+                        <div className="w-full h-full bg-gray-50 flex items-center justify-center"><span className="text-gray-300 text-sm">No image</span></div>
                       )}
                     </div>
                   </Link>
                 </div>
-                <div className="lg:w-2/5 p-4 md:p-6 lg:p-8 flex flex-col justify-center">
-                  <div className="flex items-center gap-2 text-[10px] md:text-xs text-gray-400 mb-2 md:mb-3">
-                    <span className="text-red-500 font-semibold uppercase tracking-wider text-[10px] md:text-[11px]">{cleanHtmlContent(category.name)}</span>
+                <div className="lg:w-2/5 p-6 md:p-8 lg:p-10 flex flex-col justify-center">
+                  <div className="flex items-center gap-2.5 text-xs text-gray-400 mb-3">
+                    <span className="px-2.5 py-1 bg-red-50 text-red-600 font-semibold rounded-md text-[10px] uppercase tracking-wider">{cleanHtmlContent(category.name)}</span>
                     <span className="text-gray-300">·</span>
                     <span>{formatTimeAgo(mainPost.date)}</span>
                   </div>
                   <Link href={getPostUrl(mainPost, allCategories)}>
-                    <h2 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900 leading-tight group-hover:text-red-600 transition-colors mb-2 md:mb-3"
+                    <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight group-hover:text-red-600 transition-colors mb-3"
                         dangerouslySetInnerHTML={{ __html: cleanHtmlContent(mainPost.title.rendered) }} />
                   </Link>
                   {mainPost.excerpt?.rendered && (
-                    <p className="text-xs md:text-sm text-gray-500 leading-relaxed line-clamp-2 md:line-clamp-3">{cleanTextContent(mainPost.excerpt.rendered.substring(0, 200) + '...')}</p>
+                    <p className="text-sm text-gray-500 leading-relaxed line-clamp-3">{cleanTextContent(mainPost.excerpt.rendered.substring(0, 200) + '...')}</p>
                   )}
-                  <Link href={getPostUrl(mainPost, allCategories)} className="mt-3 md:mt-4 text-[11px] md:text-xs font-medium text-red-500 hover:text-red-600 transition-colors inline-flex items-center gap-1">
+                  <Link href={getPostUrl(mainPost, allCategories)} className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-red-600 hover:text-red-700 transition-colors">
                     Read article
-                    <svg className="w-3 md:w-3.5 h-3 md:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
                   </Link>
                 </div>
               </div>
@@ -167,29 +167,34 @@ export default function CategoryPage({
         )}
 
         {/* Side + Grid */}
-        <div className="flex flex-col lg:flex-row gap-5 mb-8">
-          {/* Side column - horizontal on mobile */}
+        <div className="flex flex-col lg:flex-row gap-6 mb-10">
+          {/* Side column */}
           <div className="lg:w-1/4">
-            <div className="border-b border-gray-100 pb-2.5 mb-4 lg:hidden">
-              <h2 className="text-xs font-bold text-gray-900">Side Stories</h2>
+            <div className="flex items-center gap-2 pb-3 mb-4 border-b border-gray-100">
+              <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+              </svg>
+              <h2 className="text-xs font-bold text-gray-900 uppercase tracking-wider">Trending</h2>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-1 gap-3 lg:gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-1 gap-4">
               {sidePosts.map((post, i) => (
-                <article key={post.id} className="group bg-white rounded-lg border border-gray-100 p-2 md:p-2.5 hover:shadow-sm transition-shadow">
-                  {post.featured_media_url && (
-                    <Link href={getPostUrl(post, allCategories)}>
-                      <div className="aspect-[16/9] relative rounded-md overflow-hidden mb-2">
+                <article key={post.id} className="group">
+                  <Link href={getPostUrl(post, allCategories)}>
+                    <div className="aspect-[16/9] relative rounded-xl overflow-hidden bg-gray-50 mb-2.5">
+                      {post.featured_media_url ? (
                         <NetworkImage src={post.featured_media_url} alt={post.featured_media_alt || cleanHtmlContent(post.title.rendered)} fill className="object-cover group-hover:scale-[1.03] transition-transform duration-500" sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" />
-                      </div>
-                    </Link>
-                  )}
-                  <div className="flex items-center gap-1 text-[9px] md:text-[10px] text-gray-400 mb-1">
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center"><span className="text-gray-200 text-2xl font-bold">{i + 1}</span></div>
+                      )}
+                    </div>
+                  </Link>
+                  <div className="flex items-center gap-1.5 text-[10px] text-gray-400 mb-1">
                     <span className="text-red-500 font-semibold uppercase tracking-wider">{cleanHtmlContent(category.name)}</span>
-                    <span>·</span>
+                    <span className="text-gray-300">·</span>
                     <span>{formatTimeAgo(post.date)}</span>
                   </div>
                   <Link href={getPostUrl(post, allCategories)}>
-                    <h3 className="text-xs md:text-sm font-semibold text-gray-900 leading-snug group-hover:text-red-600 transition-colors line-clamp-2 md:line-clamp-3"
+                    <h3 className="text-sm font-semibold text-gray-900 leading-snug group-hover:text-red-600 transition-colors line-clamp-2"
                         dangerouslySetInnerHTML={{ __html: cleanHtmlContent(post.title.rendered) }} />
                   </Link>
                 </article>
@@ -199,13 +204,16 @@ export default function CategoryPage({
 
           {/* Grid column */}
           <div className="lg:w-3/4">
-            <div className="border-b border-gray-100 pb-2.5 mb-4 md:mb-6">
-              <h2 className="text-xs md:text-sm font-bold text-gray-900">Latest Stories</h2>
+            <div className="flex items-center gap-2 pb-3 mb-5 border-b border-gray-100">
+              <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2" />
+              </svg>
+              <h2 className="text-xs font-bold text-gray-900 uppercase tracking-wider">Latest Stories</h2>
             </div>
             {gridPosts.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {gridPosts.map((post) => (
-                  <article key={post.id} className="group bg-white rounded-lg border border-gray-100 overflow-hidden hover:shadow-sm transition-shadow">
+                  <article key={post.id} className="group bg-white rounded-xl border border-gray-100 overflow-hidden hover:border-gray-200 hover:shadow-md transition-all duration-200">
                     {post.featured_media_url && (
                       <Link href={getPostUrl(post, allCategories)}>
                         <div className="aspect-[16/9] relative overflow-hidden">
@@ -213,33 +221,36 @@ export default function CategoryPage({
                         </div>
                       </Link>
                     )}
-                    <div className="p-3 md:p-4">
-                      <div className="flex items-center gap-1.5 text-[9px] md:text-[10px] text-gray-400 mb-1 md:mb-1.5">
+                    <div className="p-4">
+                      <div className="flex items-center gap-1.5 text-[10px] text-gray-400 mb-1.5">
                         <span className="text-red-500 font-semibold uppercase tracking-wider">{cleanHtmlContent(category.name)}</span>
                         <span>·</span>
                         <span>{formatTimeAgo(post.date)}</span>
                       </div>
                       <Link href={getPostUrl(post, allCategories)}>
-                        <h3 className="text-xs md:text-sm font-semibold text-gray-900 leading-snug group-hover:text-red-600 transition-colors line-clamp-2"
+                        <h3 className="text-sm font-semibold text-gray-900 leading-snug group-hover:text-red-600 transition-colors line-clamp-2"
                             dangerouslySetInnerHTML={{ __html: cleanHtmlContent(post.title.rendered) }} />
                       </Link>
                       {post.excerpt?.rendered && (
-                        <p className="text-[10px] md:text-xs text-gray-500 mt-1 md:mt-1.5 leading-relaxed line-clamp-2">{cleanTextContent(post.excerpt.rendered.substring(0, 100) + '...')}</p>
+                        <p className="text-xs text-gray-500 mt-1.5 leading-relaxed line-clamp-2">{cleanTextContent(post.excerpt.rendered.substring(0, 100) + '...')}</p>
                       )}
                     </div>
                   </article>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12 md:py-16"><p className="text-gray-400 text-sm">No more stories.</p></div>
+              <div className="text-center py-16"><p className="text-gray-400 text-sm">No more stories.</p></div>
             )}
           </div>
         </div>
 
         {hasMore && (
-          <div className="text-center pb-6 md:pb-8">
-            <button onClick={() => setDisplayCount(prev => prev + 12)} className="px-4 md:px-5 h-8 md:h-9 text-[11px] md:text-xs font-medium rounded-md bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-red-600 border border-gray-200 hover:border-red-200 transition-colors">
-              Load More
+          <div className="text-center pb-10">
+            <button onClick={() => setDisplayCount(prev => prev + 12)} className="px-5 h-9 text-xs font-medium rounded-lg bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-red-600 border border-gray-200 hover:border-red-200 transition-colors inline-flex items-center gap-1.5">
+              <span>Load More</span>
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
             </button>
           </div>
         )}

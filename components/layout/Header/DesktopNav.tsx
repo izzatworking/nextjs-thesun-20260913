@@ -77,7 +77,7 @@ export default function DesktopNav({
         >
            <button
             onClick={() => toggleDropdown(item.id)}
-              className={`flex items-center font-medium py-1.5 px-3 rounded-lg text-sm transition-colors ${
+              className={`flex items-center font-medium py-2.5 px-4 rounded-lg text-lg transition-colors ${
                 isActive 
                   ? 'text-red-600 bg-red-50' 
                   : 'text-gray-700 hover:text-red-600 hover:bg-gray-50'
@@ -139,7 +139,7 @@ export default function DesktopNav({
     return (
       <Link
         href={item.slug.startsWith('/') ? item.slug : item.name === 'Home' ? '/' : `/category/${item.slug}`}
-        className="flex items-center font-medium py-1.5 px-3 rounded-lg text-sm text-gray-700 hover:text-red-600 hover:bg-gray-50 transition-colors"
+        className="flex items-center font-medium py-2.5 px-4 rounded-lg text-lg text-gray-700 hover:text-red-600 hover:bg-gray-50 transition-colors"
         key={item.id}
         onMouseEnter={() => handleMouseEnter(item.id)}
         onMouseLeave={handleMouseLeave}
@@ -162,7 +162,7 @@ export default function DesktopNav({
       >
          <button
           onClick={() => toggleDropdown(item.id)}
-          className={`flex items-center font-medium py-1.5 px-3 rounded-lg text-sm transition-colors ${
+          className={`flex items-center font-medium py-2.5 px-4 rounded-lg text-lg transition-colors ${
               isActive 
                 ? 'text-red-600 bg-red-50' 
                 : 'text-gray-700 hover:text-red-600 hover:bg-gray-50'
@@ -227,7 +227,7 @@ export default function DesktopNav({
         }
       `}</style>
       
-      <nav className="flex items-center justify-center gap-1 relative z-40">
+      <nav className="flex items-center justify-evenly gap-1 w-full relative z-40">
         {mainNavItems.map((item) => {
           if (item.external) {
             return (

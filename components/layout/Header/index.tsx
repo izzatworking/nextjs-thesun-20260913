@@ -318,25 +318,24 @@ export default function Header({ categories = [], isSidebarOpen: externalIsOpen,
       subItems: getSubCategories(findCategoryId('News'))
     },
     { 
-      name: 'Berita', 
-      slug: 'berita', 
-      id: 5, 
-      hot: true,
-      subItems: getSubCategories(findCategoryId('Berita'))
-    },
-    { 
-      name: 'Business', 
-      slug: 'business', 
-      id: 2, 
-      hot: false,
-      subItems: getSubCategories(findCategoryId('Business'))
-    },
-    { 
       name: 'Going Viral', 
       slug: 'going-viral', 
       id: 7, 
       hot: true,
       subItems: getSubCategories(findCategoryId('Going Viral'))
+    },
+    { 
+      name: 'Sports', 
+      slug: 'sports', 
+      id: 4, 
+      hot: true,
+      subItems: getSubCategories(findCategoryId('Sports'))
+    },
+    { 
+      name: 'Opinion', 
+      slug: 'opinion', 
+      id: 8, 
+      hot: false,
     },
     { 
       name: 'Lifestyle', 
@@ -346,27 +345,32 @@ export default function Header({ categories = [], isSidebarOpen: externalIsOpen,
       subItems: getSubCategories(findCategoryId('Lifestyle'))
     },
     { 
-      name: 'Sports', 
-      slug: 'sports', 
-      id: 4, 
-      hot: true,
-      subItems: getSubCategories(findCategoryId('Sports'))
+      name: 'Spotlight', 
+      slug: 'spotlight', 
+      id: 11, 
+      hot: false,
     },
-    { name: 'ipaper', slug: 'https://thesun-ipaper.cld.bz/', id: 13, hot: false, external: true },
+    { 
+      name: 'Business', 
+      slug: 'business', 
+      id: 2, 
+      hot: false,
+      subItems: getSubCategories(findCategoryId('Business'))
+    },
     { 
       name: 'More', 
       slug: 'more', 
       id: 9, 
       hot: false,
       subItems: [
+        { name: 'Berita', slug: 'berita', id: 5 },
         { name: 'Motoring', slug: 'motoring', id: 6 },
-        { name: 'Opinion', slug: 'opinion', id: 8 },
         { name: 'Classifieds', slug: 'classifieds', id: 10 },
-        { name: 'Spotlight', slug: 'spotlight', id: 11 },
         { name: 'Education', slug: 'education', id: 12 },
         { name: 'Our Team', slug: '/our-team', id: 14 }
       ]
     },
+    { name: 'ipaper', slug: 'https://thesun-ipaper.cld.bz/', id: 13, hot: false, external: true },
   ];
   const canvasCategories = {
     row1: [
@@ -435,7 +439,7 @@ export default function Header({ categories = [], isSidebarOpen: externalIsOpen,
         
         <div className="w-full">
           {/* Top row: hamburger + logo + actions */}
-          <div className="flex items-center justify-between px-4 lg:px-6 h-24 lg:h-28">
+          <div className="flex items-center justify-between px-4 lg:px-6 h-28 lg:h-32">
             <div className="flex items-center gap-3">
               <div className="relative">
                 <button
@@ -454,9 +458,7 @@ export default function Header({ categories = [], isSidebarOpen: externalIsOpen,
                       isSidebarOpen ? 'w-full -rotate-45 -translate-y-[6px]' : 'group-hover:w-full'
                     }`}></span>
                   </div>
-                  <span className="hidden lg:block text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    {isSidebarOpen ? 'Close' : 'Menu'}
-                  </span>
+
                 </button>
               </div>
               <Link href="/" className="flex-shrink-0">

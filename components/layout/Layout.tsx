@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import Head from 'next/head';
 import Header from './Header/';
 import Sidebar from './Header/Sidebar';
+import DesktopCanvasModal from './Header/DesktopCanvasModal';
+import FloatingTopStories from './FloatingTopStories';
 import Footer from './Footer';
 import { WPCategory } from '../../types/wordpress';
 import { CategoryItem } from './Header/types';
@@ -54,19 +56,19 @@ const Layout: React.FC<LayoutProps> = ({
   const mainNavItems: CategoryItem[] = [
     { name: 'Home', slug: '/', id: 0, hot: false },
     { name: 'News', slug: 'news', id: 1, hot: true },
-    { name: 'Berita', slug: 'berita', id: 5, hot: true },
-    { name: 'Business', slug: 'business', id: 2, hot: false },
     { name: 'Going Viral', slug: 'going-viral', id: 7, hot: true },
-    { name: 'Lifestyle', slug: 'lifestyle', id: 3, hot: false },
     { name: 'Sports', slug: 'sports', id: 4, hot: true },
+    { name: 'Opinion', slug: 'opinion', id: 8, hot: false },
+    { name: 'Lifestyle', slug: 'lifestyle', id: 3, hot: false },
+    { name: 'Spotlight', slug: 'spotlight', id: 11, hot: false },
+    { name: 'Business', slug: 'business', id: 2, hot: false },
     { name: 'ipaper', slug: 'https://thesun-ipaper.cld.bz/', id: 13, hot: false, external: true },
+    { name: 'Berita', slug: 'berita', id: 5, hot: true },
+    { name: 'Motoring', slug: 'motoring', id: 6, hot: false },
+    { name: 'Classifieds', slug: 'https://sunmedia.com.my/', id: 10, hot: false, external: true },
+    { name: 'Education', slug: 'education', id: 12, hot: false },
     { name: 'Our Team', slug: '/our-team', id: 14, hot: false },
     { name: 'World Cup 2026', slug: '/wcpage', id: 15, hot: true },
-    { name: 'Motoring', slug: 'motoring', id: 6, hot: false },
-    { name: 'Opinion', slug: 'opinion', id: 8, hot: false },
-    { name: 'Classifieds', slug: 'https://sunmedia.com.my/', id: 10, hot: false, external: true },
-    { name: 'Spotlight', slug: 'spotlight', id: 11, hot: false },
-    { name: 'Education', slug: 'education', id: 12, hot: false },
   ];
 
   const canvasCategories = {
@@ -119,6 +121,11 @@ const Layout: React.FC<LayoutProps> = ({
           onClose={() => setIsSidebarOpen(false)}
           mainNavItems={mainNavItems}
         />
+        <DesktopCanvasModal
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+          mainNavItems={mainNavItems}
+        />
 
         <div className="h-[160px] lg:h-[200px]"></div>
 
@@ -129,7 +136,7 @@ const Layout: React.FC<LayoutProps> = ({
             </div>
           ) : (
             <div className="container mx-auto px-1 sm:px-2">
-              <div className="bg-white">
+              <div className="bg-white rounded-xl">
                 {children}
               </div>
             </div>
@@ -139,6 +146,8 @@ const Layout: React.FC<LayoutProps> = ({
         <div className="relative z-10 mt-8 md:mt-12">
           <Footer />
         </div>
+
+        <FloatingTopStories />
 
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}

@@ -29,6 +29,24 @@ import type {
 } from './graphql/types';
 
 const WORDPRESS_API_URL = process.env.NEXT_PUBLIC_WORDPRESS_REST_URL || 'https://thesun.my/wp-json/wp/v2';
+const GRAPHQL_URL = process.env.NEXT_PUBLIC_WORDPRESS_GRAPHQL_URL || 'https://thesun.my/thesun-api';
+
+export async function fetchAPI(query: string, variables: Record<string, any> = {}) {
+  const res = await fetch(GRAPHQL_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ query, variables }),
+    next: { revalidate: 300 },
+  });
+  const json = await res.json();
+  if (json.errors) {
+    console.error('GraphQL errors:', json.errors);
+    throw new Error('Failed to fetch API');
+  }
+  return json.data;
+}
 
 let cachedCategories: WPCategory[] | null = null;
 

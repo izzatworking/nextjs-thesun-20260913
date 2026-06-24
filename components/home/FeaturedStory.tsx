@@ -35,17 +35,6 @@ export default function FeaturedStory({ pinnedPost, categories }: FeaturedStoryP
   const cleanAlt = cleanTextContent(pinnedPost.featured_media_alt || pinnedPost.title.rendered);
   const categoryName = getPostCategoryName(pinnedPost, categories);
 
-  // Handle author avatar
-  const getAuthorAvatarUrl = (author: WPAuthor): string => {
-    if (typeof author.avatar_url === 'string') {
-      return author.avatar_url;
-    }
-    if (author.avatar_url && typeof author.avatar_url === 'object' && 'url' in author.avatar_url) {
-      return author.avatar_url.url;
-    }
-    return '';
-  };
-
   return (
     <article className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
       <div className="flex flex-col lg:flex-row">
@@ -117,34 +106,10 @@ export default function FeaturedStory({ pinnedPost, categories }: FeaturedStoryP
           </div>
 
           {pinnedPost.authors && pinnedPost.authors.length > 0 && (
-            <div className="flex items-center mb-6 pt-4 border-t border-gray-100">
-              <div className="flex items-center">
-                <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden mr-3">
-                  {(() => {
-                    const avatarUrl = getAuthorAvatarUrl(pinnedPost.authors[0]);
-                    return avatarUrl ? (
-                      <img
-                        src={avatarUrl}
-                        alt={pinnedPost.authors[0].display_name}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                          e.currentTarget.parentElement?.classList.add('bg-gray-300');
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gray-300 flex items-center justify-center">
-                        <span className="text-gray-600 font-medium text-sm">
-                          {pinnedPost.authors[0].display_name.charAt(0)}
-                        </span>
-                      </div>
-                    );
-                  })()}
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900">{pinnedPost.authors[0].display_name}</p>
-                </div>
-              </div>
+            <div className="mb-6 pt-4 border-t border-gray-100">
+              <p className="text-sm text-gray-500">
+                <span className="font-medium text-gray-700">{pinnedPost.authors[0].display_name}</span>
+              </p>
             </div>
           )}
 

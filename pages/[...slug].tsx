@@ -33,6 +33,7 @@ import { TimeAgo } from '@/components/common/TimeAgo';
 import { AdWidget } from '@/components/ads/AdWidget';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import TopStories from '@/components/layout/Header/TopStories';
 
 interface PostProps {
   post: WPPostWithMedia;
@@ -163,8 +164,10 @@ const LatestStories = ({ posts }: { posts: WPPostWithMedia[] }) => {
   return (
     <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
       <div className="px-5 py-4 border-b border-gray-100">
-        <h2 className="text-sm font-bold text-gray-900 tracking-wide uppercase flex items-center gap-2">
-          <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+        <h2 className="text-base font-bold text-gray-900 tracking-wide flex items-center gap-2">
+          <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2" />
+          </svg>
           Latest Stories
         </h2>
       </div>
@@ -214,34 +217,75 @@ const PopularCategories = ({ categories }: { categories: WPCategory[] }) => {
       .includes(cat.name)
   );
 
+  const categoryIcons: Record<string, JSX.Element> = {
+    'News': (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2" />
+      </svg>
+    ),
+    'Going Viral': (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
+      </svg>
+    ),
+    'Lifestyle': (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+      </svg>
+    ),
+    'Sports': (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+    'Business': (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+      </svg>
+    ),
+    'Berita': (
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  };
+
   return (
     <div className="bg-white rounded-xl border border-gray-100 overflow-hidden mt-6">
       <div className="px-5 py-4 border-b border-gray-100">
-        <h2 className="text-sm font-bold text-gray-900 tracking-wide uppercase flex items-center gap-2">
-          <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+        <h2 className="text-base font-bold text-gray-900 tracking-wide flex items-center gap-2">
+          <span className="w-2 h-2 bg-red-500 rounded-full"></span>
           Popular Categories
         </h2>
       </div>
-      <div className="p-4">
-        <div className="flex flex-wrap gap-2">
-          {popularCategories.map((category) => (
-            <Link
-              key={category.id}
-              href={`/category/${category.slug}`}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-gray-50 hover:bg-red-50 text-gray-700 hover:text-red-600 text-xs font-medium transition-colors border border-gray-100 hover:border-red-200"
+      <div className="p-4 space-y-1.5">
+        {popularCategories.map((category) => (
+          <Link
+            key={category.id}
+            href={`/category/${category.slug}`}
+            className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 hover:bg-red-50 border border-gray-100 hover:border-red-100 transition-all duration-200 group"
+          >
+            <span className="text-gray-400 group-hover:text-red-500 transition-colors">
+              {categoryIcons[category.name] || (
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              )}
+            </span>
+            <span className="text-sm font-medium text-gray-700 group-hover:text-red-600 transition-colors flex-1">
+              {cleanTextContent(category.name)}
+            </span>
+            <svg
+              className="w-4 h-4 text-gray-300 group-hover:text-red-400 transition-colors"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              <span>{cleanTextContent(category.name)}</span>
-              <svg
-                className="w-3 h-3"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-          ))}
-        </div>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+        ))}
       </div>
     </div>
   );
@@ -650,7 +694,7 @@ export default function Post({
       <div className="min-h-screen bg-white">
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="flex flex-col lg:flex-row gap-8">
-            <div className="lg:w-3/4">
+            <div className="lg:w-[62.5%]">
               <article className="bg-white overflow-hidden">
                 <div className="max-w-4xl mx-auto pt-8 px-4 md:px-0">
                   {/* 1. Category Tags */}
@@ -701,16 +745,28 @@ export default function Post({
 
                   {/* 2. Title + Share inline */}
                   <div className="flex flex-col md:flex-row md:items-start md:justify-between md:gap-4">
-                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight md:flex-1 mb-3 md:mb-0">
+                    <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight md:flex-1 mb-3 md:mb-0">
                       {cleanTitle}
                     </h1>
                     <div className="flex-shrink-0 self-start md:self-auto md:pt-1.5">
                       <SocialShare title={cleanTitle} post={post} />
                     </div>
                   </div>
+
+                  {/* 3. Byline + Date row */}
+                  <div className="flex flex-wrap items-center gap-3 mt-4 mb-2 pb-4 border-b border-gray-200">
+                    <AuthorSection post={post} />
+                    <span className="text-gray-300">|</span>
+                    <div className="flex items-center text-gray-500">
+                      <svg className="w-3.5 h-3.5 text-red-500 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span className="text-xs font-medium"><TimeAgo dateString={post.date} format="full" /></span>
+                    </div>
+                  </div>
                 </div>
 
-                {/* 3. Featured Image */}
+                {/* 4. Featured Image */}
                 {post.featured_media_url && (
                   <div className="w-full max-w-[1200px] mx-auto px-4 md:px-0 mt-6">
                     <NetworkImage
@@ -732,17 +788,6 @@ export default function Post({
                 )}
 
                 <div className="max-w-4xl mx-auto px-4 md:px-0 mt-6">
-                  {/* 4. Byline + Date row */}
-                  <div className="flex flex-wrap items-center gap-3 mb-6 pb-4 border-b border-gray-200">
-                    <AuthorSection post={post} />
-                    <span className="text-gray-300">|</span>
-                    <div className="flex items-center text-gray-500">
-                      <svg className="w-3.5 h-3.5 text-red-500 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      <span className="text-xs font-medium"><TimeAgo dateString={post.date} format="full" /></span>
-                    </div>
-                  </div>
 
                   {/* 5. Content */}
                   {content && (
@@ -773,8 +818,11 @@ export default function Post({
               </article>
             </div>
 
-            <div className="lg:w-1/4">
+            <div className="lg:w-[37.5%]">
               <LatestStories posts={latestPosts} />
+              <div className="mt-6">
+                <TopStories />
+              </div>
               <PopularCategories categories={categories} />
               <div className="mt-6 bg-white rounded-lg shadow-lg p-4">
               </div>
