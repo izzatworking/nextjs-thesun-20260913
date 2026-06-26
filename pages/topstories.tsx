@@ -1,4 +1,4 @@
-import { GetStaticProps } from 'next';
+import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import Layout from '@/components/layout/Layout';
 import NetworkImage from '@/components/common/NetworkImage';
@@ -163,7 +163,7 @@ export default function TopStoriesPage({ articles, categories }: TopStoriesPageP
   );
 }
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getServerSideProps: GetServerSideProps = async () => {
   try {
     const [articles, categories] = await Promise.all([
       getTopStories(),
@@ -175,7 +175,6 @@ export const getStaticProps: GetStaticProps = async () => {
         articles: (articles || []).slice(0, 15),
         categories: categories || [],
       },
-      revalidate: 300,
     };
   } catch (error) {
     console.error('Error fetching top stories:', error);
@@ -184,7 +183,6 @@ export const getStaticProps: GetStaticProps = async () => {
         articles: [],
         categories: [],
       },
-      revalidate: 300,
     };
   }
 };

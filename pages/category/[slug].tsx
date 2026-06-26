@@ -1,11 +1,13 @@
-import { GetStaticProps, GetStaticPaths } from 'next';
+import { GetServerSideProps } from 'next';
 import {
   getCategories,
   getPostsByCategory,
   getPostsByCategoryWithChildren,
   extractFeaturedMedia,
   getPostUrl,
-  setCategoryCache
+  setCategoryCache,
+  getShortenedCategorySlug,
+  getOriginalCategorySlug
 } from '../../lib/wordpress';
 import { 
   WPPost, 
@@ -259,20 +261,25 @@ export default function CategoryPage({
   );
 }
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  try {
-    const allCategories = await getCategories();
-    return { paths: allCategories.map((c: WPCategory) => ({ params: { slug: c.slug } })), fallback: 'blocking' };
-  } catch { return { paths: [], fallback: 'blocking' }; }
-};
-
-export const getStaticProps: GetStaticProps = async ({ params }) => {
+export const getServerSideProps: GetServerSideProps = async ({ params }) => {
   try {
     const slug = params?.slug as string;
     const allCategoriesData = await getCategories();
     const allCategories: CategoryWithCount[] = allCategoriesData.map(c => ({ ...c, count: c.count || 0, parent: c.parent || 0 }));
     let category = allCategories.find(c => c.slug === slug);
     if (!category) category = allCategories.find(c => c.slug.toLowerCase() === slug.toLowerCase());
+    if (!category) {
+      const mappedSlug = getShortenedCategorySlug(slug);
+      if (mappedSlug !== slug) {
+        category = allCategories.find(c => c.slug === mappedSlug);
+      }
+    }
+    if (!category) {
+      const originalSlug = getOriginalCategorySlug(slug);
+      if (originalSlug !== slug) {
+        category = allCategories.find(c => c.slug === originalSlug);
+      }
+    }
     if (!category) return { notFound: true };
 
     const subCategories: CategoryWithCount[] = allCategories.filter(c => c.parent === category.id).map(c => ({ ...c, count: c.count || 0, parent: c.parent || 0 }));
@@ -280,6 +287,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     setCategoryCache(allCategories);
     const allPosts = allPostsData.map(p => extractFeaturedMedia(p));
 
-    return { props: { category, subCategories, featuredPost: allPosts[0] || null, categoryPosts: allPosts.slice(1, 10), allCategories, totalPostsCount: allPosts.length, allPosts }, revalidate: 60 };
+    return { props: { category, subCategories, featuredPost: allPosts[0] || null, categoryPosts: allPosts.slice(1, 10), allCategories, totalPostsCount: allPosts.length, allPosts } };
   } catch { return { notFound: true }; }
 };

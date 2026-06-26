@@ -1,5 +1,5 @@
 // pages/tag/[slug].tsx
-import { GetStaticProps, GetStaticPaths } from 'next';
+import { GetServerSideProps } from 'next';
 import { getPostsByTagSlug, getTags, getCategories, getPostUrl, setCategoryCache } from '../../lib/wordpress';
 import { WPPostWithMedia, WPCategory, WPTag } from '../../types/wordpress';
 import Layout from '../../components/layout/Layout';
@@ -208,29 +208,7 @@ export default function TagPage({ tag, posts, categories, allTags }: TagPageProp
   );
 }
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  try {
-    // Generate minimal paths, rely on fallback for others
-    const tags = await getTags();
-    
-    const paths = tags.slice(0, 50).map((tag) => ({
-      params: { slug: tag.slug },
-    }));
-
-    return {
-      paths,
-      fallback: 'blocking', // Generate other tags on-demand
-    };
-  } catch (error) {
-    console.error('Error generating tag paths:', error);
-    return {
-      paths: [],
-      fallback: 'blocking',
-    };
-  }
-};
-
-export const getStaticProps: GetStaticProps = async ({ params }) => {
+export const getServerSideProps: GetServerSideProps = async ({ params }) => {
   try {
     const slug = params?.slug as string;
     
@@ -295,7 +273,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
         categories: categories || [],
         allTags: allTags || [],
       },
-      revalidate: 60,
     };
   } catch (error) {
     console.error('Error in getStaticProps for tag page:', error);

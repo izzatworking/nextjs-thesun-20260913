@@ -1,4 +1,4 @@
-import { GetStaticProps } from 'next';
+import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import {
   getPosts,
@@ -21,6 +21,8 @@ import BeritaSection from '../components/home/categories/BeritaSection';
 import SportsSection from '../components/home/categories/SportsSection';
 import LifestyleSection from '../components/home/categories/LifestyleSection';
 import GoingViralSection from '../components/home/categories/GoingViralSection';
+import LocalWorldSection from '../components/home/categories/LocalWorldSection';
+import BusinessSection from '../components/home/categories/BusinessSection';
 import SpotlightSection from '../components/home/categories/SpotlightSection';
 import CombinedSection from '../components/home/categories/CombinedSection';
 import VideoSection from '../components/home/categories/VideoSection';
@@ -43,6 +45,12 @@ interface HomeProps {
   worldPosts: WPPost[];
   asiaPosts: WPPost[];
   businessPosts: WPPost[];
+  corporatePosts: WPPost[];
+  globalPosts: WPPost[];
+  localPosts: WPPost[];
+  smePosts: WPPost[];
+  motoringPosts: WPPost[];
+  educationPosts: WPPost[];
   prnPosts: WPPost[];
   palestinePosts: WPPost[];
   chinaPosts: WPPost[];
@@ -64,6 +72,12 @@ export default function Home({
   malaysiaPosts,
   worldPosts,
   businessPosts,
+  corporatePosts,
+  globalPosts,
+  localPosts,
+  smePosts,
+  motoringPosts,
+  educationPosts,
   prnPosts,
   palestinePosts,
   chinaPosts,
@@ -189,6 +203,20 @@ export default function Home({
 
         <div className="border-t border-gray-300 my-6 sm:my-10 lg:my-16"></div>
 
+        <LocalWorldSection
+          malaysiaPosts={malaysiaPosts}
+          worldPosts={worldPosts}
+          categories={categories}
+        />
+
+        <BusinessSection
+          categories={categories}
+          corporatePosts={corporatePosts}
+          globalPosts={globalPosts}
+          localPosts={localPosts}
+          smePosts={smePosts}
+        />
+
         <GoingViralSection posts={goingViralPosts} categories={categories} />
 
         <LifestyleSection posts={lifestylePosts} categories={categories} />
@@ -211,9 +239,8 @@ export default function Home({
         <SpotlightSection posts={spotlightPosts} categories={categories} />
 
         <CombinedSection
-          malaysiaPosts={malaysiaPosts}
-          worldPosts={worldPosts}
-          businessPosts={businessPosts}
+          motoringPosts={motoringPosts}
+          educationPosts={educationPosts}
           categories={categories}
         />
 
@@ -238,7 +265,7 @@ export default function Home({
   );
 }
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getServerSideProps: GetServerSideProps = async () => {
   try {
     const [posts, categories, exclusivePost, topStoriesPosts, tags, pinnedPosts] = await Promise.all([
       getPosts(30),
@@ -277,12 +304,18 @@ export const getStaticProps: GetStaticProps = async () => {
       world: getCategoryIdBySlugOrTag('world'),
       asia: getCategoryIdBySlugOrTag('asia'),
       business: getCategoryIdBySlugOrTag('business'),
+      motoring: getCategoryIdBySlugOrTag('motoring') || getCategoryIdBySlugOrTag('otomotif'),
+      education: getCategoryIdBySlugOrTag('education') || getCategoryIdBySlugOrTag('pendidikan'),
       prn: getCategoryIdBySlugOrTag('prn') || getCategoryIdBySlugOrTag('pilihan raya'),
       palestine: getCategoryIdBySlugOrTag('palestine') || getCategoryIdBySlugOrTag('gaza'),
       china: getCategoryIdBySlugOrTag('china') || getCategoryIdBySlugOrTag('beijing'),
       spotlight: getCategoryIdByName('spotlight') || getCategoryIdBySlugOrTag('spotlight'),
       video: getCategoryIdBySlugOrTag('video'),
       opinion: getCategoryIdBySlugOrTag('opinion'),
+      corporate: getCategoryIdBySlugOrTag('corporate') || getCategoryIdBySlugOrTag('corporate news'),
+      global: getCategoryIdBySlugOrTag('global'),
+      localSub: getCategoryIdBySlugOrTag('local'),
+      sme: getCategoryIdBySlugOrTag('sme') || getCategoryIdBySlugOrTag('msme'),
     };
 
     const all = await Promise.all([
@@ -301,6 +334,12 @@ export const getStaticProps: GetStaticProps = async () => {
       categoryIds.spotlight ? getPostsByCategoryWithChildren(categoryIds.spotlight) : Promise.resolve([]),
       categoryIds.video ? getPostsByCategoryWithChildren(categoryIds.video) : Promise.resolve([]),
       categoryIds.opinion ? getPostsByCategoryWithChildren(categoryIds.opinion) : Promise.resolve([]),
+      categoryIds.motoring ? getPostsByCategoryWithChildren(categoryIds.motoring) : Promise.resolve([]),
+      categoryIds.education ? getPostsByCategoryWithChildren(categoryIds.education) : Promise.resolve([]),
+      categoryIds.corporate ? getPostsByCategoryWithChildren(categoryIds.corporate) : Promise.resolve([]),
+      categoryIds.global ? getPostsByCategoryWithChildren(categoryIds.global) : Promise.resolve([]),
+      categoryIds.localSub ? getPostsByCategoryWithChildren(categoryIds.localSub) : Promise.resolve([]),
+      categoryIds.sme ? getPostsByCategoryWithChildren(categoryIds.sme) : Promise.resolve([]),
     ]);
 
     return {
@@ -325,8 +364,13 @@ export const getStaticProps: GetStaticProps = async () => {
         spotlightPosts: all[12] || [],
         videoPosts: all[13] || [],
         opinionPosts: all[14] || [],
+        motoringPosts: all[15] || [],
+        educationPosts: all[16] || [],
+        corporatePosts: all[17] || [],
+        globalPosts: all[18] || [],
+        localPosts: all[19] || [],
+        smePosts: all[20] || [],
       },
-      revalidate: 60,
     };
   } catch (error) {
     console.error('Error in getStaticProps:', error);
@@ -352,8 +396,13 @@ export const getStaticProps: GetStaticProps = async () => {
         spotlightPosts: [],
         videoPosts: [],
         opinionPosts: [],
+        motoringPosts: [],
+        educationPosts: [],
+        corporatePosts: [],
+        globalPosts: [],
+        localPosts: [],
+        smePosts: [],
       },
-      revalidate: 60,
     };
   }
 };

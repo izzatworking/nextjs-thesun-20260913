@@ -1,4 +1,4 @@
-import { GetStaticProps, GetStaticPaths } from 'next';
+import { GetServerSideProps } from 'next';
 import { getCategories, getPosts, getPostUrl, setCategoryCache } from '../../lib/wordpress';
 import { WPAuthor, WPPostWithMedia, WPCategory } from '../../types/wordpress';
 import Layout from '../../components/layout/Layout';
@@ -166,11 +166,7 @@ export default function AuthorProfilePage({ author, posts, categories, latestPos
   );
 }
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  return { paths: [], fallback: 'blocking' };
-};
-
-export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
+export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) => {
   const slug = params?.slug as string | undefined;
   if (!slug) return { notFound: true };
 
@@ -231,7 +227,6 @@ export const getStaticProps: GetStaticProps<Props> = async ({ params }) => {
 
     return {
       props: { author, posts: posts || [], categories: categories || [], latestPosts: latestPosts || [] },
-      revalidate: 300
     };
   } catch (err) {
     return { props: { author: null, posts: [], categories: [], latestPosts: [], error: err instanceof Error ? err.message : 'Unknown error' } };

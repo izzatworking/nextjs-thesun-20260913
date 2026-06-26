@@ -1,4 +1,4 @@
-import { GetServerSideProps } from 'next';
+import { GetStaticProps } from 'next';
 import Layout from '../../components/layout/Layout';
 import GraphQLTest from '../../components/test/GraphQLTest';
 import { testGraphQLConnection } from '../../lib/graphql';
@@ -42,8 +42,7 @@ export default function GraphQLTestPage({ connectionTest }: GraphQLTestPageProps
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async () => {
-  // Test GraphQL connection on server side
+export const getStaticProps: GetStaticProps = async () => {
   const connectionTest = await testGraphQLConnection();
   
   return {

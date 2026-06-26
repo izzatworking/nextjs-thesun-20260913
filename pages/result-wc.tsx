@@ -97,6 +97,5 @@ export const getStaticProps: GetStaticProps = async () => {
 
   return {
     props: { categories, fixtures, standings, sportsPosts },
-    revalidate: 60,
   };
 };

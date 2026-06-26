@@ -1,4 +1,4 @@
-import { GetStaticProps } from 'next';
+import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { getPosts, getCategories, getPostUrl, setCategoryCache } from '../lib/wordpress';
 import { WPPostWithMedia, WPCategory } from '../types/wordpress';
@@ -91,7 +91,7 @@ export default function LatestNewsPage({ posts, categories }: LatestNewsPageProp
   );
 }
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getServerSideProps: GetServerSideProps = async () => {
   const categories = await getCategories();
   setCategoryCache(categories);
   const posts = await getPosts(20);
@@ -101,6 +101,5 @@ export const getStaticProps: GetStaticProps = async () => {
       posts,
       categories,
     },
-    revalidate: 60,
   };
 };

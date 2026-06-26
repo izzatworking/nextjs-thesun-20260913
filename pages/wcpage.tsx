@@ -310,6 +310,5 @@ export const getStaticProps: GetStaticProps = async () => {
       fixtures,
       standings,
     },
-    revalidate: 60,
   };
 };

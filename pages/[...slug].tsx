@@ -1,7 +1,7 @@
 // pages/[...slug].tsx - UPDATED WITH PARENT/CHILD CATEGORY URL STRUCTURE
 // Supports: /{parent-category}/{child-category}/{post-slug}
 // Also supports: /{category}/{post-slug} for backward compatibility
-import { GetStaticProps, GetStaticPaths } from 'next';
+import { GetServerSideProps } from 'next';
 import {
   getPosts,
   getPost,
@@ -845,25 +845,7 @@ export default function Post({
    );
 }
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  try {
-    // For now, let's use a simpler approach
-    // We'll generate paths on-demand with fallback: 'blocking'
-    // This is better for large sites
-    return {
-      paths: [],
-      fallback: 'blocking',
-    };
-  } catch (error) {
-    console.error('Error generating paths:', error);
-    return {
-      paths: [],
-      fallback: 'blocking',
-    };
-  }
-};
-
-export const getStaticProps: GetStaticProps = async ({ params }) => {
+export const getServerSideProps: GetServerSideProps = async ({ params }) => {
   try {
     // Get params from URL - now it's an array of segments
     const slugArray = params?.slug as string[];
@@ -993,7 +975,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
         initialMorePosts,
         currentCategory
       },
-      revalidate: 60,
     };
     
   } catch (error) {

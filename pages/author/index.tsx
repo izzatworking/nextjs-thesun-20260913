@@ -1,5 +1,5 @@
 // pages/author/index.tsx - Author Listing Page
-import { GetStaticProps } from 'next';
+import { GetServerSideProps } from 'next';
 import Layout from '../../components/layout/Layout';
 import Breadcrumb from '../../components/common/Breadcrumb';
 import { WPAuthor, WPCategory } from '../../types/wordpress';
@@ -324,7 +324,7 @@ export default function AuthorListingPage({ authors: initialAuthors, categories 
   );
 }
 
-export const getStaticProps: GetStaticProps<Props> = async () => {
+export const getServerSideProps: GetServerSideProps<Props> = async () => {
   try {
     console.log('🔄 Fetching authors from posts data...');
     
@@ -394,7 +394,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
         authors: filteredAuthors,
         categories
       },
-      revalidate: 3600 // Revalidate every hour
     };
   } catch (error) {
     console.error('❌ Error in getStaticProps for author listing:', error);
@@ -405,7 +404,6 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
         authors: [],
         categories: []
       },
-      revalidate: 300 // Revalidate on error after 5 minutes
     };
   }
 };

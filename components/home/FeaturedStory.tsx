@@ -74,7 +74,7 @@ export default function FeaturedStory({ pinnedPost, categories }: FeaturedStoryP
               {formatRelativeTime(pinnedPost.date)}
             </span>
             {categoryName && (
-              <span className="bg-red-50 text-red-700 text-xs px-3 py-1.5 rounded-full font-medium border border-red-100">
+              <span className="text-red-600 text-xs font-semibold uppercase tracking-wider">
                 {categoryName}
               </span>
             )}
@@ -116,7 +116,7 @@ export default function FeaturedStory({ pinnedPost, categories }: FeaturedStoryP
           <div className="pt-4 border-t border-gray-100">
             <Link
               href={`${getPostUrl(pinnedPost)}`}
-              className="inline-flex items-center bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-700 hover:to-orange-600 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl"
+              className="inline-flex items-center bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 rounded-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-xl"
             >
               <span>Read Full Story</span>
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

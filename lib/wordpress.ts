@@ -131,7 +131,17 @@ async function fetchRESTPosts(url: string): Promise<WPPostWithMedia[]> {
   });
   if (!res.ok) throw new Error(`REST API error: ${res.status} ${res.statusText}`);
   const posts: WPPost[] = await res.json();
-  return posts.map(processRESTPost);
+  const result = posts.map(processRESTPost);
+  for (const post of result) {
+    if (!post.featured_media_url && post.featured_media && post.featured_media > 0) {
+      const media = await fetchMediaUrl(post.featured_media);
+      if (media.url) post.featured_media_url = media.url;
+      if (media.alt) post.featured_media_alt = media.alt;
+      if (media.width) post.featured_media_width = media.width;
+      if (media.height) post.featured_media_height = media.height;
+    }
+  }
+  return result;
 }
 
 export function extractFeaturedMedia(post: WPPost): WPPostWithMedia {
@@ -154,99 +164,192 @@ export function extractFeaturedMedia(post: WPPost): WPPostWithMedia {
   return postWithMedia;
 }
 
-export async function getPosts(perPage = 20, page = 1): Promise<WPPostWithMedia[]> {
+async function tryGraphQLPosts(perPage: number): Promise<WPPostWithMedia[] | null> {
+  const query = `
+    query GetPosts($first: Int!) {
+      posts(first: $first) {
+        nodes {
+          id slug title excerpt content date modified
+          featuredImage { node { sourceUrl altText mediaDetails { width height } } }
+          categories { nodes { id name slug } }
+          tags { nodes { id name slug } }
+          author { node { name description avatar { url } } }
+        }
+      }
+    }
+  `;
   try {
-    console.log('Fetching posts (GraphQL):', { perPage, page });
+    const data = await fetchAPI(query, { first: perPage });
+    if (data?.posts?.nodes) {
+      return graphqlToWpPosts(data.posts.nodes);
+    }
+  } catch {}
+  return null;
+}
+
+export async function getPosts(perPage = 20, page = 1): Promise<WPPostWithMedia[]> {
+  const directResult = await tryGraphQLPosts(perPage);
+  if (directResult) return directResult;
+
+  try {
+    console.log('Fetching posts (Apollo):', { perPage, page });
     const { data } = await client.query<GraphQLPostsResponse>({
       query: GET_POSTS,
       variables: { first: perPage },
       fetchPolicy: 'no-cache',
+      errorPolicy: 'none',
     });
     if (data?.posts?.nodes) {
       return graphqlToWpPosts(data.posts.nodes);
     }
-    throw new Error('No data from GraphQL');
-  } catch (graphqlError) {
-    console.error('GraphQL error, falling back to REST:', graphqlError);
-    try {
-      return await fetchRESTPosts(
-        `${WORDPRESS_API_URL}/posts?_embed=wp:featuredmedia,author,wp:term&per_page=${perPage}&page=${page}`
-      );
-    } catch (restError) {
-      console.error('REST fallback also failed:', restError);
-      return [];
-    }
+  } catch (apolloError) {
+    console.error('Apollo error, falling back to REST:', apolloError);
+  }
+
+  try {
+    return await fetchRESTPosts(
+      `${WORDPRESS_API_URL}/posts?_embed=wp:featuredmedia,author,wp:term&per_page=${perPage}&page=${page}`
+    );
+  } catch (restError) {
+    console.error('REST fallback also failed:', restError);
+    return [];
   }
 }
 
-export async function getPost(slug: string): Promise<WPPostWithMedia | null> {
+async function fetchMediaUrl(mediaId: number): Promise<{ url?: string; alt?: string; width?: number; height?: number }> {
   try {
-    console.log('Fetching post by slug (GraphQL):', slug);
+    const res = await fetch(`${WORDPRESS_API_URL}/media/${mediaId}`, {
+      headers: { 'Accept': 'application/json' }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return {
+        url: data.source_url || data.guid?.rendered,
+        alt: data.alt_text,
+        width: data.media_details?.width,
+        height: data.media_details?.height,
+      };
+    }
+  } catch {}
+  return {};
+}
+
+export async function getPost(slug: string): Promise<WPPostWithMedia | null> {
+  async function tryGraphQL(): Promise<WPPostWithMedia | null> {
+    const query = `
+      query GetPostBySlug($slug: ID!) {
+        post(id: $slug, idType: SLUG) {
+          id slug title excerpt content date modified
+          featuredImage { node { sourceUrl altText mediaDetails { width height } } }
+          categories { nodes { id name slug } }
+          tags { nodes { id name slug } }
+          author { node { name description avatar { url } } }
+        }
+      }
+    `;
+    try {
+      const data = await fetchAPI(query, { slug });
+      if (data?.post) {
+        const wpPost = graphqlToWpPost(data.post);
+        if (!wpPost.featured_media_url && wpPost.featured_media && wpPost.featured_media > 0) {
+          const media = await fetchMediaUrl(wpPost.featured_media);
+          if (media.url) wpPost.featured_media_url = media.url;
+          if (media.alt) wpPost.featured_media_alt = media.alt;
+          if (media.width) wpPost.featured_media_width = media.width;
+          if (media.height) wpPost.featured_media_height = media.height;
+        }
+        return wpPost;
+      }
+    } catch {}
+    return null;
+  }
+
+  const graphqlResult = await tryGraphQL();
+  if (graphqlResult) return graphqlResult;
+
+  console.log('GraphQL failed, trying Apollo for slug:', slug);
+  try {
     const { data } = await client.query<GraphQLPostResponse>({
       query: GET_POST_BY_SLUG,
       variables: { slug },
       fetchPolicy: 'no-cache',
+      errorPolicy: 'none',
     });
     if (data?.post) {
-      return graphqlToWpPost(data.post);
-    }
-    throw new Error('Post not found via GraphQL');
-  } catch (graphqlError) {
-    console.log('GraphQL error, falling back to REST for slug:', slug, graphqlError);
-    try {
-      const slugVariations = [
-        slug,
-        slug.replace(/-+/g, ' ').trim(),
-        slug.replace(/[^\w\s-]/g, ''),
-        encodeURIComponent(slug),
-      ];
-      const uniqueSlugs = Array.from(new Set(slugVariations.filter(s => s && s.length > 0)));
-
-      let post: WPPost | null = null;
-
-      for (const slugVar of uniqueSlugs) {
-        try {
-          const res = await fetch(
-            `${WORDPRESS_API_URL}/posts?slug=${slugVar}&_embed=wp:featuredmedia,author,wp:term`, {
-            cache: 'no-store'
-          });
-          if (res.ok) {
-            const posts: WPPost[] = await res.json();
-            if (posts.length > 0) {
-              post = posts[0];
-              break;
-            }
-          }
-        } catch {
-          continue;
-        }
+      const wpPost = graphqlToWpPost(data.post);
+      if (!wpPost.featured_media_url && wpPost.featured_media && wpPost.featured_media > 0) {
+        const media = await fetchMediaUrl(wpPost.featured_media);
+        if (media.url) wpPost.featured_media_url = media.url;
+        if (media.alt) wpPost.featured_media_alt = media.alt;
+        if (media.width) wpPost.featured_media_width = media.width;
+        if (media.height) wpPost.featured_media_height = media.height;
       }
-
-      if (!post) {
-        try {
-          const res = await fetch(
-            `${WORDPRESS_API_URL}/posts?search=${encodeURIComponent(slug.replace(/-/g, ' '))}&per_page=50&_embed=wp:featuredmedia,author,wp:term`, {
-            cache: 'no-store'
-          });
-          if (res.ok) {
-            const posts: WPPost[] = await res.json();
-            const foundPost = posts.find(p =>
-              p.slug.toLowerCase().includes(slug.toLowerCase().replace(/-/g, '')) ||
-              p.title.rendered.toLowerCase().includes(slug.toLowerCase().replace(/-/g, ' '))
-            );
-            if (foundPost) post = foundPost;
-          }
-        } catch {
-          // ignore
-        }
-      }
-
-      if (!post) return null;
-      return processRESTPost(post);
-    } catch (restError) {
-      console.error('REST fallback also failed:', restError);
-      return null;
+      return wpPost;
     }
+  } catch (apolloError) {
+    console.log('Apollo error for slug:', slug, apolloError);
+  }
+
+  console.log('Falling back to REST for slug:', slug);
+  try {
+    const slugVariations = [
+      slug,
+      slug.replace(/-+/g, ' ').trim(),
+      slug.replace(/[^\w\s-]/g, ''),
+      encodeURIComponent(slug),
+    ];
+    const uniqueSlugs = Array.from(new Set(slugVariations.filter(s => s && s.length > 0)));
+
+    let post: WPPost | null = null;
+
+    for (const slugVar of uniqueSlugs) {
+      try {
+        const res = await fetch(
+          `${WORDPRESS_API_URL}/posts?slug=${slugVar}&_embed=wp:featuredmedia,author,wp:term`, {
+          cache: 'no-store'
+        });
+        if (res.ok) {
+          const posts: WPPost[] = await res.json();
+          if (posts.length > 0) {
+            post = posts[0];
+            break;
+          }
+        }
+      } catch {
+        continue;
+      }
+    }
+
+    if (!post) {
+      try {
+        const res = await fetch(
+          `${WORDPRESS_API_URL}/posts?search=${encodeURIComponent(slug.replace(/-/g, ' '))}&per_page=50&_embed=wp:featuredmedia,author,wp:term`, {
+          cache: 'no-store'
+        });
+        if (res.ok) {
+          const posts: WPPost[] = await res.json();
+          const foundPost = posts.find(p =>
+            p.slug.toLowerCase().includes(slug.toLowerCase().replace(/-/g, '')) ||
+            p.title.rendered.toLowerCase().includes(slug.toLowerCase().replace(/-/g, ' '))
+          );
+          if (foundPost) post = foundPost;
+        }
+      } catch {}
+    }
+
+    if (!post) return null;
+    const wpPost = processRESTPost(post);
+    if (!wpPost.featured_media_url && wpPost.featured_media && wpPost.featured_media > 0) {
+      const media = await fetchMediaUrl(wpPost.featured_media);
+      if (media.url) wpPost.featured_media_url = media.url;
+      if (media.alt) wpPost.featured_media_alt = media.alt;
+      if (media.width) wpPost.featured_media_width = media.width;
+      if (media.height) wpPost.featured_media_height = media.height;
+    }
+    return wpPost;
+  } catch (restError) {
+    console.error('REST fallback also failed:', restError);
+    return null;
   }
 }
 
@@ -287,27 +390,46 @@ export async function getCategories(): Promise<WPCategory[]> {
 }
 
 export async function getPostsByCategory(categoryId: number, perPage = 20): Promise<WPPostWithMedia[]> {
+  const query = `
+    query GetPostsByCategory($categoryId: ID!, $first: Int!) {
+      posts(where: { categoryId: $categoryId }, first: $first) {
+        nodes {
+          id slug title excerpt content date modified
+          featuredImage { node { sourceUrl altText mediaDetails { width height } } }
+          categories { nodes { id name slug } }
+          tags { nodes { id name slug } }
+          author { node { name description avatar { url } } }
+        }
+      }
+    }
+  `;
   try {
-    console.log(`Fetching posts for category ${categoryId} (GraphQL)`);
+    const data = await fetchAPI(query, { categoryId: String(categoryId), first: perPage });
+    if (data?.posts?.nodes) {
+      return graphqlToWpPosts(data.posts.nodes);
+    }
+  } catch {}
+  try {
+    console.log(`Fetching posts for category ${categoryId} (Apollo)`);
     const { data } = await client.query<GraphQLPostsResponse>({
       query: GET_POSTS_BY_CATEGORY,
       variables: { categoryId: String(categoryId), first: perPage },
       fetchPolicy: 'no-cache',
+      errorPolicy: 'none',
     });
     if (data?.posts?.nodes) {
       return graphqlToWpPosts(data.posts.nodes);
     }
-    throw new Error('No data from GraphQL');
-  } catch (graphqlError) {
-    console.error('GraphQL error, falling back to REST:', graphqlError);
-    try {
-      return await fetchRESTPosts(
-        `${WORDPRESS_API_URL}/posts?categories=${categoryId}&_embed=wp:featuredmedia,author&per_page=${perPage}`
-      );
-    } catch (restError) {
-      console.error('REST fallback also failed:', restError);
-      return [];
-    }
+  } catch (apolloError) {
+    console.error('Apollo error, falling back to REST:', apolloError);
+  }
+  try {
+    return await fetchRESTPosts(
+      `${WORDPRESS_API_URL}/posts?categories=${categoryId}&_embed=wp:featuredmedia,author&per_page=${perPage}`
+    );
+  } catch (restError) {
+    console.error('REST fallback also failed:', restError);
+    return [];
   }
 }
 
@@ -718,20 +840,20 @@ export function getShortenedCategorySlug(categorySlug: string): string {
   const cleanSlug = categorySlug.toLowerCase().trim();
   const slugMappings: Record<string, string> = {
     'berita-nasional': 'news',
-    'berita-internasional': 'world',
+    'berita-internasional': 'world-news',
     'sukan': 'sports',
     'hiburan': 'entertainment',
     'gaya-hidup': 'lifestyle',
-    'teknologi': 'tech',
+    'teknologi': 'technology-social-media',
     'ekonomi': 'business',
     'politik': 'politics',
     'kesihatan': 'health',
     'pendidikan': 'education',
     'agama': 'religion',
-    'travel': 'travel',
-    'makanan': 'food',
-    'fesyen': 'fashion',
-    'otomotif': 'automotive',
+    'travel': 'travel-leisure',
+    'makanan': 'food-beverage',
+    'fesyen': 'fashion-beauty',
+    'otomotif': 'motoring',
     'jenayah': 'crime',
     'pendapat': 'opinion',
     'going-viral': 'going-viral',
@@ -747,8 +869,8 @@ export function getShortenedCategorySlug(categorySlug: string): string {
     'economy': 'business',
     'local': 'news',
     'national': 'news',
-    'international': 'world',
-    'world': 'world',
+    'international': 'world-news',
+    'world': 'world-news',
     'entertainment': 'entertainment',
     'lifestyle': 'lifestyle',
     'sports': 'sports',

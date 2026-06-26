@@ -126,7 +126,7 @@ export default function CategoryLayout3({
           </div>
 
           {/* Grid Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {gridPosts.map((post) => (
               <div key={post.id} className="bg-white/80 backdrop-blur-md rounded-2xl shadow-lg overflow-hidden border border-white/50 hover:shadow-xl transition-all duration-300 group">
                 {post.featured_media_url && (

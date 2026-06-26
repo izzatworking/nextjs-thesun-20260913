@@ -79,7 +79,6 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
         post,
         redirectUrl,
       },
-      revalidate: 60,
     };
   } catch (error) {
     console.error('Error fetching post for /post/[slug] redirect:', error);
