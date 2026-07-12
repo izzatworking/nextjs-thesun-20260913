@@ -77,11 +77,11 @@ export default function DesktopNav({
         >
            <button
             onClick={() => toggleDropdown(item.id)}
-              className={`flex items-center font-medium py-2.5 px-4 rounded-lg text-lg transition-colors ${
-                isActive 
-                  ? 'text-red-600 bg-red-50' 
-                  : 'text-gray-700 hover:text-red-600 hover:bg-gray-50'
-              }`}
+               className={`flex items-center font-medium py-2 px-3 rounded-lg text-base transition-colors ${
+                 isActive 
+                   ? 'text-red-600 bg-red-50' 
+                   : 'text-gray-700 hover:text-red-600 hover:bg-gray-50'
+               }`}
           >
             <span>{item.name}</span>
             <svg 
@@ -139,7 +139,7 @@ export default function DesktopNav({
     return (
       <Link
         href={item.slug.startsWith('/') ? item.slug : item.name === 'Home' ? '/' : `/category/${item.slug}`}
-        className="flex items-center font-medium py-2.5 px-4 rounded-lg text-lg text-gray-700 hover:text-red-600 hover:bg-gray-50 transition-colors"
+        className="flex items-center font-medium py-2 px-3 rounded-lg text-base text-gray-700 hover:text-red-600 hover:bg-gray-50 transition-colors"
         key={item.id}
         onMouseEnter={() => handleMouseEnter(item.id)}
         onMouseLeave={handleMouseLeave}
@@ -227,7 +227,7 @@ export default function DesktopNav({
         }
       `}</style>
       
-      <nav className="flex items-center justify-evenly gap-1 w-full relative z-40">
+      <nav className="flex items-center justify-evenly gap-0.5 w-full relative z-40">
         {mainNavItems.map((item) => {
           if (item.external) {
             return (
@@ -238,8 +238,8 @@ export default function DesktopNav({
                 rel="noopener noreferrer"
                 className="group/paper inline-block transition-all duration-200 hover:opacity-90 hover:scale-105 relative z-30 transform-gpu"
               >
-                <img 
-                  src="/images/ipaper.png"
+                  <img 
+                  src="/images/ipaper2.png"
                   alt="iPaper"
                   className="h-7 w-auto group-hover/paper:brightness-110 transition-all duration-200"
                   onError={(e) => {

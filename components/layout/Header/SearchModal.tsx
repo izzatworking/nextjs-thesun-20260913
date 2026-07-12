@@ -18,12 +18,43 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [results, setResults] = useState<any[]>([]);
   const [authors, setAuthors] = useState<WPAuthor[]>([]);
   const [categoriesList, setCategoriesList] = useState<WPCategory[]>([]);
+  const [allPosts, setAllPosts] = useState<WPPostWithMedia[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [categoryPosts, setCategoryPosts] = useState<WPPostWithMedia[]>([]);
   const [catLoading, setCatLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+
+  function advancedSearch<T extends Record<string, any>>(
+    data: T[],
+    criteria: { query: string; tab: TabType; categoryFilter?: string }
+  ): T[] {
+    const cleanQuery = criteria.query.trim().toLowerCase();
+
+    return data.filter(item => {
+      if (criteria.categoryFilter) {
+        const matchesCategory = item.category && String(item.category).toLowerCase() === criteria.categoryFilter.toLowerCase();
+        if (!matchesCategory) return false;
+      }
+
+      if (!cleanQuery) return true;
+
+      switch (criteria.tab) {
+        case 'articles':
+          return (
+            (item.title && String(item.title).toLowerCase().includes(cleanQuery)) ||
+            (item.content && String(item.content).toLowerCase().includes(cleanQuery))
+          );
+        case 'authors':
+          return item.authorName && String(item.authorName).toLowerCase().includes(cleanQuery);
+        case 'categories':
+          return item.name && String(item.name).toLowerCase().includes(cleanQuery);
+        default:
+          return false;
+      }
+    });
+  }
 
   const getPostSlug = (post: any): string => {
     return post.slug || '';
@@ -40,6 +71,29 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     return `/posts/${post.slug}`;
   };
 
+  const normalizePosts = (posts: WPPostWithMedia[]): any[] =>
+    posts.map(p => ({
+      ...p,
+      title: p.title?.rendered || '',
+      content: p.content?.rendered || '',
+      authorName: p.authors?.[0]?.display_name || '',
+    }));
+
+  const normalizeAuthors = (posts: WPPostWithMedia[]): any[] => {
+    const seen = new Set<number>();
+    const result: any[] = [];
+    posts.forEach(p => {
+      (p.authors || []).forEach((a: any) => {
+        const id = a.term_id || a.user_id || 0;
+        if (id && !seen.has(id)) {
+          seen.add(id);
+          result.push({ ...a, authorName: a.display_name || '' });
+        }
+      });
+    });
+    return result;
+  };
+
   useEffect(() => {
     if (isOpen && inputRef.current) {
       setTimeout(() => inputRef.current?.focus(), 100);
@@ -48,6 +102,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
       setQuery('');
       setResults([]);
       setAuthors([]);
+      setAllPosts([]);
       setSelectedCategory(null);
       setCategoryPosts([]);
     }
@@ -63,12 +118,10 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     setLoading(true);
     try {
       const posts = await searchPosts(t, 50);
-      const words = t.split(/\s+/).filter(Boolean);
-      const mapped = posts.filter((p: any) => {
-        const title = (p.title?.rendered || '').toLowerCase();
-        return words.some(w => title.includes(w));
-      });
-      setResults(mapped);
+      setAllPosts(posts);
+      const normalized = normalizePosts(posts);
+      const filtered = advancedSearch(normalized, { query: t, tab: 'articles' });
+      setResults(filtered);
     } catch (e) { console.error('Search error:', e); setResults([]); } finally { setLoading(false); }
   }, []);
 
@@ -78,19 +131,9 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     setLoading(true);
     try {
       const posts = await searchPosts(t, 50);
-      const seen = new Set<number>();
-      const found: any[] = [];
-      posts.forEach((p: any) => {
-        (p.authors || []).forEach((a: any) => {
-          const id = a.term_id || a.user_id || 0;
-          const name = (a.display_name || '').toLowerCase();
-          if (id && !seen.has(id) && name.includes(t)) {
-            seen.add(id);
-            found.push(a);
-          }
-        });
-      });
-      setAuthors(found);
+      const normalized = normalizeAuthors(posts);
+      const filtered = advancedSearch(normalized, { query: t, tab: 'authors' });
+      setAuthors(filtered);
     } catch { setAuthors([]); } finally { setLoading(false); }
   }, []);
 
@@ -109,6 +152,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     setQuery('');
     setResults([]);
     setAuthors([]);
+    setAllPosts([]);
     setSelectedCategory(null);
     setCategoryPosts([]);
     if (inputRef.current) inputRef.current.focus();
@@ -134,7 +178,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   if (!isOpen) return null;
 
   const filteredCategories = query.trim().length >= 2
-    ? categoriesList.filter(c => c.name.toLowerCase().includes(query.toLowerCase()))
+    ? advancedSearch(categoriesList, { query, tab: 'categories' })
     : categoriesList;
 
   return (

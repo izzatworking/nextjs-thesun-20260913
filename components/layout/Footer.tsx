@@ -22,7 +22,7 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="border-t border-gray-200" style={{background: 'linear-gradient(to bottom, #ffffff, #ffffff 20%, #52BEFF)'}}>
+    <footer className="border-t border-gray-200" style={{background: 'linear-gradient(to bottom, #ffffff, #ffffff 20%, #d4d4d4)'}}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-10">
           {/* Logo + About */}

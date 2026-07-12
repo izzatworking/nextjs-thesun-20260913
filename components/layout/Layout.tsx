@@ -57,14 +57,16 @@ const Layout: React.FC<LayoutProps> = ({
     { name: 'Home', slug: '/', id: 0, hot: false },
     { name: 'News', slug: 'news', id: 1, hot: true },
     { name: 'Going Viral', slug: 'going-viral', id: 7, hot: true },
-    { name: 'Sports', slug: 'sports', id: 4, hot: true },
+    { name: 'Business', slug: 'business', id: 2, hot: false },
     { name: 'Opinion', slug: 'opinion', id: 8, hot: false },
     { name: 'Lifestyle', slug: 'lifestyle', id: 3, hot: false },
     { name: 'Spotlight', slug: 'spotlight', id: 11, hot: false },
-    { name: 'Business', slug: 'business', id: 2, hot: false },
+    { name: 'Sports', slug: 'sports', id: 4, hot: true },
     { name: 'ipaper', slug: 'https://thesun-ipaper.cld.bz/', id: 13, hot: false, external: true },
     { name: 'Berita', slug: 'berita', id: 5, hot: true },
     { name: 'Motoring', slug: 'motoring', id: 6, hot: false },
+    { name: 'Most Viewed', slug: '/topstories', id: 16, hot: false },
+    { name: 'Videos', slug: '/videos', id: 17, hot: false },
     { name: 'Classifieds', slug: 'https://sunmedia.com.my/', id: 10, hot: false, external: true },
     { name: 'Education', slug: 'education', id: 12, hot: false },
     { name: 'Our Team', slug: '/our-team', id: 14, hot: false },
@@ -111,7 +113,7 @@ const Layout: React.FC<LayoutProps> = ({
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
       </Head>
 
-      <div className="min-h-screen" style={{background: 'linear-gradient(to bottom, #52BEFF, #52BEFF 250px, #ffffff 400px, #ffffff)'}}>
+      <div className="min-h-screen" style={{background: 'linear-gradient(to bottom, #d4d4d4, #d4d4d4 250px, #ffffff 400px, #ffffff)'}}>
         <div className="relative z-50">
           <Header categories={categories} isSidebarOpen={isSidebarOpen} onSidebarToggle={toggleSidebar} />
         </div>
@@ -127,7 +129,7 @@ const Layout: React.FC<LayoutProps> = ({
           mainNavItems={mainNavItems}
         />
 
-        <div className="h-[160px] lg:h-[200px]"></div>
+        <div className="h-[130px] lg:h-[150px]"></div>
 
         <main className={`relative z-10 mt-0 ${!hideContentBackground ? 'py-6 md:py-8' : ''}`}>
           {hideContentBackground ? (

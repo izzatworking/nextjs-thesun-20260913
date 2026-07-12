@@ -4,6 +4,7 @@ import { WPPost, WPCategory } from '../../../types/wordpress';
 import { cleanTextContent } from '../utils/contentCleaner';
 import { formatRelativeTime } from '../utils/timeFormatter';
 import { useState, useEffect, useRef } from 'react';
+import VideoPlayerModal from './VideoPlayerModal';
 
 interface YouTubeVideo {
   id: { videoId: string };
@@ -30,6 +31,7 @@ export default function CategoryLayout6({
   const [videos, setVideos] = useState<YouTubeVideo[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
 
   const mockVideos: YouTubeVideo[] = [
@@ -59,7 +61,11 @@ export default function CategoryLayout6({
   }, []);
 
   const handleVideoClick = (videoId: string) => {
-    window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
+    setSelectedVideo(videoId);
+  };
+
+  const closePlayer = () => {
+    setSelectedVideo(null);
   };
 
   const scrollToIndex = (index: number) => {
@@ -125,6 +131,7 @@ export default function CategoryLayout6({
   const totalSlides = Math.ceil(videos.length / 2);
 
   return (
+    <>
     <section className="relative overflow-hidden rounded-3xl p-4 sm:p-6 lg:p-8 h-full flex flex-col"
       style={{ background: 'linear-gradient(180deg, #FFBB66 0%, #FFBB66 40%, #ffffff 100%)' }}
     >
@@ -244,5 +251,12 @@ export default function CategoryLayout6({
         </div>
       </div>
     </section>
+
+      <VideoPlayerModal
+        videoId={selectedVideo || ''}
+        isOpen={!!selectedVideo}
+        onClose={closePlayer}
+      />
+    </>
   );
 }

@@ -96,28 +96,26 @@ export default function CategoryLayout3({
                     <h3 className="text-3xl font-bold text-gray-900 mb-4 hover:text-emerald-600 transition-colors cursor-pointer" dangerouslySetInnerHTML={{ __html: cleanTextContent(featuredPost.title.rendered) }} />
                   </Link>
 
-                  {featuredPost.excerpt?.rendered && (
-                    <div className="text-gray-600 text-lg leading-relaxed mb-6" dangerouslySetInnerHTML={{ __html: cleanTextContent(featuredPost.excerpt.rendered) }} />
-                  )}
+
                 </div>
               </div>
             </div>
 
-            {/* Secondary Articles */}
-            <div className="space-y-6">
+            {/* Secondary Articles - 2 cols on mobile/tablet, stacked on desktop */}
+            <div className="grid grid-cols-2 lg:grid-cols-1 gap-4 lg:gap-0 lg:space-y-6">
               {secondaryPosts.map((post) => (
                 <div key={post.id} className="bg-white/80 backdrop-blur-md rounded-2xl shadow-lg overflow-hidden border border-white/50 hover:shadow-xl transition-all duration-300 group">
                   {post.featured_media_url && (
-                    <div className="w-full h-48 relative overflow-hidden">
+                    <div className="w-full h-36 lg:h-48 relative overflow-hidden">
                       <img src={post.featured_media_url} alt={cleanTextContent(post.featured_media_alt || post.title.rendered)} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                     </div>
                   )}
-                  <div className="p-4">
+                  <div className="p-3 lg:p-4">
                     <div className="flex items-center justify-between mb-2">
                       <span className="bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded-full font-medium">{getPostCategoryName(post, categories)}</span>
                     </div>
                     <Link href={`${getPostUrl(post)}`}>
-                      <h4 className="font-semibold text-gray-900 text-sm hover:text-emerald-600 transition-colors cursor-pointer line-clamp-2" dangerouslySetInnerHTML={{ __html: cleanTextContent(post.title.rendered) }} />
+                      <h4 className="font-semibold text-gray-900 text-xs lg:text-sm hover:text-emerald-600 transition-colors cursor-pointer line-clamp-2" dangerouslySetInnerHTML={{ __html: cleanTextContent(post.title.rendered) }} />
                     </Link>
                   </div>
                 </div>

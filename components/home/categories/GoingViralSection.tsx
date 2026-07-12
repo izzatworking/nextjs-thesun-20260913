@@ -1,5 +1,4 @@
 import { getPostUrl } from '../../../lib/wordpress';
-// components/home/categories/GoingViralSection.tsx
 import { WPPostWithMedia, WPCategory } from '../../../types/wordpress';
 import { cleanTextContent } from '../utils/contentCleaner';
 import { formatRelativeTime } from '../utils/timeFormatter';
@@ -14,16 +13,15 @@ interface GoingViralSectionProps {
 export default function GoingViralSection({ posts, categories, isLast = false }: GoingViralSectionProps) {
   if (posts.length === 0) return null;
 
-  // Jika posts memiliki kategori, ambil dari post pertama
   const firstPost = posts[0];
   let sectionName = 'Going Viral';
   let sectionSlug = 'viral';
-  
+
   if (firstPost.categories && firstPost.categories.length > 0) {
-    const categoryId = typeof firstPost.categories[0] === 'number' 
-      ? firstPost.categories[0] 
+    const categoryId = typeof firstPost.categories[0] === 'number'
+      ? firstPost.categories[0]
       : (firstPost.categories[0] as any).id;
-    
+
     const category = categories.find(cat => cat.id === categoryId);
     if (category) {
       sectionName = cleanTextContent(category.name);
@@ -31,89 +29,127 @@ export default function GoingViralSection({ posts, categories, isLast = false }:
     }
   }
 
-  return (
-    <div className="bg-gradient-to-b from-[#63B8EB] via-[#63B8EB]/70 to-white rounded-2xl sm:rounded-3xl p-3 sm:p-8 mb-16 shadow-2xl">
-      {/* Section Header dengan gaya viral/meme - Kekalkan warna oren */}
-      <div className="mb-4 sm:mb-8 text-center">
-        <div className="inline-block bg-gradient-to-r from-[#5266FF] to-[#52FFEB] px-4 sm:px-8 py-2 sm:py-4 rounded-full mb-2 sm:mb-4 shadow-xl">
-          <h2 className="text-lg sm:text-3xl font-bold text-white flex items-center justify-center">
-            <svg className="w-5 h-5 sm:w-8 sm:h-8 mr-2 sm:mr-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-              <path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clipRule="evenodd" />
-            </svg>
-            {sectionName}
-          </h2>
-        </div>
-        <p className="text-blue-900/70 text-sm sm:text-lg font-medium">Trending topics everyone is talking about</p>
-        <div className="w-20 sm:w-32 h-0.5 sm:h-1 bg-gradient-to-r from-[#5266FF] to-[#52FFEB] rounded-full mx-auto mt-2 sm:mt-4"></div>
-      </div>
+  const main = posts[0];
+  const rest = posts.slice(1, 7);
 
-      {/* Viral Grid - Compact dengan icon viral */}
-      <div className="mb-10">
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
-          {posts.slice(0, 6).map((post, index) => (
-            <div key={post.id} className="bg-white/90 backdrop-blur-md rounded-xl shadow-2xl overflow-hidden hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.3)] transition-all duration-300 hover:-translate-y-2 group border border-white/50">
-              {/* Viral Badge - Kekalkan warna oren/merah */}
-              <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10">
-                <div className="bg-gradient-to-r from-[#5266FF] to-[#52FFEB] text-white text-[10px] sm:text-xs px-2 sm:px-4 py-1 sm:py-2 rounded-full font-bold flex items-center shadow-lg">
-                  <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1 sm:mr-1.5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                    <path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clipRule="evenodd" />
-                  </svg>
-                  VIRAL
+  return (
+    <div className="relative bg-gradient-to-b from-[#3b82f6] via-[#60a5fa] to-[#93c5fd] w-screen left-1/2 -translate-x-1/2 mb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 lg:py-20">
+        <div className="flex items-center gap-4 mb-10 sm:mb-14">
+          <div className="flex items-center gap-3">
+            <span className="w-1.5 h-6 bg-white/60 rounded-full" />
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white tracking-tight">
+              {sectionName}
+            </h2>
+          </div>
+          <div className="flex-1 h-px bg-white/20" />
+          <Link
+            href={`/category/${sectionSlug}`}
+            className="text-sm font-medium text-white/60 hover:text-white transition-colors"
+          >
+            View all
+          </Link>
+        </div>
+
+        {main && (
+          <Link href={getPostUrl(main)} className="group block mb-10 sm:mb-14">
+            <div className="bg-white rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow">
+              <div className="grid grid-cols-1 lg:grid-cols-5">
+                <div className="lg:col-span-3 bg-gray-100 overflow-hidden">
+                  <div className="aspect-[4/3] lg:aspect-auto lg:h-full">
+                    {main.featured_media_url ? (
+                      <img
+                        src={main.featured_media_url}
+                        alt={cleanTextContent(main.featured_media_alt || main.title.rendered)}
+                        className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-300">
+                        <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="lg:col-span-2 p-6 sm:p-8 lg:p-10 flex flex-col justify-center">
+                  <span className="text-[11px] font-semibold text-[#3b82f6] uppercase tracking-wider mb-2">
+                    {sectionName}
+                  </span>
+                  <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 group-hover:text-[#3b82f6] transition-colors leading-tight mb-3">
+                    {cleanTextContent(main.title.rendered)}
+                  </h3>
+                  {main.excerpt?.rendered && (
+                    <p className="text-sm text-gray-500 leading-relaxed line-clamp-3 mb-4">
+                      {cleanTextContent(main.excerpt.rendered)}
+                    </p>
+                  )}
+                  <div className="flex items-center gap-3 mt-auto pt-4 border-t border-gray-100">
+                    <span className="text-xs text-gray-400">{formatRelativeTime(main.date)}</span>
+                    <span className="text-gray-300 text-xs">•</span>
+                    <span className="text-xs font-medium text-[#3b82f6] group-hover:gap-2 transition-all inline-flex items-center gap-1">
+                      Read full story
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                      </svg>
+                    </span>
+                  </div>
                 </div>
               </div>
-              
-              {post.featured_media_url && (
-                <div className="w-full aspect-[4/3] sm:h-48 sm:aspect-auto relative overflow-hidden">
-                  <img 
-                    src={post.featured_media_url} 
-                    alt={cleanTextContent(post.featured_media_alt || post.title.rendered)}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 brightness-90"
-                  />
-                  {/* Overlay gradient gelap */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
-                  {/* Glow effect */}
-                  <div className="absolute inset-0 bg-gradient-to-tr from-[#5266FF]/10 to-[#52FFEB]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            </div>
+          </Link>
+        )}
+
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          {rest.slice(0, 6).map((post) => (
+            <Link key={post.id} href={getPostUrl(post)} className="group">
+              <div className="bg-white rounded-lg overflow-hidden shadow hover:shadow-md transition-shadow h-full flex flex-col">
+                <div className="aspect-[16/10] bg-gray-100 overflow-hidden">
+                  {post.featured_media_url ? (
+                    <img
+                      src={post.featured_media_url}
+                      alt=""
+                      className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-200">
+                      <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                  )}
                 </div>
-              )}
-              
-              <div className="p-3 sm:p-6 bg-gradient-to-b from-white to-blue-50">
-                <div className="mb-1.5 sm:mb-4">
-                  <span className="text-gray-500 text-[10px] sm:text-xs font-medium">
+                <div className="p-4 sm:p-5 flex-1 flex flex-col">
+                  <span className="text-[10px] font-semibold text-[#3b82f6] uppercase tracking-wider mb-1.5">
+                    {sectionName}
+                  </span>
+                  <h4 className="text-sm sm:text-base font-bold text-gray-900 group-hover:text-[#3b82f6] transition-colors leading-snug line-clamp-2 flex-1">
+                    {cleanTextContent(post.title.rendered)}
+                  </h4>
+                  <span className="text-[11px] text-gray-400 mt-2 block">
                     {formatRelativeTime(post.date)}
                   </span>
                 </div>
-                
-                <Link href={`${getPostUrl(post)}`}>
-                  <h4 
-                    className="font-bold text-gray-900 text-xs sm:text-lg hover:text-blue-600 transition-colors cursor-pointer line-clamp-2 mb-1 sm:mb-4 leading-tight"
-                    dangerouslySetInnerHTML={{ __html: cleanTextContent(post.title.rendered) }} 
-                  />
-                </Link>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
 
-        {/* View All Button - Kekalkan warna oren */}
-        <div className="text-center mt-6 sm:mt-12">
-          <Link 
+        <div className="text-center mt-10 sm:mt-14">
+          <Link
             href={`/category/${sectionSlug}`}
-            className="inline-flex items-center px-5 sm:px-12 py-2.5 sm:py-5 bg-gradient-to-r from-[#5266FF] to-[#52FFEB] text-white text-sm sm:text-base rounded-xl font-bold hover:from-[#3B4FE8] hover:to-[#3BE8D4] transition-all duration-300 hover:shadow-[0_20px_60px_-10px_rgba(82,102,255,0.5)] transform hover:scale-105 shadow-xl border border-[#5266FF]/30"
+            className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/40 px-6 sm:px-8 py-3 sm:py-3.5 rounded-sm font-medium text-sm sm:text-base transition-all duration-300 group"
           >
-            <svg className="w-4 h-4 sm:w-6 sm:h-6 mr-2 sm:mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            EXPLORE VIRAL STORIES
-            <svg className="w-4 h-4 sm:w-6 sm:h-6 ml-2 sm:ml-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            More from {sectionName}
+            <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>
           </Link>
         </div>
       </div>
 
-      {/* Line break - gradient gelap */}
       {!isLast && (
-        <div className="h-px bg-gradient-to-r from-transparent via-blue-300 to-transparent mt-8"></div>
+        <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
       )}
     </div>
   );

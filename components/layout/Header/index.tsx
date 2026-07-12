@@ -26,26 +26,7 @@ export default function Header({ categories = [], isSidebarOpen: externalIsOpen,
   const [isLoading, setIsLoading] = useState(true);
   const [showWorldCup, setShowWorldCup] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [headerVisible, setHeaderVisible] = useState(true);
-  const lastScrollY = useRef(0);
   const dropdownContainerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY < 80) {
-        setHeaderVisible(true);
-      } else if (currentScrollY > lastScrollY.current) {
-        setHeaderVisible(false);
-      } else {
-        setHeaderVisible(true);
-      }
-      lastScrollY.current = currentScrollY;
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Clean category names
   function cleanHtmlContent(html: string): string {
@@ -325,11 +306,11 @@ export default function Header({ categories = [], isSidebarOpen: externalIsOpen,
       subItems: getSubCategories(findCategoryId('Going Viral'))
     },
     { 
-      name: 'Sports', 
-      slug: 'sports', 
-      id: 4, 
-      hot: true,
-      subItems: getSubCategories(findCategoryId('Sports'))
+      name: 'Business', 
+      slug: 'business', 
+      id: 2, 
+      hot: false,
+      subItems: getSubCategories(findCategoryId('Business'))
     },
     { 
       name: 'Opinion', 
@@ -351,11 +332,11 @@ export default function Header({ categories = [], isSidebarOpen: externalIsOpen,
       hot: false,
     },
     { 
-      name: 'Business', 
-      slug: 'business', 
-      id: 2, 
-      hot: false,
-      subItems: getSubCategories(findCategoryId('Business'))
+      name: 'Sports', 
+      slug: 'sports', 
+      id: 4, 
+      hot: true,
+      subItems: getSubCategories(findCategoryId('Sports'))
     },
     { 
       name: 'More', 
@@ -365,6 +346,8 @@ export default function Header({ categories = [], isSidebarOpen: externalIsOpen,
       subItems: [
         { name: 'Berita', slug: 'berita', id: 5 },
         { name: 'Motoring', slug: 'motoring', id: 6 },
+        { name: 'Most Viewed', slug: '/topstories', id: 16 },
+        { name: 'Videos', slug: '/videos', id: 17 },
         { name: 'Classifieds', slug: 'classifieds', id: 10 },
         { name: 'Education', slug: 'education', id: 12 },
         { name: 'Our Team', slug: '/our-team', id: 14 }
@@ -393,6 +376,8 @@ export default function Header({ categories = [], isSidebarOpen: externalIsOpen,
         subItems: [
           { name: 'Motoring', slug: 'motoring', id: 6 },
           { name: 'Opinion', slug: 'opinion', id: 8 },
+          { name: 'Most Viewed', slug: '/topstories', id: 16 },
+          { name: 'Videos', slug: '/videos', id: 17 },
           { name: 'Classifieds', slug: 'classifieds', id: 10 },
           { name: 'Spotlight', slug: 'spotlight', id: 11 },
           { name: 'Education', slug: 'education', id: 12 },
@@ -426,7 +411,7 @@ export default function Header({ categories = [], isSidebarOpen: externalIsOpen,
   };
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100 transition-all duration-300 ${headerVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-100">
       
       <div className="relative z-20">
         <BreakingNews
@@ -439,7 +424,7 @@ export default function Header({ categories = [], isSidebarOpen: externalIsOpen,
         
         <div className="w-full">
           {/* Top row: hamburger + logo + actions */}
-          <div className="flex items-center justify-between px-4 lg:px-6 h-28 lg:h-32">
+          <div className="flex items-center justify-between px-4 lg:px-6 h-20 lg:h-24">
             <div className="flex items-center gap-3">
               <div className="relative">
                 <button
@@ -488,6 +473,15 @@ export default function Header({ categories = [], isSidebarOpen: externalIsOpen,
             />
 
             <div className="flex items-center gap-2">
+              <a
+                href="https://thesun-ipaper.cld.bz/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 rounded-lg hover:bg-gray-50 transition-colors lg:hidden"
+                aria-label="iPaper"
+              >
+                <img src="/images/ipaper2.png" alt="iPaper" className="h-6 w-auto" />
+              </a>
               <button
                 onClick={() => setSearchOpen(true)}
                 className="p-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-400 hover:text-gray-600"

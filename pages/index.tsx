@@ -90,9 +90,9 @@ export default function Home({
 
   let latestPosts = [];
   if (isExclusive) {
-    latestPosts = posts.slice(0, 10);
+    latestPosts = posts.slice(0, 5);
   } else {
-    latestPosts = posts.slice(1, 11);
+    latestPosts = posts.slice(1, 6);
   }
 
   const pinnedMain = pinnedPost || posts[0];
@@ -219,6 +219,8 @@ export default function Home({
 
         <GoingViralSection posts={goingViralPosts} categories={categories} />
 
+        <SportsSection posts={sportsPosts} categories={categories} />
+
         <LifestyleSection posts={lifestylePosts} categories={categories} />
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -230,12 +232,7 @@ export default function Home({
           </div>
         </div>
 
-        <BeritaSection posts={beritaPosts} categories={categories} />
-
-        <SportsSection posts={sportsPosts} categories={categories} isLast={true} />
-
-        <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent my-10 sm:my-12 lg:my-14" />
-
+       
         <SpotlightSection posts={spotlightPosts} categories={categories} />
 
         <CombinedSection

@@ -9,6 +9,7 @@ import {
   getShortenedCategorySlug,
   getOriginalCategorySlug
 } from '../../lib/wordpress';
+import { getTopStories } from '../../lib/queries';
 import { 
   WPPost, 
   WPPostWithMedia,
@@ -24,6 +25,16 @@ interface CategoryWithCount extends WPCategory {
   parent: number;
 }
 
+interface TopStory {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  date: string;
+  categories?: { nodes: { slug: string; name: string }[] };
+  featuredImage?: { node: { sourceUrl: string; altText: string } };
+}
+
 interface CategoryProps {
   category: CategoryWithCount;
   subCategories: CategoryWithCount[];
@@ -32,6 +43,7 @@ interface CategoryProps {
   allCategories: CategoryWithCount[];
   totalPostsCount: number;
   allPosts: WPPostWithMedia[];
+  mostViewed: TopStory[];
 }
 
 function cleanHtmlContent(html: string): string {
@@ -70,17 +82,23 @@ function formatTimeAgo(dateString: string): string {
   return date.toLocaleDateString('en-MY', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
+function getTopStoryPath(article: TopStory): string {
+  const catSlug = article.categories?.nodes?.[0]?.slug;
+  if (catSlug) return `/${catSlug}/${article.slug}`;
+  return `/posts/${article.slug}`;
+}
+
 export default function CategoryPage({ 
   category, 
   subCategories, 
   allCategories,
-  allPosts
+  allPosts,
+  mostViewed
 }: CategoryProps) {
   const [displayCount, setDisplayCount] = useState(12);
   const mainPost = allPosts[0];
-  const sidePosts = allPosts.slice(1, 4);
-  const gridPosts = allPosts.slice(4, displayCount + 4);
-  const hasMore = displayCount < allPosts.length - 4;
+  const gridPosts = allPosts.slice(1, displayCount + 1);
+  const hasMore = displayCount < allPosts.length - 1;
   const parentCategory = category.parent !== 0 ? allCategories.find(cat => cat.id === category.parent) : null;
   const siblingCategories = parentCategory ? allCategories.filter(cat => cat.parent === parentCategory.id && cat.id !== category.id) : [];
 
@@ -90,7 +108,7 @@ export default function CategoryPage({
       title={`${cleanHtmlContent(category.name)} | The Sun Malaysia`}
       description={`Latest news and articles in ${cleanHtmlContent(category.name)} category on The Sun Malaysia`}
     >
-      <div className="max-w-full mx-auto px-3 sm:px-4 md:px-6 py-6 lg:py-8 lg:max-w-7xl">
+      <div className="container mx-auto px-1 sm:px-2 lg:px-3 py-6 sm:py-8">
         {/* Header */}
         <div className="mb-6 md:mb-10">
           {parentCategory && (
@@ -129,83 +147,80 @@ export default function CategoryPage({
           <div className="text-center py-16 md:py-20"><p className="text-gray-400 text-sm">No stories yet.</p></div>
         )}
 
-        {/* Featured Hero Card */}
-        {mainPost && (
-          <div className="mb-8 md:mb-12">
-            <article className="group relative bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300">
-              <div className="flex flex-col lg:flex-row">
-                <div className="lg:w-3/5 relative">
-                  <Link href={getPostUrl(mainPost, allCategories)}>
-                    <div className="aspect-[16/9] md:aspect-[2/1] lg:aspect-auto lg:h-full relative min-h-[200px] md:min-h-[320px] lg:min-h-[300px]">
-                      {mainPost.featured_media_url ? (
-                        <NetworkImage src={mainPost.featured_media_url} alt={mainPost.featured_media_alt || cleanHtmlContent(mainPost.title.rendered)} fill className="object-cover group-hover:scale-[1.03] transition-transform duration-700" sizes="(max-width: 1024px) 100vw, 60vw" />
-                      ) : (
-                        <div className="w-full h-full bg-gray-50 flex items-center justify-center"><span className="text-gray-300 text-sm">No image</span></div>
-                      )}
-                    </div>
-                  </Link>
-                </div>
-                <div className="lg:w-2/5 p-6 md:p-8 lg:p-10 flex flex-col justify-center">
-                  <div className="flex items-center gap-2.5 text-xs text-gray-400 mb-3">
-                    <span className="px-2.5 py-1 bg-red-50 text-red-600 font-semibold rounded-md text-[10px] uppercase tracking-wider">{cleanHtmlContent(category.name)}</span>
-                    <span className="text-gray-300">·</span>
-                    <span>{formatTimeAgo(mainPost.date)}</span>
+        {/* Featured + Most Viewed Row */}
+        <div className="flex flex-col lg:flex-row gap-6 mb-8 md:mb-12">
+          {/* Featured Hero Card */}
+          {mainPost && (
+            <div className="lg:w-3/4">
+              <article className="group relative bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300">
+                <div className="flex flex-col lg:flex-row">
+                  <div className="lg:w-3/5 relative">
+                    <Link href={getPostUrl(mainPost, allCategories)}>
+                      <div className="aspect-[16/9] md:aspect-[2/1] lg:aspect-auto lg:h-full relative min-h-[200px] md:min-h-[320px] lg:min-h-[300px]">
+                        {mainPost.featured_media_url ? (
+                          <NetworkImage src={mainPost.featured_media_url} alt={mainPost.featured_media_alt || cleanHtmlContent(mainPost.title.rendered)} fill className="object-cover group-hover:scale-[1.03] transition-transform duration-700" sizes="(max-width: 1024px) 100vw, 60vw" />
+                        ) : (
+                          <div className="w-full h-full bg-gray-50 flex items-center justify-center"><span className="text-gray-300 text-sm">No image</span></div>
+                        )}
+                      </div>
+                    </Link>
                   </div>
-                  <Link href={getPostUrl(mainPost, allCategories)}>
-                    <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight group-hover:text-red-600 transition-colors mb-3"
-                        dangerouslySetInnerHTML={{ __html: cleanHtmlContent(mainPost.title.rendered) }} />
-                  </Link>
-                  {mainPost.excerpt?.rendered && (
-                    <p className="text-sm text-gray-500 leading-relaxed line-clamp-3">{cleanTextContent(mainPost.excerpt.rendered.substring(0, 200) + '...')}</p>
-                  )}
-                  <Link href={getPostUrl(mainPost, allCategories)} className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-red-600 hover:text-red-700 transition-colors">
-                    Read article
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                  </Link>
+                  <div className="lg:w-2/5 p-6 md:p-8 lg:p-10 flex flex-col justify-center">
+                    <div className="flex items-center gap-2.5 text-xs text-gray-400 mb-3">
+                      <span className="px-2.5 py-1 bg-red-50 text-red-600 font-semibold rounded-md text-[10px] uppercase tracking-wider">{cleanHtmlContent(category.name)}</span>
+                      <span className="text-gray-300">·</span>
+                      <span>{formatTimeAgo(mainPost.date)}</span>
+                    </div>
+                    <Link href={getPostUrl(mainPost, allCategories)}>
+                      <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 leading-tight group-hover:text-red-600 transition-colors mb-3"
+                          dangerouslySetInnerHTML={{ __html: cleanHtmlContent(mainPost.title.rendered) }} />
+                    </Link>
+                    {mainPost.excerpt?.rendered && (
+                      <p className="text-sm text-gray-500 leading-relaxed line-clamp-3">{cleanTextContent(mainPost.excerpt.rendered.substring(0, 200) + '...')}</p>
+                    )}
+                    <Link href={getPostUrl(mainPost, allCategories)} className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-red-600 hover:text-red-700 transition-colors">
+                      Read article
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            </article>
-          </div>
-        )}
+              </article>
+            </div>
+          )}
 
-        {/* Side + Grid */}
-        <div className="flex flex-col lg:flex-row gap-6 mb-10">
-          {/* Side column */}
+          {/* Most Viewed sidebar */}
           <div className="lg:w-1/4">
             <div className="flex items-center gap-2 pb-3 mb-4 border-b border-gray-100">
-              <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
               </svg>
-              <h2 className="text-xs font-bold text-gray-900 uppercase tracking-wider">Trending</h2>
+              <h2 className="text-xs font-bold text-gray-900 uppercase tracking-wider">Most Viewed</h2>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-1 gap-4">
-              {sidePosts.map((post, i) => (
-                <article key={post.id} className="group">
-                  <Link href={getPostUrl(post, allCategories)}>
-                    <div className="aspect-[16/9] relative rounded-xl overflow-hidden bg-gray-50 mb-2.5">
-                      {post.featured_media_url ? (
-                        <NetworkImage src={post.featured_media_url} alt={post.featured_media_alt || cleanHtmlContent(post.title.rendered)} fill className="object-cover group-hover:scale-[1.03] transition-transform duration-500" sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center"><span className="text-gray-200 text-2xl font-bold">{i + 1}</span></div>
+            <div className="space-y-4">
+              {mostViewed.slice(0, 5).map((post, i) => (
+                <article key={post.id} className="group flex gap-3">
+                  <span className="text-lg font-bold text-gray-200 leading-none mt-0.5 w-5 flex-shrink-0">{i + 1}</span>
+                  <div className="flex-1 min-w-0">
+                    <Link href={getTopStoryPath(post)}>
+                      <h3 className="text-sm font-semibold text-gray-900 leading-snug group-hover:text-red-600 transition-colors line-clamp-2"
+                          dangerouslySetInnerHTML={{ __html: cleanHtmlContent(post.title) }} />
+                    </Link>
+                    <div className="flex items-center gap-1.5 text-[10px] text-gray-400 mt-1">
+                      {post.categories?.nodes?.[0] && (
+                        <span className="text-red-500 font-semibold uppercase tracking-wider">{cleanHtmlContent(post.categories.nodes[0].name)}</span>
                       )}
+                      <span>·</span>
+                      <span>{formatTimeAgo(post.date)}</span>
                     </div>
-                  </Link>
-                  <div className="flex items-center gap-1.5 text-[10px] text-gray-400 mb-1">
-                    <span className="text-red-500 font-semibold uppercase tracking-wider">{cleanHtmlContent(category.name)}</span>
-                    <span className="text-gray-300">·</span>
-                    <span>{formatTimeAgo(post.date)}</span>
                   </div>
-                  <Link href={getPostUrl(post, allCategories)}>
-                    <h3 className="text-sm font-semibold text-gray-900 leading-snug group-hover:text-red-600 transition-colors line-clamp-2"
-                        dangerouslySetInnerHTML={{ __html: cleanHtmlContent(post.title.rendered) }} />
-                  </Link>
                 </article>
               ))}
             </div>
           </div>
+        </div>
 
-          {/* Grid column */}
-          <div className="lg:w-3/4">
+        {/* Latest Stories */}
+        <div className="mb-10">
             <div className="flex items-center gap-2 pb-3 mb-5 border-b border-gray-100">
               <svg className="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2" />
@@ -213,13 +228,13 @@ export default function CategoryPage({
               <h2 className="text-xs font-bold text-gray-900 uppercase tracking-wider">Latest Stories</h2>
             </div>
             {gridPosts.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 {gridPosts.map((post) => (
                   <article key={post.id} className="group bg-white rounded-xl border border-gray-100 overflow-hidden hover:border-gray-200 hover:shadow-md transition-all duration-200">
                     {post.featured_media_url && (
                       <Link href={getPostUrl(post, allCategories)}>
                         <div className="aspect-[16/9] relative overflow-hidden">
-                          <NetworkImage src={post.featured_media_url} alt={post.featured_media_alt || cleanHtmlContent(post.title.rendered)} fill className="object-cover group-hover:scale-[1.03] transition-transform duration-500" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" />
+                          <NetworkImage src={post.featured_media_url} alt={post.featured_media_alt || cleanHtmlContent(post.title.rendered)} fill className="object-cover group-hover:scale-[1.03] transition-transform duration-500" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw" />
                         </div>
                       </Link>
                     )}
@@ -243,7 +258,6 @@ export default function CategoryPage({
             ) : (
               <div className="text-center py-16"><p className="text-gray-400 text-sm">No more stories.</p></div>
             )}
-          </div>
         </div>
 
         {hasMore && (
@@ -286,7 +300,8 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
     const allPostsData = category.parent === 0 ? await getPostsByCategoryWithChildren(category.id, 50) : await getPostsByCategory(category.id, 50);
     setCategoryCache(allCategories);
     const allPosts = allPostsData.map(p => extractFeaturedMedia(p));
+    const mostViewed = await getTopStories();
 
-    return { props: { category, subCategories, featuredPost: allPosts[0] || null, categoryPosts: allPosts.slice(1, 10), allCategories, totalPostsCount: allPosts.length, allPosts } };
+    return { props: { category, subCategories, featuredPost: allPosts[0] || null, categoryPosts: allPosts.slice(1, 10), allCategories, totalPostsCount: allPosts.length, allPosts, mostViewed } };
   } catch { return { notFound: true }; }
 };

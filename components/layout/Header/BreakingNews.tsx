@@ -78,14 +78,14 @@ export default function BreakingNews({
 
   if (isLoading) {
     return (
-      <div className="w-full bg-[#307EDB] py-3.5">
+      <div className="w-full bg-[#DC2626] py-2">
         <div className="container mx-auto px-4">
           <div className="flex items-center">
-            <div className="bg-[#DB5151] text-white px-3 py-1.5 font-bold text-xs uppercase tracking-wider flex-shrink-0">
+            <div className="bg-[#1E40AF] text-white px-2.5 py-1 font-bold text-xs uppercase tracking-wider flex-shrink-0">
               BREAKING
             </div>
             <div className="ml-3 flex items-center flex-1">
-              <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+              <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
               <span className="text-white text-sm">Loading...</span>
             </div>
           </div>
@@ -96,10 +96,10 @@ export default function BreakingNews({
 
   if (breakingNews.length === 0) {
     return (
-      <div className="w-full bg-[#307EDB] py-3.5">
+      <div className="w-full bg-[#DC2626] py-2">
         <div className="container mx-auto px-4">
           <div className="flex items-center">
-            <div className="bg-[#DB5151] text-white px-3 py-1.5 font-bold text-xs uppercase tracking-wider flex-shrink-0">
+            <div className="bg-[#1E40AF] text-white px-3 py-1.5 font-bold text-xs uppercase tracking-wider flex-shrink-0">
               BREAKING
             </div>
             <div className="ml-3 text-white text-sm">No news available</div>
@@ -110,16 +110,16 @@ export default function BreakingNews({
   }
 
   return (
-      <div className="w-full bg-[#307EDB] py-3 overflow-hidden relative"
+      <div className="w-full bg-[#DC2626] py-1.5 overflow-hidden relative"
         onMouseEnter={() => onHover(true)}
         onMouseLeave={() => onHover(false)}
       >
         <div className="container mx-auto px-4">
           <div className="flex items-center">
-            <div className="bg-[#DB5151] text-white px-3 py-1.5 font-bold text-xs uppercase tracking-wider flex-shrink-0">
+            <div className="bg-[#1E40AF] text-white px-3 py-1.5 font-bold text-xs uppercase tracking-wider flex-shrink-0">
               BREAKING
             </div>
-            <div className="flex-1 overflow-hidden ml-3 h-8">
+            <div className="flex-1 overflow-hidden ml-3 h-6">
               <div
                 ref={marqueeRef}
                 className="flex whitespace-nowrap h-full items-center"
