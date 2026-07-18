@@ -29,6 +29,7 @@ import VideoSection from '../components/home/categories/VideoSection';
 import OpinionSection from '../components/home/categories/OpinionSection';
 import { cleanTextContent, cleanHtmlContent } from '../components/home/utils/contentCleaner';
 import { formatRelativeTime } from '../components/home/utils/timeFormatter';
+import AdvertisementBanner from '../components/home/AdvertisementBanner';
 
 interface HomeProps {
   posts: WPPost[];
@@ -138,6 +139,13 @@ export default function Home({
   return (
     <Layout categories={categories}>
       <div className="container mx-auto px-1 sm:px-2 lg:px-3 py-6 sm:py-8">
+        {/* A. Full Banner (1400×300) — Under Menu Bar */}
+        <AdvertisementBanner
+          desktopWidth={1400} desktopHeight={300}
+          mobileWidth={320} mobileHeight={100}
+          color="#2563eb" rate="RM 15,000 / week"
+        />
+
         {/* Row 1: Pin 3/4 + Latest 1/4 */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-6">
           <div className="lg:col-span-3">
@@ -203,6 +211,13 @@ export default function Home({
           </div>
         </div>
 
+        {/* E. Middle Banner (970×90) — Under Headlines */}
+        <AdvertisementBanner
+          desktopWidth={970} desktopHeight={90}
+          mobileWidth={320} mobileHeight={100}
+          color="#059669" rate="RM 6,000 / week"
+        />
+
         <div className="border-t border-gray-300 my-6 sm:my-10 lg:my-16"></div>
 
         <LocalWorldSection
@@ -225,6 +240,13 @@ export default function Home({
 
         <LifestyleSection posts={lifestylePosts} categories={categories} />
 
+        {/* G. Middle Banner (970×90) — Middle grid layout */}
+        <AdvertisementBanner
+          desktopWidth={970} desktopHeight={90}
+          mobileWidth={320} mobileHeight={100}
+          color="#7c3aed" rate="RM 6,000 / week"
+        />
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <div>
             <VideoSection categories={categories} />
@@ -235,12 +257,26 @@ export default function Home({
         </div>
 
        
+        {/* F. Middle Banner (970×90) — Under Videos */}
+        <AdvertisementBanner
+          desktopWidth={970} desktopHeight={90}
+          mobileWidth={320} mobileHeight={100}
+          color="#ca8a04" rate="RM 6,000 / week"
+        />
+
         <SpotlightSection posts={spotlightPosts} categories={categories} />
 
         <CombinedSection
           motoringPosts={motoringPosts}
           educationPosts={educationPosts}
           categories={categories}
+        />
+
+        {/* H. Middle Banner (970×90) — Lower page grid layout */}
+        <AdvertisementBanner
+          desktopWidth={970} desktopHeight={90}
+          mobileWidth={320} mobileHeight={100}
+          color="#0891b2" rate="RM 6,000 / week"
         />
 
         <div className="border-t-2 border-dashed border-gray-400 my-8 sm:my-12 lg:my-20"></div>
@@ -259,6 +295,12 @@ export default function Home({
             </div>
           );
         })}
+        {/* I. Bottom Panel (970×90) — Very bottom */}
+        <AdvertisementBanner
+          desktopWidth={970} desktopHeight={90}
+          mobileWidth={320} mobileHeight={100}
+          color="#be185d" rate="RM 6,000 / week"
+        />
       </div>
     </Layout>
   );
