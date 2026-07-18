@@ -55,7 +55,7 @@ export default function LocalWorldSection({ malaysiaPosts, worldPosts, categorie
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-0.5 h-5 bg-gray-900" />
                 <Link href={`/category/${col.slug}`}>
-                  <h3 className="text-sm font-bold text-gray-900 uppercase tracking-[0.12em] hover:text-gray-600 transition-colors">
+                  <h3 className="text-4xl font-black text-gray-900 tracking-tight hover:text-gray-600 transition-colors">
                     {col.name}
                   </h3>
                 </Link>

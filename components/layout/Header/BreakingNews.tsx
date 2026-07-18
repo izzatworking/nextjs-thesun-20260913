@@ -81,7 +81,7 @@ export default function BreakingNews({
       <div className="w-full bg-[#DC2626] py-2">
         <div className="container mx-auto px-4">
           <div className="flex items-center">
-            <div className="bg-[#1E40AF] text-white px-2.5 py-1 font-bold text-xs uppercase tracking-wider flex-shrink-0">
+            <div className="bg-[rgba(0,83,33)] text-white px-2.5 py-1 font-bold text-xs uppercase tracking-wider flex-shrink-0">
               BREAKING
             </div>
             <div className="ml-3 flex items-center flex-1">
@@ -99,7 +99,7 @@ export default function BreakingNews({
       <div className="w-full bg-[#DC2626] py-2">
         <div className="container mx-auto px-4">
           <div className="flex items-center">
-            <div className="bg-[#1E40AF] text-white px-3 py-1.5 font-bold text-xs uppercase tracking-wider flex-shrink-0">
+            <div className="bg-[rgba(0,83,33)] text-white px-3 py-1.5 font-bold text-xs uppercase tracking-wider flex-shrink-0">
               BREAKING
             </div>
             <div className="ml-3 text-white text-sm">No news available</div>
@@ -116,7 +116,7 @@ export default function BreakingNews({
       >
         <div className="container mx-auto px-4">
           <div className="flex items-center">
-            <div className="bg-[#1E40AF] text-white px-3 py-1.5 font-bold text-xs uppercase tracking-wider flex-shrink-0">
+            <div className="bg-[rgba(0,83,33)] text-white px-3 py-1.5 font-bold text-xs uppercase tracking-wider flex-shrink-0">
               BREAKING
             </div>
             <div className="flex-1 overflow-hidden ml-3 h-6">

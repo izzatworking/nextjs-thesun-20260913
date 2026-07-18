@@ -37,7 +37,7 @@ export default function BusinessSection({ categories, corporatePosts, globalPost
   if (allPosts.length === 0) return null;
 
   const featured = allPosts[0];
-  const rest = allPosts.slice(1, 7);
+  const rest = allPosts.slice(1, 5);
 
   return (
     <div className="mb-20">
@@ -46,7 +46,7 @@ export default function BusinessSection({ categories, corporatePosts, globalPost
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-1.5 h-6 bg-[#1e40af] rounded-full" />
-              <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 tracking-tight">
+              <h2 className="text-4xl font-black text-gray-900 tracking-tight">
                 Business
               </h2>
             </div>

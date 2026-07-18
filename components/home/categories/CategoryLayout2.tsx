@@ -71,7 +71,7 @@ export default function CategoryLayout2({
         <div className="min-w-0">
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="w-1 sm:w-1.5 h-5 sm:h-8 bg-gradient-to-b from-orange-500 to-red-600 rounded-full shrink-0" />
-            <h2 className="text-lg sm:text-2xl md:text-3xl font-black tracking-tight text-gray-900 uppercase truncate">
+            <h2 className="text-4xl font-black tracking-tight text-gray-900 uppercase truncate">
               {name}
             </h2>
           </div>

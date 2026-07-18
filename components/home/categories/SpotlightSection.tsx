@@ -40,7 +40,7 @@ export default function SpotlightSection({ posts, categories, isLast = false }: 
       <div className="flex items-center justify-between mb-5 sm:mb-6">
         <div className="flex items-center gap-3">
           <div className="w-1 h-6 sm:w-1.5 sm:h-7 bg-gradient-to-b from-purple-500 to-fuchsia-500 rounded-full" />
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-gray-900">
+          <h2 className="text-4xl font-black tracking-tight text-gray-900">
             Spotlight
           </h2>
         </div>

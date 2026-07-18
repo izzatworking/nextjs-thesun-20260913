@@ -37,7 +37,7 @@ export default function MostViewsSidebar() {
     async function fetch() {
       try {
         const data = await getTopStories();
-        setArticles(data.slice(0, 3));
+        setArticles(data.slice(0, 5));
       } catch (e) {
         console.error('Failed to load most views:', e);
       } finally {
