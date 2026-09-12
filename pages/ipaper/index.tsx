@@ -35,7 +35,7 @@ export default function IPaperPage({ categories }: Props) {
       const response = await fetch('/api/ipaper/list');
       const data = await response.json();
       
-      if (data.success) {
+      if (data.success && Array.isArray(data.pdfs)) {
         setCurrentPDF(data.todayPDF || data.pdfs[0]);
         setPreviousPDFs(data.pdfs);
       }

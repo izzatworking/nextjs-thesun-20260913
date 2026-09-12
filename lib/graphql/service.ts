@@ -131,7 +131,7 @@ export async function getPostsByCategoryGraphQL(
     
     const result = await client.query<GraphQLPostsResponse>({
       query: queries.GET_POSTS_BY_CATEGORY,
-      variables: { categoryId: categoryId.toString(), first, after },
+      variables: { categoryId, first, after },
     });
     
     if (!result.data) {
@@ -160,7 +160,7 @@ export async function getPostsByTagGraphQL(
     
     const result = await client.query<GraphQLPostsResponse>({
       query: queries.GET_POSTS_BY_TAG,
-      variables: { tagId: tagId.toString(), first, after },
+      variables: { tagId, first, after },
     });
     
     if (!result.data) {

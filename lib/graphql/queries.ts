@@ -129,7 +129,7 @@ export const GET_CATEGORY_BY_SLUG = gql`
 `;
 
 export const GET_POSTS_BY_CATEGORY = gql`
-  query GetPostsByCategory($categoryId: ID!, $first: Int = 20, $after: String) {
+  query GetPostsByCategory($categoryId: Int!, $first: Int = 20, $after: String) {
     posts(where: { categoryId: $categoryId }, first: $first, after: $after) {
       nodes {
         ...PostWithRelationsFragment
@@ -166,7 +166,7 @@ export const GET_TAG_BY_SLUG = gql`
 `;
 
 export const GET_POSTS_BY_TAG = gql`
-  query GetPostsByTag($tagId: ID!, $first: Int = 20, $after: String) {
+  query GetPostsByTag($tagId: Int!, $first: Int = 20, $after: String) {
     posts(where: { tagId: $tagId }, first: $first, after: $after) {
       nodes {
         ...PostWithRelationsFragment
@@ -226,7 +226,7 @@ export const GET_AUTHOR_BY_SLUG = gql`
 `;
 
 export const GET_POSTS_BY_AUTHOR = gql`
-  query GetPostsByAuthor($authorId: ID!, $first: Int = 20, $after: String) {
+  query GetPostsByAuthor($authorId: Int!, $first: Int = 20, $after: String) {
     posts(where: { author: $authorId }, first: $first, after: $after) {
       nodes {
         ...PostWithRelationsFragment

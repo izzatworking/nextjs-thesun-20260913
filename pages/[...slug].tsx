@@ -24,7 +24,7 @@ import { TimeAgo } from '@/components/common/TimeAgo';
 import { AdWidget } from '@/components/ads/AdWidget';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type JSX } from 'react';
 import TopStories from '@/components/layout/Header/TopStories';
 
 interface PostProps {

@@ -47,7 +47,7 @@ export default function BreakingNews({
   const contentRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState(0);
   const [contentWidth, setContentWidth] = useState(0);
-  const animationRef = useRef<number>();
+  const animationRef = useRef<number | null>(null);
 
   const SPEED = 50;
 

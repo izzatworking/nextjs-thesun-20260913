@@ -131,6 +131,7 @@ async function fetchRESTPosts(url: string): Promise<WPPostWithMedia[]> {
   });
   if (!res.ok) throw new Error(`REST API error: ${res.status} ${res.statusText}`);
   const posts: WPPost[] = await res.json();
+  if (!Array.isArray(posts)) return [];
   const result = posts.map(processRESTPost);
   for (const post of result) {
     if (!post.featured_media_url && post.featured_media && post.featured_media > 0) {
@@ -310,7 +311,7 @@ export async function getPost(slug: string): Promise<WPPostWithMedia | null> {
         });
         if (res.ok) {
           const posts: WPPost[] = await res.json();
-          if (posts.length > 0) {
+          if (Array.isArray(posts) && posts.length > 0) {
             post = posts[0];
             break;
           }
@@ -328,6 +329,7 @@ export async function getPost(slug: string): Promise<WPPostWithMedia | null> {
         });
         if (res.ok) {
           const posts: WPPost[] = await res.json();
+          if (!Array.isArray(posts)) return null;
           const foundPost = posts.find(p =>
             p.slug.toLowerCase().includes(slug.toLowerCase().replace(/-/g, '')) ||
             p.title.rendered.toLowerCase().includes(slug.toLowerCase().replace(/-/g, ' '))
@@ -374,6 +376,7 @@ export async function getCategories(): Promise<WPCategory[]> {
       });
       if (!res.ok) throw new Error(`Failed to fetch categories: ${res.status}`);
       const categories = await res.json();
+      if (!Array.isArray(categories)) return [];
       return categories.map((cat: any) => ({
         id: cat.id,
         name: cat.name,
@@ -391,7 +394,7 @@ export async function getCategories(): Promise<WPCategory[]> {
 
 export async function getPostsByCategory(categoryId: number, perPage = 20): Promise<WPPostWithMedia[]> {
   const query = `
-    query GetPostsByCategory($categoryId: ID!, $first: Int!) {
+    query GetPostsByCategory($categoryId: Int!, $first: Int!) {
       posts(where: { categoryId: $categoryId }, first: $first) {
         nodes {
           id slug title excerpt content date modified
@@ -404,7 +407,7 @@ export async function getPostsByCategory(categoryId: number, perPage = 20): Prom
     }
   `;
   try {
-    const data = await fetchAPI(query, { categoryId: String(categoryId), first: perPage });
+    const data = await fetchAPI(query, { categoryId, first: perPage });
     if (data?.posts?.nodes) {
       return graphqlToWpPosts(data.posts.nodes);
     }
@@ -413,7 +416,7 @@ export async function getPostsByCategory(categoryId: number, perPage = 20): Prom
     console.log(`Fetching posts for category ${categoryId} (Apollo)`);
     const { data } = await client.query<GraphQLPostsResponse>({
       query: GET_POSTS_BY_CATEGORY,
-      variables: { categoryId: String(categoryId), first: perPage },
+      variables: { categoryId, first: perPage },
       fetchPolicy: 'no-cache',
       errorPolicy: 'none',
     });
@@ -480,6 +483,7 @@ export async function getTopStories(): Promise<WPPostWithMedia[]> {
     });
     if (!res.ok) throw new Error(`Failed to fetch top stories: ${res.status}`);
     const posts: WPPost[] = await res.json();
+    if (!Array.isArray(posts)) return [];
     return posts.map((post: WPPost): WPPostWithMedia => {
       const categories = Array.isArray(post.categories)
         ? post.categories.map(cat => typeof cat === 'object' ? (cat as WPCategory).id : cat)
@@ -542,7 +546,7 @@ export async function getPostsByAuthor(authorId: number, perPage = 20): Promise<
     console.log(`Fetching posts by author ${authorId} (GraphQL)`);
     const { data } = await client.query<GraphQLPostsResponse>({
       query: GET_POSTS_BY_AUTHOR,
-      variables: { authorId: String(authorId), first: perPage },
+      variables: { authorId, first: perPage },
       fetchPolicy: 'no-cache',
     });
     if (data?.posts?.nodes) {
@@ -639,6 +643,7 @@ export async function getTags(): Promise<WPTag[]> {
       });
       if (!res.ok) throw new Error(`Failed to fetch tags: ${res.status}`);
       const tags = await res.json();
+      if (!Array.isArray(tags)) return [];
       return tags.map((tag: any) => ({ id: tag.id, name: tag.name, slug: tag.slug }));
     } catch (restError) {
       console.error('REST fallback also failed:', restError);
@@ -658,6 +663,7 @@ export async function getTagsByIds(tagIds: number[]): Promise<WPTag[]> {
     });
     if (!res.ok) return [];
     const tags = await res.json();
+    if (!Array.isArray(tags)) return [];
     return tags.map((tag: any) => ({ id: tag.id, name: tag.name, slug: tag.slug }));
   } catch (error) {
     console.error('Error fetching tags by IDs:', error);
@@ -670,7 +676,7 @@ export async function getPostsByTag(tagId: number, perPage = 10): Promise<WPPost
     console.log(`Fetching posts for tag ${tagId} (GraphQL)`);
     const { data } = await client.query<GraphQLPostsResponse>({
       query: GET_POSTS_BY_TAG,
-      variables: { tagId: String(tagId), first: perPage },
+      variables: { tagId, first: perPage },
       fetchPolicy: 'no-cache',
     });
     if (data?.posts?.nodes) {
@@ -696,7 +702,7 @@ export async function getPostsByTagSlug(tagSlug: string, perPage = 10): Promise<
     const tagsResponse = await fetch(`${WORDPRESS_API_URL}/tags?slug=${tagSlug}`);
     if (!tagsResponse.ok) return [];
     const tags = await tagsResponse.json();
-    if (tags.length === 0) return [];
+    if (!Array.isArray(tags) || tags.length === 0) return [];
     const tagId = tags[0].id;
     return await getPostsByTag(tagId, perPage);
   } catch (error) {
@@ -757,6 +763,7 @@ export async function getPostsByMultipleTags(tagIds: number[], perPage = 10): Pr
     });
     if (!res.ok) throw new Error(`Failed to fetch posts by multiple tags: ${res.status}`);
     const posts: WPPost[] = await res.json();
+    if (!Array.isArray(posts)) return [];
     return posts.map(processRESTPost);
   } catch (error) {
     console.error('Error fetching posts by multiple tags:', error);
@@ -1048,6 +1055,7 @@ export async function getTopStoriesWithCategories(): Promise<WPPostWithMedia[]> 
     });
     if (!res.ok) throw new Error(`Failed to fetch top stories: ${res.status}`);
     const posts: WPPost[] = await res.json();
+    if (!Array.isArray(posts)) return [];
     const allCategories = await getCategories();
     return posts.map((post: WPPost): WPPostWithMedia => {
       let categories: number[] = [];
@@ -1102,7 +1110,7 @@ export async function getAuthorBySlug(slug: string): Promise<WPAuthor | null> {
     });
     if (!res.ok) return null;
     const users = await res.json();
-    if (users.length === 0) {
+    if (!Array.isArray(users) || users.length === 0) {
       return await getAuthorBySlugFallback(slug);
     }
     const user = users[0];
@@ -1136,7 +1144,7 @@ async function getAuthorBySlugFallback(slug: string): Promise<WPAuthor | null> {
     const res = await fetch(url, { next: { revalidate: 300 } });
     if (!res.ok) return null;
     const posts = await res.json();
-    if (posts.length === 0 || !posts[0]._embedded?.author?.[0]) return null;
+    if (!Array.isArray(posts) || posts.length === 0 || !posts[0]._embedded?.author?.[0]) return null;
     const rawAuthor = posts[0]._embedded.author[0];
     return {
       term_id: rawAuthor.id || rawAuthor.term_id || 0,

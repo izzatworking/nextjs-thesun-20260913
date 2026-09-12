@@ -10,7 +10,7 @@ interface DesktopNavProps {
   activeDropdown: number | null;
   toggleDropdown: (id: number) => void;
   setActiveDropdown: (id: number | null) => void;
-  dropdownContainerRef: React.RefObject<HTMLDivElement>;
+  dropdownContainerRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export default function DesktopNav({

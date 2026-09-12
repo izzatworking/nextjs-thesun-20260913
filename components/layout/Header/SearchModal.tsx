@@ -24,7 +24,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [categoryPosts, setCategoryPosts] = useState<WPPostWithMedia[]>([]);
   const [catLoading, setCatLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   function advancedSearch<T extends Record<string, any>>(
     data: T[],

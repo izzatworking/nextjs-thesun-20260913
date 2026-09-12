@@ -38,7 +38,7 @@ export default function IPaperAdminPage({ categories }: Props) {
       const response = await fetch(`/api/ipaper/list?date=${date}`);
       const data = await response.json();
       
-      if (data.success) {
+      if (data.success && Array.isArray(data.pdfs)) {
         setPDFs(data.pdfs);
         if (data.pdfs.length > 0) {
           setSelectedPDF(data.pdfs[0]);

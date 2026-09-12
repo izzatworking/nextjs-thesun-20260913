@@ -89,6 +89,11 @@ export default function Header({ categories = [], isSidebarOpen: externalIsOpen,
       }
       
       // Transform data ke format breaking news DENGAN LINK YANG BETUL
+      if (!Array.isArray(posts)) {
+        setBreakingNews([]);
+        setIsLoading(false);
+        return;
+      }
       const newsItems: BreakingNewsType[] = posts.map((post: any) => {
         // Dapatkan kategori
         let category = 'News';
