@@ -1,0 +1,30 @@
+[
+  {
+    "id": "pdf-2025-12-04",
+    "date": "2025-12-04",
+    "title": "theSun Edition - December 4, 2025",
+    "fileUrl": "/uploads/ipaper/sample.pdf",
+    "pages": 24,
+    "size": "2.4 MB",
+    "uploaded": "2025-12-04T23:53:24.381Z",
+    "isToday": true
+  },
+  {
+    "id": "pdf-2025-12-03",
+    "date": "2025-12-03",
+    "title": "theSun Edition - December 3, 2025",
+    "fileUrl": "/uploads/ipaper/sample.pdf",
+    "pages": 24,
+    "size": "2.3 MB",
+    "uploaded": "2025-12-04T23:53:24.381Z"
+  },
+  {
+    "id": "pdf-2025-12-02",
+    "date": "2025-12-02",
+    "title": "theSun Edition - December 2, 2025",
+    "fileUrl": "/uploads/ipaper/sample.pdf",
+    "pages": 24,
+    "size": "2.5 MB",
+    "uploaded": "2025-12-04T23:53:24.381Z"
+  }
+]

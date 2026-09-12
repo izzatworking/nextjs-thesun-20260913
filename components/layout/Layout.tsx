@@ -122,11 +122,13 @@ const Layout: React.FC<LayoutProps> = ({
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
           mainNavItems={mainNavItems}
+          categories={categories}
         />
         <DesktopCanvasModal
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
           mainNavItems={mainNavItems}
+          categories={categories}
         />
 
         <div className="h-[130px] lg:h-[150px]"></div>

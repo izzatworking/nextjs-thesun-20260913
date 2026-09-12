@@ -137,7 +137,7 @@ export default function CategoryLayout2({
                 href={`${getPostUrl(post)}`}
                 className={`group relative overflow-hidden rounded-lg xs:rounded-xl bg-gray-900 ${
                   isFirst ? 'col-span-2 row-span-2 md:col-span-2 md:row-span-2' : 'col-span-1'
-                } ${isFirst ? 'min-h-[300px] xs:min-h-[340px] sm:min-h-[400px] md:min-h-[460px]' : 'min-h-[130px] xs:min-h-[150px] sm:min-h-[190px] md:min-h-[220px]'}`}
+                } ${isFirst ? 'min-h-[270px] xs:min-h-[310px] sm:min-h-[370px] md:min-h-[460px]' : 'min-h-[130px] xs:min-h-[150px] sm:min-h-[190px] md:min-h-[220px]'}`}
               >
                 {post.featured_media_url && (
                   <img

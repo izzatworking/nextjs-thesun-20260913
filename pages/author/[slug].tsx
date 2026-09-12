@@ -1,9 +1,9 @@
-import { GetServerSideProps } from 'next';
-import { getCategories, getPosts, getPostUrl, setCategoryCache } from '../../lib/wordpress';
+import { getCategories, getPosts, getPostUrl, setCategoryCache, getAllAuthors } from '../../lib/wordpress';
 import { WPAuthor, WPPostWithMedia, WPCategory } from '../../types/wordpress';
 import Layout from '../../components/layout/Layout';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 const he = require('he');
 
 interface Props {
@@ -32,7 +32,7 @@ function cleanTextContent(text: string): string {
   return he.decode(text.replace(/<[^>]*>/g, '')).trim();
 }
 
-export default function AuthorProfilePage({ author, posts, categories, latestPosts, error }: Props) {
+function AuthorProfilePageInner({ author, posts, categories, latestPosts, error }: Props) {
   const [visibleCount, setVisibleCount] = useState(12);
 
   if (error && !author) {
@@ -166,69 +166,103 @@ export default function AuthorProfilePage({ author, posts, categories, latestPos
   );
 }
 
-export const getServerSideProps: GetServerSideProps<Props> = async ({ params }) => {
-  const slug = params?.slug as string | undefined;
-  if (!slug) return { notFound: true };
+export const getStaticProps = async () => ({ props: {} });
 
-  try {
-    let author: WPAuthor | null = null;
-    let posts: WPPostWithMedia[] = [];
-    const WORDPRESS_API_URL = 'https://thesun.my/wp-json/wp/v2';
+export const getStaticPaths = async () => {
+  const authors = await getAllAuthors();
+  return { paths: authors.filter(a => a.slug).map(a => ({ params: { slug: a.slug } })), fallback: false };
+};
 
-    // Step 1: Find author by searching in 100 posts
-    const postsRes = await fetch(`${WORDPRESS_API_URL}/posts?per_page=100`);
-    if (postsRes.ok) {
-      const rawPosts = await postsRes.json();
-      if (Array.isArray(rawPosts)) {
-        for (const p of rawPosts) {
-          const postAuthors = p.authors;
-          if (postAuthors && Array.isArray(postAuthors) && postAuthors.length > 0) {
-            for (const a of postAuthors) {
-              if (a && a.slug === slug && !author) {
-                author = {
-                  term_id: a.term_id || 0, user_id: a.user_id || 0, is_guest: a.is_guest || 1,
-                  slug: a.slug || slug, job_title: a.job_title || '',
-                  display_name: a.display_name || a.name || slug,
-                  avatar_url: { url: a.avatar_url?.url || '', url2x: a.avatar_url?.url2x || '' },
-                  author_category: a.author_category || '', first_name: a.first_name || '',
-                  last_name: a.last_name || '', description: a.description || a.bio || ''
-                };
-                break;
+export default function AuthorProfilePage() {
+  const { query } = useRouter();
+  const slug = Array.isArray(query.slug) ? query.slug[0] : query.slug;
+  const [data, setData] = useState<Props | null>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    (async () => {
+      try {
+        if (!slug) {
+          if (active) setData({ author: null, posts: [], categories: [], latestPosts: [], error: 'Author not found' });
+          return;
+        }
+
+        let author: WPAuthor | null = null;
+        let posts: WPPostWithMedia[] = [];
+        const WORDPRESS_API_URL = 'https://thesun.my/wp-json/wp/v2';
+
+        // Step 1: Find author by searching in 100 posts
+        const postsRes = await fetch(`${WORDPRESS_API_URL}/posts?per_page=100`);
+        if (postsRes.ok) {
+          const rawPosts = await postsRes.json();
+          if (Array.isArray(rawPosts)) {
+            for (const p of rawPosts) {
+              const postAuthors = p.authors;
+              if (postAuthors && Array.isArray(postAuthors) && postAuthors.length > 0) {
+                for (const a of postAuthors) {
+                  if (a && a.slug === slug && !author) {
+                    author = {
+                      term_id: a.term_id || 0, user_id: a.user_id || 0, is_guest: a.is_guest || 1,
+                      slug: a.slug || slug, job_title: a.job_title || '',
+                      display_name: a.display_name || a.name || slug,
+                      avatar_url: { url: a.avatar_url?.url || '', url2x: a.avatar_url?.url2x || '' },
+                      author_category: a.author_category || '', first_name: a.first_name || '',
+                      last_name: a.last_name || '', description: a.description || a.bio || ''
+                    };
+                    break;
+                  }
+                }
+                if (author) break;
               }
             }
-            if (author) break;
           }
         }
-      }
-    }
 
-    if (!author) {
-      return { props: { author: null, posts: [], categories: [], latestPosts: [], error: `Author "${slug}" not found` } };
-    }
-
-    // Step 2: Fetch ALL posts by this author using ppma_author (gets all posts regardless of position)
-    const authorTermId = author.term_id || 0;
-    if (authorTermId > 0) {
-      const allRes = await fetch(`${WORDPRESS_API_URL}/posts?ppma_author=${authorTermId}&_embed=wp:featuredmedia&per_page=100`);
-      if (allRes.ok) {
-        const allPosts = await allRes.json();
-        if (Array.isArray(allPosts)) {
-          posts = allPosts.map((p: any) => ({
-            ...p,
-            featured_media_url: p._embedded?.['wp:featuredmedia']?.[0]?.source_url || null,
-            authors: p.authors || []
-          }));
+        if (!author) {
+          if (active) setData({ author: null, posts: [], categories: [], latestPosts: [], error: `Author "${slug}" not found` });
+          return;
         }
+
+        // Step 2: Fetch ALL posts by this author using ppma_author (gets all posts regardless of position)
+        const authorTermId = author.term_id || 0;
+        if (authorTermId > 0) {
+          const allRes = await fetch(`${WORDPRESS_API_URL}/posts?ppma_author=${authorTermId}&_embed=wp:featuredmedia&per_page=100`);
+          if (allRes.ok) {
+            const allPosts = await allRes.json();
+            if (Array.isArray(allPosts)) {
+              posts = allPosts.map((p: any) => ({
+                ...p,
+                featured_media_url: p._embedded?.['wp:featuredmedia']?.[0]?.source_url || null,
+                authors: p.authors || []
+              }));
+            }
+          }
+        }
+
+        const [categories, latestPosts] = await Promise.all([getCategories(), getPosts(6)]);
+        setCategoryCache(categories);
+
+        if (active) {
+          setData({ author, posts: posts || [], categories: categories || [], latestPosts: latestPosts || [] });
+        }
+      } catch (err) {
+        console.error('❌ Error loading author profile:', err);
+        if (active) setData({ author: null, posts: [], categories: [], latestPosts: [], error: err instanceof Error ? err.message : 'Unknown error' });
       }
-    }
+    })();
 
-    const [categories, latestPosts] = await Promise.all([getCategories(), getPosts(6)]);
-    setCategoryCache(categories);
+    return () => { active = false; };
+  }, [slug]);
 
-    return {
-      props: { author, posts: posts || [], categories: categories || [], latestPosts: latestPosts || [] },
-    };
-  } catch (err) {
-    return { props: { author: null, posts: [], categories: [], latestPosts: [], error: err instanceof Error ? err.message : 'Unknown error' } };
+  if (!data) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
+        <div className="w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
+        <p className="mt-4 text-sm text-gray-500">Memuatkan…</p>
+      </div>
+    );
   }
-};
+
+  return <AuthorProfilePageInner {...data} />;
+}

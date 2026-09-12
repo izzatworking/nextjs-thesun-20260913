@@ -3,7 +3,6 @@ import { WPPostWithMedia, WPCategory } from '../../../types/wordpress';
 import { cleanTextContent } from '../utils/contentCleaner';
 import { formatRelativeTime } from '../utils/timeFormatter';
 import Link from 'next/link';
-import AdvertisementBanner from '../AdvertisementBanner';
 
 interface BusinessSectionProps {
   categories: WPCategory[];
@@ -41,74 +40,61 @@ export default function BusinessSection({ categories, corporatePosts, globalPost
   const rest = allPosts.slice(1, 5);
 
   return (
-    <div className="mb-20">
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        <div className="lg:col-span-3">
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-1.5 h-6 bg-[#1e40af] rounded-full" />
-              <h2 className="text-4xl font-black text-gray-900 tracking-tight">
-                Business
-              </h2>
-            </div>
-            <div className="flex-1 h-px bg-gray-200" />
-          </div>
+    <div className="mb-10">
+      <div className="mb-4">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-1.5 h-6 bg-[#1e40af] rounded-full" />
+          <h2 className="text-3xl font-black text-gray-900 tracking-tight">
+            Business
+          </h2>
+        </div>
+        <div className="flex-1 h-px bg-gray-200" />
+      </div>
 
+      {/* Desktop: 60% content / 40% follow us image */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:gap-6">
+        <div className="lg:col-span-3 min-w-0">
           {featured && (
-            <Link href={getPostUrl(featured, categories)} className="group block mb-10">
-              <div className="grid grid-cols-1 lg:grid-cols-5 gap-0 bg-white border border-gray-200">
-                <div className="lg:col-span-3 overflow-hidden bg-gray-100">
-                  <div className="aspect-[4/3] lg:aspect-auto lg:h-full">
-                    {featured.featured_media_url ? (
-                      <img
-                        src={featured.featured_media_url}
-                        alt={cleanTextContent(featured.featured_media_alt || featured.title.rendered)}
-                        className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-200">
-                        <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <div className="lg:col-span-2 p-6 lg:p-8 flex flex-col justify-center">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${getCategoryBadge(featured, categories).class}`}>
-                      {getCategoryBadge(featured, categories).label}
-                    </span>
-                    <span className="text-[10px] text-gray-400">
-                      {formatRelativeTime(featured.date)}
-                    </span>
-                  </div>
-                  <h3 className="text-lg lg:text-xl font-bold text-gray-900 group-hover:text-[#1e40af] transition-colors leading-snug mb-3">
-                    {cleanTextContent(featured.title.rendered)}
-                  </h3>
-                  {featured.excerpt?.rendered && (
-                    <p className="text-sm text-gray-500 leading-relaxed line-clamp-3 mb-4">
-                      {cleanTextContent(featured.excerpt.rendered)}
-                    </p>
-                  )}
-                  <span className="inline-flex items-center text-xs font-medium text-[#1e40af] gap-1.5 group-hover:gap-2.5 transition-all">
-                    Read more
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            <Link href={getPostUrl(featured, categories)} className="group block mb-3 bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-md hover:border-gray-300 transition-all">
+              <div className="aspect-[16/9] bg-gray-100 overflow-hidden">
+                {featured.featured_media_url ? (
+                  <img
+                    src={featured.featured_media_url}
+                    alt={cleanTextContent(featured.featured_media_alt || featured.title.rendered)}
+                    className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-200">
+                    <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
+                  </div>
+                )}
+              </div>
+              <div className="p-3 sm:p-4">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className={`text-[9px] font-semibold px-1.5 py-0.5 rounded ${getCategoryBadge(featured, categories).class}`}>
+                    {getCategoryBadge(featured, categories).label}
+                  </span>
+                  <span className="text-[10px] text-gray-400">
+                    {formatRelativeTime(featured.date)}
                   </span>
                 </div>
+                <h3 className="text-sm sm:text-base font-bold text-gray-900 group-hover:text-[#1e40af] transition-colors leading-snug">
+                  {cleanTextContent(featured.title.rendered)}
+                </h3>
               </div>
             </Link>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          {/* jarak 1px pada mobile, kecil sahaja pada sm+ */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-px sm:gap-2">
             {rest.map((post) => {
               const badge = getCategoryBadge(post, categories);
               return (
-                <Link key={post.id} href={getPostUrl(post, categories)} className="group flex items-start gap-4 p-4 bg-white border border-gray-200 hover:border-gray-300 transition-all">
+                <Link key={post.id} href={getPostUrl(post, categories)} className="group flex items-start gap-2.5 p-2.5 bg-white border border-gray-200 hover:border-gray-300 transition-all rounded-lg">
                   {post.featured_media_url && (
-                    <div className="flex-shrink-0 w-20 h-20 bg-gray-100 overflow-hidden">
+                    <div className="flex-shrink-0 w-16 h-16 bg-gray-100 overflow-hidden rounded">
                       <img
                         src={post.featured_media_url}
                         alt=""
@@ -117,13 +103,13 @@ export default function BusinessSection({ categories, corporatePosts, globalPost
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <span className={`inline-block text-[10px] font-semibold px-1.5 py-0.5 rounded ${badge.class} mb-1.5`}>
+                    <span className={`inline-block text-[9px] font-semibold px-1 py-0.5 rounded ${badge.class} mb-1`}>
                       {badge.label}
                     </span>
-                    <h4 className="text-sm font-semibold text-gray-900 group-hover:text-[#1e40af] transition-colors leading-snug line-clamp-2">
+                    <h4 className="text-xs font-semibold text-gray-900 group-hover:text-[#1e40af] transition-colors leading-snug line-clamp-2">
                       {cleanTextContent(post.title.rendered)}
                     </h4>
-                    <span className="text-[10px] text-gray-400 mt-1 block">
+                    <span className="text-[10px] text-gray-400 mt-0.5 block">
                       {formatRelativeTime(post.date)}
                     </span>
                   </div>
@@ -133,21 +119,16 @@ export default function BusinessSection({ categories, corporatePosts, globalPost
           </div>
         </div>
 
-        <div className="hidden lg:flex flex-col gap-4">
-          <div className="sticky top-24 flex flex-col gap-4">
-            {/* C. Medium Rectangular (350×300) */}
-            <AdvertisementBanner
-              desktopWidth={350} desktopHeight={300}
-              mobileWidth={300} mobileHeight={250}
-              color="#65a30d" rate="RM 7,000 / week"
+        {/* 40% — Follow Us on Social Media (image) */}
+        <div className="lg:col-span-2 min-w-0">
+          <Link href="/follow-us" className="block relative overflow-hidden rounded-xl h-full min-h-[240px] bg-gray-100 group">
+            <img
+              src="/images/follow-us.png"
+              alt="Follow Us on Social Media"
+              className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
             />
-            {/* D. Medium Rectangular (300×250) */}
-            <AdvertisementBanner
-              desktopWidth={300} desktopHeight={250}
-              mobileWidth={300} mobileHeight={250}
-              color="#4f46e5" rate="RM 7,000 / week"
-            />
-          </div>
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+          </Link>
         </div>
       </div>
     </div>

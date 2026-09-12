@@ -1,4 +1,3 @@
-import { GetServerSideProps } from 'next';
 import {
   getCategories,
   getPostsByCategory,
@@ -18,7 +17,9 @@ import {
 import Layout from '../../components/layout/Layout';
 import NetworkImage from '../../components/common/NetworkImage';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import { MAIN_SPORTS } from '../../components/layout/Header/sportsUtils';
 
 interface CategoryWithCount extends WPCategory {
   count: number;
@@ -88,7 +89,7 @@ function getTopStoryPath(article: TopStory): string {
   return `/posts/${article.slug}`;
 }
 
-export default function CategoryPage({ 
+function CategoryInner({ 
   category, 
   subCategories, 
   allCategories,
@@ -96,11 +97,22 @@ export default function CategoryPage({
   mostViewed
 }: CategoryProps) {
   const [displayCount, setDisplayCount] = useState(12);
+  const [openOtherSports, setOpenOtherSports] = useState(false);
   const mainPost = allPosts[0];
   const gridPosts = allPosts.slice(1, displayCount + 1);
   const hasMore = displayCount < allPosts.length - 1;
   const parentCategory = category.parent !== 0 ? allCategories.find(cat => cat.id === category.parent) : null;
   const siblingCategories = parentCategory ? allCategories.filter(cat => cat.parent === parentCategory.id && cat.id !== category.id) : [];
+  const isSports = category.slug === 'sports';
+  const sportsMain = isSports ? subCategories.filter(cat => MAIN_SPORTS.includes(cat.slug)) : [];
+  const sportsOther = isSports ? subCategories.filter(cat => !MAIN_SPORTS.includes(cat.slug)) : [];
+
+  const renderCategoryChip = (cat: CategoryWithCount) => (
+    <Link key={cat.id} href={`/category/${cat.slug}`} className="group relative px-2 h-5 md:px-2.5 md:h-6 text-[9px] md:text-[10px] font-medium rounded-md bg-white text-gray-400 hover:text-white border border-gray-200 hover:border-red-500 transition-colors inline-flex items-center overflow-hidden">
+      <span className="relative z-10">{cleanHtmlContent(cat.name)}</span>
+      <div className="absolute inset-0 bg-red-500 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-200"></div>
+    </Link>
+  );
 
   return (
     <Layout 
@@ -133,12 +145,31 @@ export default function CategoryPage({
                   <div className="absolute inset-0 bg-red-500 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-200"></div>
                 </Link>
               ))}
-              {category.parent === 0 && subCategories.map(cat => (
-                <Link key={cat.id} href={`/category/${cat.slug}`} className="group relative px-2 h-5 md:px-2.5 md:h-6 text-[9px] md:text-[10px] font-medium rounded-md bg-white text-gray-400 hover:text-white border border-gray-200 hover:border-red-500 transition-colors inline-flex items-center overflow-hidden">
-                  <span className="relative z-10">{cleanHtmlContent(cat.name)}</span>
-                  <div className="absolute inset-0 bg-red-500 scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-200"></div>
-                </Link>
-              ))}
+              {category.parent === 0 && isSports && (
+                <>
+                  {sportsMain.map(renderCategoryChip)}
+                  <button
+                    onClick={() => setOpenOtherSports(prev => !prev)}
+                    className={`group relative px-2 h-5 md:px-2.5 md:h-6 text-[9px] md:text-[10px] font-medium rounded-md bg-red-50 text-red-600 border border-red-200 transition-colors inline-flex items-center gap-1 overflow-hidden ${
+                      openOtherSports ? 'border-red-500' : ''
+                    }`}
+                  >
+                    <span className="relative z-10">Other Sports</span>
+                    <svg
+                      className={`relative z-10 w-2.5 h-2.5 md:w-3 md:h-3 transition-transform duration-200 ${
+                        openOtherSports ? 'rotate-180' : ''
+                      }`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                  {openOtherSports && sportsOther.map(renderCategoryChip)}
+                </>
+              )}
+              {category.parent === 0 && !isSports && subCategories.map(renderCategoryChip)}
             </div>
           )}
         </div>
@@ -275,33 +306,63 @@ export default function CategoryPage({
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ params }) => {
-  try {
-    const slug = params?.slug as string;
-    const allCategoriesData = await getCategories();
-    const allCategories: CategoryWithCount[] = allCategoriesData.map(c => ({ ...c, count: c.count || 0, parent: c.parent || 0 }));
-    let category = allCategories.find(c => c.slug === slug);
-    if (!category) category = allCategories.find(c => c.slug.toLowerCase() === slug.toLowerCase());
-    if (!category) {
-      const mappedSlug = getShortenedCategorySlug(slug);
-      if (mappedSlug !== slug) {
-        category = allCategories.find(c => c.slug === mappedSlug);
-      }
-    }
-    if (!category) {
-      const originalSlug = getOriginalCategorySlug(slug);
-      if (originalSlug !== slug) {
-        category = allCategories.find(c => c.slug === originalSlug);
-      }
-    }
-    if (!category) return { notFound: true };
+export default function Category() {
+  const { query } = useRouter();
+  const slug = String(Array.isArray(query.slug) ? query.slug[0] : query.slug) || '';
+  const [data, setData] = useState<CategoryProps | null>(null);
 
-    const subCategories: CategoryWithCount[] = allCategories.filter(c => c.parent === category.id).map(c => ({ ...c, count: c.count || 0, parent: c.parent || 0 }));
-    const allPostsData = category.parent === 0 ? await getPostsByCategoryWithChildren(category.id, 50) : await getPostsByCategory(category.id, 50);
-    setCategoryCache(allCategories);
-    const allPosts = allPostsData.map(p => extractFeaturedMedia(p));
-    const mostViewed = await getTopStories();
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const allCategoriesData = await getCategories();
+        const allCategories: CategoryWithCount[] = allCategoriesData.map(c => ({ ...c, count: c.count || 0, parent: c.parent || 0 }));
+        let category = allCategories.find(c => c.slug === slug);
+        if (!category) category = allCategories.find(c => c.slug.toLowerCase() === slug.toLowerCase());
+        if (!category) {
+          const mappedSlug = getShortenedCategorySlug(slug);
+          if (mappedSlug !== slug) {
+            category = allCategories.find(c => c.slug === mappedSlug);
+          }
+        }
+        if (!category) {
+          const originalSlug = getOriginalCategorySlug(slug);
+          if (originalSlug !== slug) {
+            category = allCategories.find(c => c.slug === originalSlug);
+          }
+        }
+        if (!category) return;
 
-    return { props: { category, subCategories, featuredPost: allPosts[0] || null, categoryPosts: allPosts.slice(1, 10), allCategories, totalPostsCount: allPosts.length, allPosts, mostViewed } };
-  } catch { return { notFound: true }; }
+        const subCategories: CategoryWithCount[] = allCategories.filter(c => c.parent === category.id).map(c => ({ ...c, count: c.count || 0, parent: c.parent || 0 }));
+        const allPostsData = category.parent === 0 ? await getPostsByCategoryWithChildren(category.id, 50) : await getPostsByCategory(category.id, 50);
+        setCategoryCache(allCategories);
+        const allPosts = allPostsData.map(p => extractFeaturedMedia(p));
+        const mostViewed = await getTopStories();
+        const result: CategoryProps = { category, subCategories, featuredPost: allPosts[0] || null, categoryPosts: allPosts.slice(1, 10), allCategories, totalPostsCount: allPosts.length, allPosts, mostViewed };
+        if (active) setData(result);
+      } catch (err) {
+        console.error(err);
+      }
+    })();
+    return () => { active = false; };
+  }, [slug]);
+
+  if (!data) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
+        <div className="w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
+        <p className="mt-4 text-sm text-gray-500">Memuatkan…</p>
+      </div>
+    );
+  }
+
+  return <CategoryInner {...data} />;
+}
+
+export const getStaticProps = async () => ({ props: {} });
+
+export const getStaticPaths = async () => {
+  const cats = await getCategories();
+  const paths = cats.filter(c => c.slug).map(c => ({ params: { slug: getShortenedCategorySlug(c.slug) } }));
+  return { paths, fallback: false };
 };

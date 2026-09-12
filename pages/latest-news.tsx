@@ -1,4 +1,4 @@
-import { GetServerSideProps } from 'next';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getPosts, getCategories, getPostUrl, setCategoryCache } from '../lib/wordpress';
 import { WPPostWithMedia, WPCategory } from '../types/wordpress';
@@ -11,7 +11,7 @@ interface LatestNewsPageProps {
   categories: WPCategory[];
 }
 
-export default function LatestNewsPage({ posts, categories }: LatestNewsPageProps) {
+function LatestNewsPageInner({ posts, categories }: LatestNewsPageProps) {
   const currentPosts = posts.slice(0, 10);
 
   const getPostCategoryName = (post: WPPostWithMedia): string => {
@@ -91,15 +91,39 @@ export default function LatestNewsPage({ posts, categories }: LatestNewsPageProp
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async () => {
-  const categories = await getCategories();
-  setCategoryCache(categories);
-  const posts = await getPosts(20);
+export default function LatestNewsPage() {
+  const [data, setData] = useState<LatestNewsPageProps | null>(null);
 
-  return {
-    props: {
-      posts,
-      categories,
-    },
-  };
-};
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const categories = await getCategories();
+        setCategoryCache(categories);
+        const posts = await getPosts(20);
+
+        const result: LatestNewsPageProps = {
+          posts,
+          categories,
+        };
+        if (active) setData(result);
+      } catch (error) {
+        console.error(error);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (!data) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
+        <div className="w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
+        <p className="mt-4 text-sm text-gray-500">Memuatkan…</p>
+      </div>
+    );
+  }
+
+  return <LatestNewsPageInner {...data} />;
+}

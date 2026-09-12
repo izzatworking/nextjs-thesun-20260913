@@ -7,11 +7,12 @@ import Link from 'next/link';
 interface LocalWorldSectionProps {
   malaysiaPosts: WPPostWithMedia[];
   worldPosts: WPPostWithMedia[];
+  asiaPosts: WPPostWithMedia[];
   categories: WPCategory[];
 }
 
-export default function LocalWorldSection({ malaysiaPosts, worldPosts, categories }: LocalWorldSectionProps) {
-  if (malaysiaPosts.length === 0 && worldPosts.length === 0) return null;
+export default function LocalWorldSection({ malaysiaPosts, worldPosts, asiaPosts, categories }: LocalWorldSectionProps) {
+  if (malaysiaPosts.length === 0 && worldPosts.length === 0 && asiaPosts.length === 0) return null;
 
   const malaysiaCategory = categories.find((cat: WPCategory) =>
     cat.slug.toLowerCase().includes('malaysia') ||
@@ -20,6 +21,10 @@ export default function LocalWorldSection({ malaysiaPosts, worldPosts, categorie
   const worldCategory = categories.find((cat: WPCategory) =>
     cat.slug.toLowerCase().includes('world') ||
     cat.name.toLowerCase().includes('world')
+  );
+  const asiaCategory = categories.find((cat: WPCategory) =>
+    cat.slug.toLowerCase().includes('asia') ||
+    cat.name.toLowerCase().includes('asia')
   );
 
   const columns = [
@@ -35,18 +40,24 @@ export default function LocalWorldSection({ malaysiaPosts, worldPosts, categorie
       posts: worldPosts,
       accent: 'before:bg-[#2563eb]',
     },
+    {
+      name: asiaCategory?.name || 'Asia',
+      slug: asiaCategory?.slug || 'asia',
+      posts: asiaPosts,
+      accent: 'before:bg-[#059669]',
+    },
   ];
 
   return (
     <div className="mb-20">
       <div className="flex items-center gap-4 mb-8">
         <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-[0.2em]">
-          Local &amp; World
+          Local, World &amp; Asia
         </h2>
         <div className="flex-1 h-px bg-gray-200" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
         {columns.map((col) => {
           const featured = col.posts[0];
           const list = col.posts.slice(1, 4);

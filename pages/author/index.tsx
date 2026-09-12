@@ -1,5 +1,4 @@
 // pages/author/index.tsx - Author Listing Page
-import { GetServerSideProps } from 'next';
 import Layout from '../../components/layout/Layout';
 import Breadcrumb from '../../components/common/Breadcrumb';
 import { WPAuthor, WPCategory } from '../../types/wordpress';
@@ -17,7 +16,7 @@ interface Props {
   categories: WPCategory[];
 }
 
-export default function AuthorListingPage({ authors: initialAuthors, categories }: Props) {
+function AuthorListingPageInner({ authors: initialAuthors, categories }: Props) {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'posts'>('name');
   const authors = initialAuthors;
@@ -324,86 +323,107 @@ export default function AuthorListingPage({ authors: initialAuthors, categories 
   );
 }
 
-export const getServerSideProps: GetServerSideProps<Props> = async () => {
-  try {
-    console.log('🔄 Fetching authors from posts data...');
-    
-    const [allAuthors, categories] = await Promise.all([
-      getAllAuthors(),
-      getCategories()
-    ]);
+export default function AuthorListingPage() {
+  const [data, setData] = useState<Props | null>(null);
 
-    console.log(`📊 Authors extracted from posts: ${allAuthors.length}`);
-    
-    // Since getAllAuthors now extracts authors from posts with post counts,
-    // we need to get the actual post count for each author
-    const authorsWithStats: AuthorWithStats[] = [];
-    
-    // Process authors in batches to avoid overwhelming the API
-    const batchSize = 5;
-    for (let i = 0; i < allAuthors.length; i += batchSize) {
-      const batch = allAuthors.slice(i, i + batchSize);
-      
-      const batchPromises = batch.map(async (author) => {
-        try {
-          // Get post count with timeout
-          const postCount = await Promise.race([
-            getAuthorPostCount(author.term_id, author.slug),
-            new Promise<number>((resolve) => setTimeout(() => resolve(1), 2000)) // Default to 1 since they came from posts
-          ]);
+  useEffect(() => {
+    let active = true;
+
+    (async () => {
+      try {
+        console.log('🔄 Fetching authors from posts data...');
+        
+        const [allAuthors, categories] = await Promise.all([
+          getAllAuthors(),
+          getCategories()
+        ]);
+
+        console.log(`📊 Authors extracted from posts: ${allAuthors.length}`);
+        
+        // Since getAllAuthors now extracts authors from posts with post counts,
+        // we need to get the actual post count for each author
+        const authorsWithStats: AuthorWithStats[] = [];
+        
+        // Process authors in batches to avoid overwhelming the API
+        const batchSize = 5;
+        for (let i = 0; i < allAuthors.length; i += batchSize) {
+          const batch = allAuthors.slice(i, i + batchSize);
           
-          return {
-            ...author,
-            postCount: postCount || 1 // Minimum 1 since they were found in posts
-          };
-        } catch (error) {
-          console.error(`❌ Error getting post count for ${author.display_name}:`, error);
-          return {
-            ...author,
-            postCount: 1 // Default to 1 on error
-          };
+          const batchPromises = batch.map(async (author) => {
+            try {
+              // Get post count with timeout
+              const postCount = await Promise.race([
+                getAuthorPostCount(author.term_id, author.slug),
+                new Promise<number>((resolve) => setTimeout(() => resolve(1), 2000)) // Default to 1 since they came from posts
+              ]);
+              
+              return {
+                ...author,
+                postCount: postCount || 1 // Minimum 1 since they were found in posts
+              };
+            } catch (error) {
+              console.error(`❌ Error getting post count for ${author.display_name}:`, error);
+              return {
+                ...author,
+                postCount: 1 // Default to 1 on error
+              };
+            }
+          });
+          
+          const batchResults = await Promise.all(batchPromises);
+          authorsWithStats.push(...batchResults);
+          
+          // Small delay between batches
+          if (i + batchSize < allAuthors.length) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
         }
-      });
-      
-      const batchResults = await Promise.all(batchPromises);
-      authorsWithStats.push(...batchResults);
-      
-      // Small delay between batches
-      if (i + batchSize < allAuthors.length) {
-        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Filter out authors with 0 posts and sort by name
+        const filteredAuthors = authorsWithStats
+          .filter(author => author.postCount > 0)
+          .sort((a, b) => a.display_name.localeCompare(b.display_name));
+
+        console.log(`📊 Final authors with confirmed posts: ${filteredAuthors.length}`);
+        
+        // Log some sample authors for debugging
+        if (filteredAuthors.length > 0) {
+          console.log('📝 Sample authors found:');
+          filteredAuthors.slice(0, 5).forEach(author => {
+            console.log(`   • ${author.display_name}: ${author.postCount} posts (slug: ${author.slug})`);
+          });
+        }
+        
+        if (active) {
+          setData({
+            authors: filteredAuthors,
+            categories
+          });
+        }
+      } catch (error) {
+        console.error('❌ Error in getStaticProps for author listing:', error);
+        
+        // Return empty array on error
+        if (active) {
+          setData({
+            authors: [],
+            categories: []
+          });
+        }
       }
-    }
+    })();
 
-    // Filter out authors with 0 posts and sort by name
-    const filteredAuthors = authorsWithStats
-      .filter(author => author.postCount > 0)
-      .sort((a, b) => a.display_name.localeCompare(b.display_name));
+    return () => { active = false; };
+  }, []);
 
-    console.log(`📊 Final authors with confirmed posts: ${filteredAuthors.length}`);
-    
-    // Log some sample authors for debugging
-    if (filteredAuthors.length > 0) {
-      console.log('📝 Sample authors found:');
-      filteredAuthors.slice(0, 5).forEach(author => {
-        console.log(`   • ${author.display_name}: ${author.postCount} posts (slug: ${author.slug})`);
-      });
-    }
-    
-    return {
-      props: {
-        authors: filteredAuthors,
-        categories
-      },
-    };
-  } catch (error) {
-    console.error('❌ Error in getStaticProps for author listing:', error);
-    
-    // Return empty array on error
-    return {
-      props: {
-        authors: [],
-        categories: []
-      },
-    };
+  if (!data) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
+        <div className="w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
+        <p className="mt-4 text-sm text-gray-500">Memuatkan…</p>
+      </div>
+    );
   }
-};
+
+  return <AuthorListingPageInner authors={data.authors} categories={data.categories} />;
+}

@@ -48,4 +48,4 @@ next-env.d.ts
 # Uploaded PDFs
 public/uploads/ipaper/*.pdf
 !public/uploads/ipaper/sample.pdf
-public/uploads/ipaper/metadata.json
+public/uploads/ipaper/metadata.jsondeploy.zip

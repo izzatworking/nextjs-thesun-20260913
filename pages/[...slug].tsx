@@ -1,23 +1,14 @@
 // pages/[...slug].tsx - UPDATED WITH PARENT/CHILD CATEGORY URL STRUCTURE
 // Supports: /{parent-category}/{child-category}/{post-slug}
 // Also supports: /{category}/{post-slug} for backward compatibility
-import { GetServerSideProps } from 'next';
 import {
   getPosts,
   getPost,
-  getPostsByCategory,
   getCategories,
-  getTags,
   getTagsByIds,
-  getAuthorBySlug,
-  getCategoryById,
-  getCategoryHierarchy,
   generatePostUrl,
-  getOriginalCategorySlug,
-  getShortenedCategorySlug,
   setCategoryCache
 } from '@/lib/wordpress';
-import { cleanSlug, cleanCategorySlug } from '@/utils/slugCleaner';
 import he from 'he';
 import {
   WPPost,
@@ -32,6 +23,7 @@ import NetworkImage from '@/components/common/NetworkImage';
 import { TimeAgo } from '@/components/common/TimeAgo';
 import { AdWidget } from '@/components/ads/AdWidget';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import TopStories from '@/components/layout/Header/TopStories';
 
@@ -547,7 +539,7 @@ const PostTags = ({ tags, allTags }: { tags: number[], allTags: WPTag[] }) => {
   );
 };
 
-export default function Post({
+function Post({
   post,
   latestPosts,
   categories,
@@ -845,140 +837,134 @@ export default function Post({
    );
 }
 
-export const getServerSideProps: GetServerSideProps = async ({ params }) => {
-  try {
-    // Get params from URL - now it's an array of segments
-    const slugArray = params?.slug as string[];
-    
-    if (!slugArray || slugArray.length < 2) {
-      console.log('❌ Invalid URL format - need at least category and slug');
-      return { notFound: true };
-    }
-    
-    // Last segment is the post slug
-    const urlSlug = slugArray[slugArray.length - 1];
-    
-    // Previous segments are category path
-    const urlCategoryPath = slugArray.slice(0, -1);
-    
-    console.log('🔍 getStaticProps - URL params:', { 
-      categoryPath: urlCategoryPath.join('/'), 
-      slug: urlSlug,
-      fullPath: slugArray.join('/')
-    });
-    
-    // Clean the URL slug for better matching
-    const cleanUrlSlug = urlSlug
-      .toLowerCase()
-      .replace(/[^\w\-]/g, '')
-      .trim();
-    
-    console.log('🔧 Cleaned URL slug:', cleanUrlSlug);
-    
-    // Get the post - try with cleaned slug first
-    let post = await getPost(cleanUrlSlug);
-    
-    // If not found, try with original slug
-    if (!post) {
-      console.log('🔄 Trying with original slug...');
-      post = await getPost(urlSlug);
-    }
-    
-    // If still not found, try to find post by searching
-    if (!post) {
-      console.log('🔍 Searching for post...');
-      const allPosts = await getPosts(100);
-      const foundPost = allPosts.find(p => {
-        const postSlug = p.slug.toLowerCase();
-        const urlSlugLower = urlSlug.toLowerCase();
-        
-        // Check exact match or partial match
-        return postSlug === urlSlugLower || 
-               postSlug === cleanUrlSlug ||
-               postSlug.includes(urlSlugLower.replace(/-/g, '')) ||
-               p.title.rendered.toLowerCase().includes(urlSlugLower.replace(/-/g, ' '));
-      });
-      
-      if (foundPost) {
-        post = foundPost;
-        console.log(`✅ Found post via search: ${post.title.rendered}`);
-      }
-    }
-    
-    if (!post) {
-      console.log(`❌ Post not found: ${urlSlug}`);
-      return { notFound: true };
-    }
-    
-    console.log(`✅ Found post: ${post.title.rendered}`);
-    console.log(`📝 Post slug: ${post.slug}`);
-    console.log(`🔗 URL slug: ${urlSlug}`);
-    
-    // Get other data
-    const [categories, allPosts] = await Promise.all([
-      getCategories(),
-      getPosts(50),
-    ]);
+export default function ArticleRoute() {
+  const router = useRouter();
+  const [data, setData] = useState<PostProps | null>(null);
+  const [notFound, setNotFound] = useState(false);
 
-    setCategoryCache(categories);
-    
-    // Fetch tags specific to this post
-    const postTagIds = post.tags || [];
-    const postTags = postTagIds.length > 0 ? await getTagsByIds(postTagIds) : [];
-    
-    // Get post's category hierarchy
-    const firstCategoryId = post.categories?.[0];
-    let currentCategory = categories[0]; // Default
-    
-    if (firstCategoryId) {
-      const foundCategory = categories.find(cat => cat.id === firstCategoryId);
-      if (foundCategory) {
-        currentCategory = foundCategory;
-        console.log(`📂 Post category: ${foundCategory.name} (${foundCategory.slug})`);
-        
-        // Get category hierarchy for this post
-        const categoryHierarchy = await getCategoryHierarchy(firstCategoryId);
-        const expectedUrlPath = categoryHierarchy.map(cat => 
-          getShortenedCategorySlug(cat.slug)
-        ).join('/');
-        
-        const urlPath = urlCategoryPath.join('/');
-        
-        console.log(`📊 Category check: URL="${urlPath}", Expected="${expectedUrlPath}"`);
-        
-        if (urlPath !== expectedUrlPath) {
-          console.log(`⚠️ URL category path doesn't match expected`);
-          
-          // For now, we'll allow the mismatch for backward compatibility
-          // In production, you might want to redirect to the correct URL
-          console.log(`ℹ️ Allowing URL mismatch for backward compatibility`);
+  useEffect(() => {
+    if (!router.isReady) return;
+
+    const asPath = router.asPath.split('?')[0].replace(/\/+$/, '');
+    const slugArray = asPath.split('/').filter(Boolean);
+
+    if (!slugArray || slugArray.length < 2) {
+      setNotFound(true);
+      return;
+    }
+
+    const urlSlug = slugArray[slugArray.length - 1];
+    const cleanUrlSlug = urlSlug.toLowerCase().replace(/[^\w\-]/g, '').trim();
+    let active = true;
+    let attempt = 0;
+
+    const load = async () => {
+      try {
+        let post = await getPost(cleanUrlSlug);
+        if (!post) post = await getPost(urlSlug);
+
+        if (!post) {
+          const allPosts = await getPosts(100);
+          const foundPost = allPosts.find(p => {
+            const postSlug = p.slug.toLowerCase();
+            const urlSlugLower = urlSlug.toLowerCase();
+            return postSlug === urlSlugLower ||
+                   postSlug === cleanUrlSlug ||
+                   postSlug.includes(urlSlugLower.replace(/-/g, '')) ||
+                   p.title.rendered.toLowerCase().includes(urlSlugLower.replace(/-/g, ' '));
+          });
+          if (foundPost) post = foundPost;
+        }
+
+        if (!post) {
+          if (active) setNotFound(true);
+          return;
+        }
+
+        const [categories, allPosts] = await Promise.all([
+          getCategories(),
+          getPosts(50),
+        ]);
+
+        setCategoryCache(categories);
+
+        const postTagIds = post.tags || [];
+        const postTags = postTagIds.length > 0 ? await getTagsByIds(postTagIds) : [];
+
+        const firstCategoryId = post.categories?.[0];
+        let currentCategory = categories[0];
+
+        if (firstCategoryId) {
+          const foundCategory = categories.find(cat => cat.id === firstCategoryId);
+          if (foundCategory) {
+            currentCategory = foundCategory;
+          }
+        }
+
+        const latestPosts = allPosts
+          .filter((p: WPPostWithMedia) => p.id !== post.id)
+          .slice(0, 5);
+
+        const initialMorePosts = allPosts
+          .filter((p: WPPostWithMedia) => p.id !== post.id)
+          .slice(0, 24);
+
+        if (active) {
+          setData({
+            post,
+            latestPosts,
+            categories,
+            allTags: postTags,
+            initialMorePosts,
+            currentCategory,
+          });
+        }
+      } catch (error) {
+        console.error('💥 Error fetching post:', error);
+        if (active && attempt < 3) {
+          attempt += 1;
+          setTimeout(load, 1200 * attempt);
+        } else if (active) {
+          setNotFound(true);
         }
       }
-    }
-    
-    // Get latest posts (excluding current)
-    const latestPosts = allPosts
-      .filter((p: WPPostWithMedia) => p.id !== post.id)
-      .slice(0, 5);
-    
-    // Get more posts for "More Stories"
-    const initialMorePosts = allPosts
-      .filter((p: WPPostWithMedia) => p.id !== post.id)
-      .slice(0, 24);
-    
-    return {
-      props: {
-        post,
-        latestPosts,
-        categories,
-        allTags: postTags,
-        initialMorePosts,
-        currentCategory
-      },
     };
-    
-  } catch (error) {
-    console.error('💥 Error fetching post:', error);
-    return { notFound: true };
+
+    load();
+    return () => { active = false; };
+  }, [router.isReady, router.asPath]);
+
+  if (notFound) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Article Not Found</h1>
+        <p className="text-gray-500 text-sm mb-6 item-center text-center">Artikel yang cari telah dipindahkan atau tidak wujud lagi.</p>
+        <Link href="/" className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium text-sm rounded-lg">
+          Kembali ke Laman Utama
+        </Link>
+      </div>
+    );
   }
+
+  if (!data) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
+        <div className="w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
+        <p className="mt-4 text-sm text-gray-500">Memuatkan artikel…</p>
+      </div>
+    );
+  }
+
+  return <Post {...data} />;
+}
+
+export const getStaticProps = async () => {
+  return { props: {} };
+};
+
+export const getStaticPaths = async () => {
+  return {
+    paths: [{ params: { slug: ['article-shell'] } }],
+    fallback: false,
+  };
 };

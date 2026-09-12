@@ -3,7 +3,6 @@ import { WPPostWithMedia, WPCategory } from '../../types/wordpress';
 import { cleanTextContent } from './utils/contentCleaner';
 import { formatRelativeTime } from './utils/timeFormatter';
 import { getPostUrl } from '../../lib/wordpress';
-import MostViewsSidebar from './MostViewsSidebar';
 
 interface LatestNewsProps {
   posts: WPPostWithMedia[];
@@ -68,10 +67,6 @@ export default function LatestNews({ posts, categories }: LatestNewsProps) {
           </div>
         </div>
       )}
-
-      <div className="mt-8 pt-6 border-t border-gray-100">
-        <MostViewsSidebar />
-      </div>
     </div>
   );
 }

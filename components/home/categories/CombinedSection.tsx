@@ -3,11 +3,11 @@ import { WPPostWithMedia, WPCategory } from '../../../types/wordpress';
 import { cleanTextContent } from '../utils/contentCleaner';
 import { formatRelativeTime } from '../utils/timeFormatter';
 import Link from 'next/link';
-import AdvertisementBanner from '../AdvertisementBanner';
 
 interface CombinedSectionProps {
   motoringPosts: WPPostWithMedia[];
   educationPosts: WPPostWithMedia[];
+  peopleIssuesPosts: WPPostWithMedia[];
   categories: WPCategory[];
   isLast?: boolean;
 }
@@ -15,6 +15,7 @@ interface CombinedSectionProps {
 export default function CombinedSection({
   motoringPosts,
   educationPosts,
+  peopleIssuesPosts,
   categories,
   isLast = false
 }: CombinedSectionProps) {
@@ -25,6 +26,11 @@ export default function CombinedSection({
   const educationCategory = categories.find((cat: WPCategory) =>
     cat.slug.toLowerCase().includes('education') ||
     cat.name.toLowerCase().includes('education')
+  );
+  const peopleIssuesCategory = categories.find((cat: WPCategory) =>
+    cat.slug.toLowerCase().includes('people') ||
+    cat.name.toLowerCase().includes('people') ||
+    cat.slug.toLowerCase().includes('issues')
   );
 
   const columns = [
@@ -38,7 +44,20 @@ export default function CombinedSection({
       slug: educationCategory?.slug || 'education',
       posts: educationPosts,
     },
+    {
+      name: peopleIssuesCategory?.name || 'People & Issues',
+      slug: peopleIssuesCategory?.slug || 'people-issues',
+      posts: peopleIssuesPosts,
+    },
   ];
+
+  const allCategories = categories
+    .filter((cat) => cat.parent === 0 && cat.name && cat.slug)
+    .slice(0, 30)
+    .map((cat) => ({
+      name: cat.name,
+      slug: cat.slug,
+    }));
 
   return (
     <div className="mb-16">
@@ -49,8 +68,9 @@ export default function CombinedSection({
         <div className="flex-1 h-px bg-gray-200" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-10 lg:gap-14">
-        <div className="lg:col-span-3 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-10">
+        {/* 60% - Motoring / Education / People & Issues */}
+        <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-6 min-w-0 sm:gap-8">
           {columns.map((col) => {
             const featured = col.posts[0];
             const list = col.posts.slice(1, 4);
@@ -59,7 +79,7 @@ export default function CombinedSection({
                 <div className="flex items-center gap-3 mb-5">
                   <div className="w-0.5 h-5 bg-gray-900" />
                   <Link href={`/category/${col.slug}`}>
-                    <h3 className="text-4xl font-black text-gray-900 tracking-tight hover:text-red-600 transition-colors">
+                    <h3 className="text-2xl font-black text-gray-900 tracking-tight hover:text-red-600 transition-colors xl:text-3xl">
                       {col.name}
                     </h3>
                   </Link>
@@ -86,7 +106,7 @@ export default function CombinedSection({
                       <span className="text-[11px] text-gray-400 uppercase tracking-wider">
                         {formatRelativeTime(featured.date)}
                       </span>
-                      <h4 className="text-lg font-bold text-gray-900 group-hover:text-red-600 transition-colors leading-snug">
+                      <h4 className="text-base font-bold text-gray-900 group-hover:text-red-600 transition-colors leading-snug">
                         {cleanTextContent(featured.title.rendered)}
                       </h4>
                       {featured.excerpt?.rendered && (
@@ -136,20 +156,61 @@ export default function CombinedSection({
           })}
         </div>
 
-        {/* C & D */}
-        <div className="hidden lg:flex flex-col gap-4">
-          <div className="sticky top-24 flex flex-col gap-4">
-            <AdvertisementBanner
-              desktopWidth={350} desktopHeight={300}
-              mobileWidth={300} mobileHeight={250}
-              color="#65a30d" rate="RM 7,000 / week"
-            />
-            <AdvertisementBanner
-              desktopWidth={300} desktopHeight={250}
-              mobileWidth={300} mobileHeight={250}
-              color="#4f46e5" rate="RM 7,000 / week"
-            />
-          </div>
+        {/* 40% - Browse Categories */}
+        <div className="lg:col-span-2 min-w-0 flex">
+          <aside className="relative w-full h-full overflow-hidden rounded-[28px] bg-gradient-to-br from-[#CB3534] via-[#a91f2a] to-[#8E0320] shadow-[0_28px_70px_-35px_rgba(142,3,32,0.85)] flex flex-col">
+            {/* Top green → red hairline */}
+            <div className="pointer-events-none absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#005321] via-[#CB3534] to-transparent" />
+
+            {/* Decorative arcs */}
+            <svg className="pointer-events-none absolute -top-10 -right-10 h-48 w-48 text-[#8E0320]/60" viewBox="0 0 100 100" fill="none">
+              <circle cx="90" cy="10" r="60" stroke="currentColor" strokeWidth="10" strokeLinecap="round" strokeDasharray="160 240" />
+            </svg>
+            <svg className="pointer-events-none absolute -bottom-14 -left-12 h-52 w-52 text-white/5" viewBox="0 0 100 100" fill="none">
+              <circle cx="10" cy="90" r="60" stroke="currentColor" strokeWidth="12" strokeLinecap="round" strokeDasharray="110 270" />
+            </svg>
+
+            {/* Gradient blobs */}
+            <div className="pointer-events-none absolute -top-16 left-1/3 h-56 w-56 rounded-full bg-[#8E0320]/50 blur-2xl" />
+            <div className="pointer-events-none absolute -bottom-20 -right-16 h-64 w-64 rounded-full bg-[#005321]/15 blur-3xl" />
+
+            <div className="relative z-10 flex flex-1 flex-col p-7 sm:p-9">
+              {/* Overline */}
+              <div className="flex items-center gap-3 mb-6">
+                <span className="h-0.5 w-8 bg-[#005321]" />
+                <span className="h-0.5 w-8 bg-[#005321]/50" />
+                <p className="text-[11px] font-semibold text-white/70 uppercase tracking-[0.25em]">
+                  Explore More
+                </p>
+              </div>
+
+              {/* Heading */}
+              <h3 className="text-4xl font-black leading-none text-white xl:text-5xl">
+                Browse
+                <span className="block text-white/90">Categories</span>
+              </h3>
+
+              <p className="mt-4 mb-8 text-sm leading-relaxed text-white/70">
+                Discover in-depth coverage across every section of The Sun.
+              </p>
+
+              {/* All categories — 2 per row */}
+              <ul className="grid grid-cols-2 gap-3">
+                {allCategories.map((cat) => (
+                  <li key={cat.slug}>
+                    <Link
+                      href={`/category/${cat.slug}`}
+                      className="group/cat flex h-full items-center justify-center rounded-xl border border-white/20 bg-white/[0.07] px-2 py-3.5 text-center transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#EEB3B5] hover:border-transparent hover:shadow-lg hover:shadow-black/10"
+                    >
+                      <span className="truncate text-xs font-semibold text-white transition-colors duration-300 group-hover/cat:text-[#8E0320]">
+                        {cat.name}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </aside>
         </div>
       </div>
 

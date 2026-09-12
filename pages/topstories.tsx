@@ -1,4 +1,4 @@
-import { GetServerSideProps } from 'next';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Layout from '@/components/layout/Layout';
 import NetworkImage from '@/components/common/NetworkImage';
@@ -40,7 +40,7 @@ function getPostPath(article: TopStory): string {
   return `/posts/${article.slug}`;
 }
 
-export default function TopStoriesPage({ articles, categories }: TopStoriesPageProps) {
+function TopStoriesPageInner({ articles, categories }: TopStoriesPageProps) {
   if (articles.length === 0) {
     return (
       <Layout categories={categories} title="Top Stories | The Sun Malaysia" description="">
@@ -163,26 +163,40 @@ export default function TopStoriesPage({ articles, categories }: TopStoriesPageP
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async () => {
-  try {
-    const [articles, categories] = await Promise.all([
-      getTopStories(),
-      getCategories(),
-    ]);
+export default function TopStoriesPage() {
+  const [data, setData] = useState<TopStoriesPageProps | null>(null);
 
-    return {
-      props: {
-        articles: (articles || []).slice(0, 15),
-        categories: categories || [],
-      },
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const [articles, categories] = await Promise.all([
+          getTopStories(),
+          getCategories(),
+        ]);
+
+        const result: TopStoriesPageProps = {
+          articles: (articles || []).slice(0, 15),
+          categories: categories || [],
+        };
+        if (active) setData(result);
+      } catch (error) {
+        console.error('Error fetching top stories:', error);
+      }
+    })();
+    return () => {
+      active = false;
     };
-  } catch (error) {
-    console.error('Error fetching top stories:', error);
-    return {
-      props: {
-        articles: [],
-        categories: [],
-      },
-    };
+  }, []);
+
+  if (!data) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
+        <div className="w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
+        <p className="mt-4 text-sm text-gray-500">Memuatkan…</p>
+      </div>
+    );
   }
-};
+
+  return <TopStoriesPageInner {...data} />;
+}

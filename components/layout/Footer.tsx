@@ -1,85 +1,259 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
+import {
+  FaInstagram,
+  FaFacebookF,
+  FaXTwitter,
+  FaTiktok,
+  FaWhatsapp,
+  FaTelegram,
+  FaYoutube,
+} from 'react-icons/fa6';
+
+const HOME_URL = '/';
+
+const socialLinks = [
+  { name: 'Instagram', url: 'https://www.instagram.com/thesundaily/', Icon: FaInstagram },
+  { name: 'Facebook', url: 'https://www.facebook.com/thesundaily', Icon: FaFacebookF },
+  { name: 'X', url: 'https://x.com/thesundaily', Icon: FaXTwitter },
+  { name: 'TikTok', url: 'https://www.tiktok.com/@thesundaily', Icon: FaTiktok },
+  { name: 'WhatsApp', url: 'https://wa.me/thesunmalaysia', Icon: FaWhatsapp },
+  { name: 'Telegram', url: 'https://t.me/thesundaily', Icon: FaTelegram },
+  { name: 'YouTube', url: 'https://www.youtube.com/theSunMedia', Icon: FaYoutube },
+];
+
+interface FooterColumn {
+  title: string;
+  links: { label: string; href: string; external?: boolean }[];
+}
+
+const columns: FooterColumn[] = [
+  {
+    title: 'News',
+    links: [
+      { label: 'News', href: '/category/news' },
+      { label: 'Malaysia', href: '/category/malaysia-news' },
+      { label: 'Asia', href: '/category/asia' },
+      { label: 'World', href: '/category/world-news' },
+      { label: 'Going Viral', href: '/category/going-viral' },
+      { label: 'Business', href: '/category/business' },
+      { label: 'Opinion', href: '/category/opinion' },
+      { label: 'Berita', href: '/category/berita' },
+    ],
+  },
+  {
+    title: 'More',
+    links: [
+      { label: 'Lifestyle', href: '/category/lifestyle' },
+      { label: 'Spotlight', href: '/category/spotlight' },
+      { label: 'Sports', href: '/category/sports' },
+      { label: 'Education', href: '/category/education' },
+      { label: 'Property', href: '/category/property' },
+      { label: 'Motoring', href: '/category/motoring' },
+      { label: 'Videos', href: '/videos' },
+      { label: 'Latest News', href: '/latest-news' },
+    ],
+  },
+  {
+    title: 'About Us',
+    links: [
+      { label: 'Company', href: '/about-us' },
+      { label: 'Contact', href: '/contact-us' },
+      { label: 'Our Team', href: '/our-team' },
+      { label: 'Privacy Policy', href: '/privacy-policy' },
+      { label: 'Disclaimer', href: '/disclaimer' },
+      { label: 'Advertising', href: '/advertise' },
+    ],
+  },
+  {
+    title: 'Subscriptions',
+    links: [
+      { label: 'Newspaper', href: '/subscriptions' },
+      { label: 'Subscribe Now', href: '/subscribe-now' },
+      { label: 'iPaper', href: '/ipaper' },
+      { label: 'iPaper Digital', href: 'https://thesun-ipaper.cld.bz/', external: true },
+    ],
+  },
+  {
+    title: 'Advertise',
+    links: [
+      { label: 'Advertising', href: '/advertise' },
+      { label: 'Classifieds', href: 'https://sunmedia.com.my/', external: true },
+    ],
+  },
+];
+
+function FooterLink({ label, href, external }: { label: string; href: string; external?: boolean }) {
+  const className =
+    'inline-flex items-center gap-1 text-[13px] text-[#525252] py-1 transition-colors duration-200 hover:text-[#E30613] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E30613]/40 focus-visible:rounded';
+  if (external) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={className} aria-label={`${label} (opens in a new tab)`}>
+        {label}
+      </a>
+    );
+  }
+  return (
+    <Link href={href} className={className}>
+      {label}
+    </Link>
+  );
+}
 
 export default function Footer() {
-  const socialLinks = [
-    { name: 'Facebook', url: 'https://www.facebook.com/thesundaily', icon: (
-      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-    )},
-    { name: 'X', url: 'https://x.com/thesundaily', icon: (
-      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-    )},
-    { name: 'Instagram', url: 'https://www.instagram.com/thesundaily/', icon: (
-      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM5.838 12a6.162 6.162 0 1112.324 0 6.162 6.162 0 01-12.324 0zM12 16a4 4 0 110-8 4 4 0 010 8zm4.965-10.405a1.44 1.44 0 112.881.001 1.44 1.44 0 01-2.881-.001z"/></svg>
-    )},
-    { name: 'TikTok', url: 'https://www.tiktok.com/@thesundaily', icon: (
-      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.33 6.33 0 0 0-1-.05A6.34 6.34 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/></svg>
-    )},
-    { name: 'YouTube', url: 'https://www.youtube.com/theSunMedia', icon: (
-      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-    )},
-  ];
+  const [openCol, setOpenCol] = useState<number | null>(null);
+
+  const toggleCol = (i: number) => setOpenCol(openCol === i ? null : i);
 
   return (
-    <footer className="border-t border-gray-200" style={{background: '#e5e7eb'}}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-10">
-          {/* Logo + About */}
-          <div className="md:col-span-12 lg:col-span-4">
-            <img src="/images/thesun.png" alt="The Sun Malaysia" className="h-14 sm:h-16 md:h-20 w-auto mb-3 md:mb-4" />
-            <p className="text-sm text-gray-500 leading-relaxed max-w-xs">
-              Malaysia&apos;s leading news source delivering accurate, timely, and comprehensive coverage of news, sports, entertainment, and current events.
+    <footer className="border-t border-[#E5E7EB] bg-[#F3F4F6] text-[#1F2937]">
+      {/* Top accent rule */}
+      <div className="h-[3px] w-full bg-gradient-to-r from-[#E30613] via-[#E30613]/60 to-[#005321]" />
+
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* ============ Main footer ============ */}
+        <div className="grid grid-cols-1 gap-x-10 gap-y-10 py-12 md:py-16 lg:grid-cols-12">
+          {/* Brand / App download */}
+          <div className="lg:col-span-4 xl:col-span-4">
+            <Link href={HOME_URL} className="inline-block" aria-label="The Sun Malaysia — Home">
+              <img
+                src="/images/thesun.png"
+                alt="The Sun Malaysia"
+                className="h-12 md:h-14 w-auto"
+              />
+            </Link>
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-[#525252]">
+              Independent Malaysian Journalism.
             </p>
-          </div>
 
-          {/* Links */}
-          <div className="md:col-span-7 lg:col-span-5 grid grid-cols-2 sm:grid-cols-3 gap-5 md:gap-6">
-            <div>
-              <h4 className="text-[11px] md:text-xs font-semibold text-gray-700 uppercase tracking-wider mb-3">Company</h4>
-              <ul className="space-y-1.5">
-                <li><Link href="/about-us" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">About Us</Link></li>
-                <li><Link href="/contact-us" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">Contact Us</Link></li>
-                <li><Link href="/our-team" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">Our Team</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-[11px] md:text-xs font-semibold text-gray-700 uppercase tracking-wider mb-3">Legal</h4>
-              <ul className="space-y-1.5">
-                <li><Link href="/privacy-policy" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">Privacy Policy</Link></li>
-                <li><Link href="/disclaimer" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">Disclaimer</Link></li>
-                <li><Link href="/advertise" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">Advertise</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-[11px] md:text-xs font-semibold text-gray-700 uppercase tracking-wider mb-3">More</h4>
-              <ul className="space-y-1.5">
-                <li><Link href="/subscribe-now" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">Subscribe</Link></li>
-                <li><Link href="/ipaper" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">iPaper</Link></li>
-              </ul>
+            <div className="mt-7 border-t border-[#E5E7EB] pt-6">
+              <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#1F2937]">
+                Download our app now
+              </h3>
+              <p className="mt-2 max-w-xs text-sm leading-relaxed text-[#525252]">
+                Your trusted source for news that matters.
+              </p>
             </div>
           </div>
 
-          {/* Social */}
-          <div className="md:col-span-5 lg:col-span-3">
-            <h4 className="text-[11px] md:text-xs font-semibold text-gray-700 uppercase tracking-wider mb-3">Follow Us</h4>
-            <div className="flex flex-wrap gap-2.5">
-              {socialLinks.map((s) => (
-                <a key={s.name} href={s.url} target="_blank" rel="noopener noreferrer"
-                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gray-200/70 hover:bg-gray-300 flex items-center justify-center text-gray-600 hover:text-gray-800 transition-colors"
-                  title={s.name}
-                >
-                  {s.icon}
-                </a>
+          {/* Navigation columns */}
+          <div className="lg:col-span-8 xl:col-span-8">
+            <div className="hidden md:grid md:grid-cols-3 xl:grid-cols-5 gap-8">
+              {columns.map((col) => (
+                <div key={col.title}>
+                  <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#1F2937] pb-2.5 mb-1 border-b border-[#E5E7EB] relative">
+                    {col.title}
+                  </h3>
+                  <ul className="mt-3 space-y-0.5">
+                    {col.links.map((link) => (
+                      <li key={link.label}>
+                        <FooterLink label={link.label} href={link.href} external={link.external} />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ))}
+            </div>
+
+            {/* Mobile accordion */}
+            <div className="md:hidden divide-y divide-[#E5E7EB] border-y border-[#E5E7EB]">
+              {columns.map((col, i) => {
+                const open = openCol === i;
+                return (
+                  <div key={col.title}>
+                    <button
+                      onClick={() => toggleCol(i)}
+                      className="flex w-full items-center justify-between py-3.5 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E30613]/40"
+                      aria-expanded={open}
+                      aria-controls={`footer-col-${i}`}
+                    >
+                      <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#1F2937]">
+                        {col.title}
+                      </span>
+                      <svg
+                        className={`h-4 w-4 text-[#9CA3AF] transition-transform duration-200 ${open ? 'rotate-180' : 'rotate-0'}`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    {open && (
+                      <div id={`footer-col-${i}`} className="pb-4">
+                        <ul className="space-y-1">
+                          {col.links.map((link) => (
+                            <li key={link.label}>
+                              {link.external ? (
+                                <a
+                                  href={link.href}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={() => setOpenCol(null)}
+                                  className="inline-flex items-center gap-1 text-[13px] text-[#525252] py-1 transition-colors duration-200 hover:text-[#E30613]"
+                                >
+                                  {link.label}
+                                </a>
+                              ) : (
+                                <Link
+                                  href={link.href}
+                                  onClick={() => setOpenCol(null)}
+                                  className="inline-flex items-center gap-1 text-[13px] text-[#525252] py-1 transition-colors duration-200 hover:text-[#E30613]"
+                                >
+                                  {link.label}
+                                </Link>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
 
-        {/* Bottom */}
-        <div className="border-t border-gray-300/50 mt-8 md:mt-10 pt-6 md:pt-7 flex flex-col sm:flex-row justify-between items-center gap-3">
-          <p className="text-xs text-gray-500">&copy; 2025 The Sun Malaysia. All rights reserved.</p>
-          <p className="text-xs text-gray-500">Built with integrity, driven by truth.</p>
+        {/* ============ Follow us / social strip ============ */}
+        <div className="flex flex-col items-start justify-between gap-5 border-t border-[#E5E7EB] py-7 md:flex-row md:items-center">
+          <div>
+            <h3 className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#1F2937]">Follow Us</h3>
+          </div>
+          <div className="flex flex-wrap items-center gap-2.5">
+            {socialLinks.map(({ name, url, Icon }) => (
+              <a
+                key={name}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={name}
+                title={name}
+                className="group flex h-9 w-9 items-center justify-center rounded-md bg-[#E5E7EB] text-[#374151] transition-all duration-200 hover:bg-[#E30613] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E30613]/50"
+              >
+                <Icon className="h-[15px] w-[15px]" />
+              </a>
+            ))}
+          </div>
+        </div>
+
+        {/* ============ Bottom bar ============ */}
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-[#E5E7EB] py-6 md:flex-row">
+          <p className="text-center text-xs text-[#525252] md:text-left">
+            © 1993-2026 All Rights Reserved.
+          </p>
+          <p className="text-center text-xs text-[#525252] md:text-right">
+            <Link
+              href={HOME_URL}
+              className="font-semibold text-[#E30613] hover:text-[#b30310] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E30613]/40 rounded"
+            >
+              The Sun Malaysia
+            </Link>{' '}
+            — A Publication of Sun Media Corporation.
+          </p>
         </div>
       </div>
     </footer>

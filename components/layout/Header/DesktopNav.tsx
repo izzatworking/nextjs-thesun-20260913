@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { CategoryItem } from './types';
 import { useState, useEffect, useRef } from 'react';
+import { splitSports } from './sportsUtils';
 
 interface DesktopNavProps {
   mainNavItems: CategoryItem[];
@@ -21,6 +22,7 @@ export default function DesktopNav({
 }: DesktopNavProps) {
   const [hoverDropdown, setHoverDropdown] = useState<number | null>(null);
   const [dropdownHeights, setDropdownHeights] = useState<Record<number, number>>({});
+  const [openOtherSports, setOpenOtherSports] = useState(false);
   const dropdownRefs = useRef<Record<number, HTMLDivElement>>({});
   const enterTimer = useRef<number | null>(null);
   const leaveTimer = useRef<number | null>(null);
@@ -99,9 +101,9 @@ export default function DesktopNav({
           {(isActive) && item.subItems && (
              <div 
               ref={el => { if (el) dropdownRefs.current[item.id] = el; }}
-              className="absolute top-full left-0 mt-1.5 w-56 bg-white border border-gray-100 rounded-xl shadow-lg z-[9999] overflow-hidden"
+              className={`absolute top-full left-0 mt-1.5 bg-white border border-gray-100 rounded-xl shadow-lg z-[9999] ${item.slug === 'sports' ? 'w-64 overflow-y-auto custom-scrollbar' : 'w-56 overflow-hidden'}`}
               style={{
-                maxHeight: dropdownHeight > 280 ? '280px' : 'auto',
+                maxHeight: item.slug === 'sports' ? '400px' : (dropdownHeight > 280 ? '280px' : 'auto'),
               }}
               onMouseEnter={() => handleMouseEnter(item.id)}
               onMouseLeave={handleMouseLeave}
@@ -118,17 +120,72 @@ export default function DesktopNav({
                   </svg>
                 </Link>
                 <div className="border-t border-gray-50 my-1"></div>
-                {item.subItems.map((subItem: any) => (
-                  <Link
-                    key={subItem.id}
-                    href={subItem.slug.startsWith('/') ? subItem.slug : `/category/${subItem.slug}`}
-                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
-                    onClick={() => setActiveDropdown(null)}
-                  >
-                    <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                    <span>{subItem.name}</span>
-                  </Link>
-                ))}
+                {item.slug === 'sports' ? (
+                  (() => {
+                    const { main, other } = splitSports(item.subItems || []);
+                    return (
+                      <>
+                        {main.map((subItem: any) => (
+                          <Link
+                            key={subItem.id}
+                            href={subItem.slug.startsWith('/') ? subItem.slug : `/category/${subItem.slug}`}
+                            className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                            onClick={() => setActiveDropdown(null)}
+                          >
+                            <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                            <span>{subItem.name}</span>
+                          </Link>
+                        ))}
+                        <div>
+                          <button
+                            onClick={() => setOpenOtherSports(!openOtherSports)}
+                            className="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors"
+                          >
+                            <span className="w-1 h-1 rounded-full bg-red-400"></span>
+                            <span>Other Sports</span>
+                            <svg
+                              className={`ml-auto w-3.5 h-3.5 transition-transform duration-200 ${
+                                openOtherSports ? 'rotate-180' : ''
+                              }`}
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </button>
+                          {openOtherSports && (
+                            <div className="py-0.5">
+                              {other.map((subItem: any) => (
+                                <Link
+                                  key={subItem.id}
+                                  href={subItem.slug.startsWith('/') ? subItem.slug : `/category/${subItem.slug}`}
+                                  className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                                  onClick={() => setActiveDropdown(null)}
+                                >
+                                  <span className="w-1 h-1 rounded-full bg-red-200"></span>
+                                  <span>{subItem.name}</span>
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    );
+                  })()
+                ) : (
+                  item.subItems.map((subItem: any) => (
+                    <Link
+                      key={subItem.id}
+                      href={subItem.slug.startsWith('/') ? subItem.slug : `/category/${subItem.slug}`}
+                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                      onClick={() => setActiveDropdown(null)}
+                    >
+                      <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                      <span>{subItem.name}</span>
+                    </Link>
+                  ))
+                )}
               </div>
             </div>
           )}
