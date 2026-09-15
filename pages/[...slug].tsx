@@ -938,9 +938,9 @@ export default function ArticleRoute() {
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Article Not Found</h1>
-        <p className="text-gray-500 text-sm mb-6 item-center text-center">Artikel yang cari telah dipindahkan atau tidak wujud lagi.</p>
+        <p className="text-gray-500 text-sm mb-6 item-center text-center">The article you&apos;re looking for has been moved or no longer exists.</p>
         <Link href="/" className="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium text-sm rounded-lg">
-          Kembali ke Laman Utama
+          Back to main page
         </Link>
       </div>
     );
@@ -950,7 +950,7 @@ export default function ArticleRoute() {
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
         <div className="w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
-        <p className="mt-4 text-sm text-gray-500">Memuatkan artikel…</p>
+        <p className="mt-4 text-sm text-gray-500">Loading article…</p>
       </div>
     );
   }

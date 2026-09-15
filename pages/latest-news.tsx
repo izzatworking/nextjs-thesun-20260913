@@ -120,7 +120,7 @@ export default function LatestNewsPage() {
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
         <div className="w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
-        <p className="mt-4 text-sm text-gray-500">Memuatkan…</p>
+        <p className="mt-4 text-sm text-gray-500">Loading…</p>
       </div>
     );
   }
