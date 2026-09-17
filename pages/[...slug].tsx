@@ -33,7 +33,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import TopStories from '@/components/layout/Header/TopStories';
-import CategoryPage from '@/components/category/CategoryPage';
+import CategoryPage, { getCategoryContent } from '@/components/category/CategoryPage';
+import type { CategoryProps } from '@/components/category/CategoryPage';
 import { NAV_CATEGORY_MAP } from '@/components/layout/Header/navConfig';
 
 interface PostProps {
@@ -954,7 +955,8 @@ export default function ArticleRoute(ssgProps: Partial<PostProps> = {}) {
 
   const categorySlug = (ssgProps as any)?.categorySlug as string | undefined;
   if (categorySlug) {
-    return <CategoryPage slug={categorySlug} />;
+    const categoryData = (ssgProps as any)?.categoryData as CategoryProps | null | undefined;
+    return <CategoryPage slug={categorySlug} initialData={categoryData} />;
   }
 
   if (notFound) {
@@ -1013,7 +1015,8 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     }
   }
   if (categorySlug) {
-    return { props: { categorySlug } };
+    const categoryData = await getCategoryContent(categorySlug);
+    return { props: { categorySlug, categoryData } };
   }
 
   try {

@@ -345,17 +345,22 @@ function CategoryInner({
   );
 }
 
-export default function CategoryPage({ slug }: { slug: string }) {
-  const [data, setData] = useState<CategoryProps | null>(null);
+export default function CategoryPage({ slug, initialData }: { slug: string; initialData?: CategoryProps | null }) {
+  const [data, setData] = useState<CategoryProps | null>(initialData ?? null);
 
   useEffect(() => {
+    setData(initialData ?? null);
+  }, [slug, initialData]);
+
+  useEffect(() => {
+    if (initialData !== undefined) return;
     let active = true;
     (async () => {
       const result = await getCategoryContent(slug);
       if (active) setData(result);
     })();
     return () => { active = false; };
-  }, [slug]);
+  }, [slug, initialData]);
 
   if (!data) {
     return (
