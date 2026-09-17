@@ -68,7 +68,7 @@ export default function MobileSidebar({ isOpen, onClose, mainNavItems }: MobileS
                   </a>
                 ) : (
                   <>
-                    <Link href={`/category/${item.slug}`} onClick={onClose}
+                    <Link href={`/${item.slug}`} onClick={onClose}
                       className="flex items-center justify-between p-4 rounded-xl bg-slate-800/40 hover:bg-slate-700/50 transition-all duration-200"
                     >
                       <div className="flex items-center gap-3">
@@ -87,13 +87,13 @@ export default function MobileSidebar({ isOpen, onClose, mainNavItems }: MobileS
                     </Link>
                     {item.subItems && item.subItems.length > 0 && (
                       <div className="ml-4 mt-1 space-y-1 border-l-2 border-slate-700/50 pl-3">
-                        <Link href={`/category/${item.slug}`} onClick={onClose}
+                        <Link href={`/${item.slug}`} onClick={onClose}
                           className="block p-3 rounded-lg bg-slate-700/30 hover:bg-blue-500/10 transition-all duration-200"
                         >
                           <span className="text-blue-300 text-sm font-medium">All {item.name}</span>
                         </Link>
                         {item.subItems.map((sub: any) => (
-                          <Link key={sub.id} href={`/category/${sub.slug}`} onClick={onClose}
+                          <Link key={sub.id} href={sub.href || (sub.slug.startsWith('/') ? sub.slug : `/${sub.slug}`)} onClick={onClose}
                             className="block p-3 rounded-lg hover:bg-slate-700/30 transition-all duration-200"
                           >
                             <span className="text-slate-300 text-sm">{sub.name}</span>

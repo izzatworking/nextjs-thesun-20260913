@@ -302,7 +302,7 @@ export default function SpecialSection({
             {/* View All Button */}
             <div className="mt-8 text-center">
               <Link 
-                href={`/category/${section.slug}`}
+                href={`/${section.slug}`}
                 className="inline-flex items-center justify-center w-full py-3.5 rounded-xl font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg group"
                 style={{ 
                   backgroundColor: accentColor,

@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { FiMail, FiBell, FiArrowRight } from 'react-icons/fi';
 import type { CategoryItem } from './types';
 import type { WPCategory } from '../../../types/wordpress';
-import { splitSports } from './sportsUtils';
 import { cleanHtmlContent } from '../../home/utils/contentCleaner';
+import { getShortenedCategorySlug } from '../../../lib/wordpress';
+import SubscribeModal, { SubscribeMode } from '../../common/SubscribeModal';
 
 interface SidebarMenuProps {
   isOpen: boolean;
@@ -14,9 +16,6 @@ interface SidebarMenuProps {
   categories?: WPCategory[];
   wide?: boolean;
 }
-
-const BOTTOM_SECTIONS = ['Most Viewed', 'Videos', 'Our Team'];
-const REMOVED_SECTIONS = ['World Cup 2026'];
 
 const socialLinks = [
   { name: 'Facebook', url: 'https://www.facebook.com/thesundaily', icon: (
@@ -50,13 +49,12 @@ export default function SidebarMenu({
   wide = false,
 }: SidebarMenuProps) {
   const [expanded, setExpanded] = useState<number | null>(null);
-  const [expandedOther, setExpandedOther] = useState<number | null>(null);
+  const [subscribeMode, setSubscribeMode] = useState<SubscribeMode | null>(null);
 
   // Reset accordion when panel closes
   useEffect(() => {
     if (!isOpen) {
       setExpanded(null);
-      setExpandedOther(null);
     }
   }, [isOpen]);
 
@@ -71,30 +69,34 @@ export default function SidebarMenu({
   }
 
   const hasChildren = (item: CategoryItem) =>
-    (childrenBySlug[item.slug] || []).length > 0 || (item.subItems && item.subItems.length > 0);
+    (item.subItems && item.subItems.length > 0) || (childrenBySlug[item.slug] || []).length > 0;
 
   const getChildren = (item: CategoryItem) => {
-    const fromWp = childrenBySlug[item.slug] || [];
-    if (fromWp.length > 0) return fromWp;
-    return (item.subItems || []).map((s: any) => ({ id: s.id, name: s.name, slug: s.slug, parent: 0 } as WPCategory));
+    if (item.subItems && item.subItems.length > 0) {
+      return item.subItems.map((s: any, i: number) => ({
+        id: typeof s.id === 'number' ? s.id : i + 1000,
+        name: s.name,
+        slug: s.slug,
+        href: s.href,
+        parent: 0,
+      } as WPCategory & { href?: string }));
+    }
+    return childrenBySlug[item.slug] || [];
   };
 
-  const hrefFor = (slug: string) => (slug.startsWith('/') ? slug : `/category/${slug}`);
+  const hrefFor = (slug: string) => `/${getShortenedCategorySlug(slug.replace(/^\/+/, ''))}`;
   const toggle = (id: number) => setExpanded(expanded === id ? null : id);
 
-  const navItems = mainNavItems.filter(
-    (i) => i.name !== 'Home' && !REMOVED_SECTIONS.includes(i.name)
-  );
-  const topItems = navItems.filter((i) => !i.external && !BOTTOM_SECTIONS.includes(i.name));
-  const bottomItems = navItems.filter((i) => !i.external && BOTTOM_SECTIONS.includes(i.name));
+  const navItems = mainNavItems.filter((i) => i.name !== 'Home');
+  const topItems = navItems.filter((i) => !i.external);
   const externalItems = navItems.filter((i) => i.external);
 
   const childrenRows = (item: CategoryItem) => {
     const children = getChildren(item);
-    const childLink = (sub: WPCategory) => (
+    const childLink = (sub: WPCategory & { href?: string }) => (
       <Link
         key={sub.id}
-        href={hrefFor(sub.slug)}
+        href={(sub as any).href || hrefFor(sub.slug)}
         onClick={onClose}
         className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-[13px] font-medium text-[#5d3a40] transition-colors hover:bg-red-50 hover:text-red-700"
       >
@@ -102,45 +104,6 @@ export default function SidebarMenu({
         {cleanHtmlContent(sub.name)}
       </Link>
     );
-
-    if (item.slug === 'sports') {
-      const { main, other } = splitSports(children);
-      return (
-        <>
-          {main.map(childLink)}
-          <div className="mt-0.5 rounded-xl px-1 py-0.5">
-            <button
-              onClick={() => setExpandedOther(expandedOther === item.id ? null : item.id)}
-              className="group flex w-full items-center gap-3 rounded-xl px-3.5 py-2.5 text-left transition-colors hover:bg-red-50"
-            >
-              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-red-400" />
-              <span className="text-[13px] font-semibold text-[#5d3a40] group-hover:text-red-700">
-                Other Sports
-              </span>
-              <svg
-                className={`ml-auto h-3.5 w-3.5 text-[#c4a6ab] transition-transform duration-300 ${
-                  expandedOther === item.id ? 'rotate-180' : 'rotate-0'
-                }`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            <div
-              className={`overflow-hidden transition-all duration-300 ${
-                expandedOther === item.id ? 'max-h-96' : 'max-h-0'
-              }`}
-            >
-              <div className="ml-1 mt-0.5 space-y-0.5 border-l-2 border-red-100 pl-4">
-                {other.map(childLink)}
-              </div>
-            </div>
-          </div>
-        </>
-      );
-    }
 
     return children.map(childLink);
   };
@@ -177,14 +140,6 @@ export default function SidebarMenu({
             }`}
           >
             <div className="ml-3 mt-1 space-y-0.5 border-l-2 border-red-100 pb-1 pl-4">
-              <Link
-                href={hrefFor(item.slug)}
-                onClick={onClose}
-                className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-[13px] font-semibold text-red-600 transition-colors hover:bg-red-50"
-              >
-                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-red-400" />
-                All {cleanHtmlContent(item.name)}
-              </Link>
               {childrenRows(item)}
             </div>
           </div>
@@ -271,7 +226,7 @@ export default function SidebarMenu({
           </Link>
         </div>
 
-        {/* Top sections */}
+        {/* Sections */}
         {wide ? (
           <div className="mt-3 grid grid-cols-2 xl:grid-cols-3 gap-x-5 gap-y-1">
             {topItems.map(renderRow)}
@@ -280,28 +235,6 @@ export default function SidebarMenu({
           <div className="mt-4 space-y-1.5">
             {topItems.map(renderRow)}
           </div>
-        )}
-
-        {/* Bottom sections */}
-        {bottomItems.length > 0 && (
-          <>
-            <div className="my-4 flex items-center gap-4 px-2">
-              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-red-200 to-transparent" />
-              <span className="text-[10px] font-semibold uppercase tracking-[0.25em] text-red-600/60">
-                More
-              </span>
-              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-red-200 to-transparent" />
-            </div>
-            {wide ? (
-              <div className="grid grid-cols-2 gap-x-5 gap-y-1 md:grid-cols-3">
-                {bottomItems.map(renderRow)}
-              </div>
-            ) : (
-              <div className="space-y-1.5">
-                {bottomItems.map(renderRow)}
-              </div>
-            )}
-          </>
         )}
       </div>
 
@@ -340,6 +273,41 @@ export default function SidebarMenu({
           </div>
         )}
 
+        {/* Subscribe cards */}
+        <div className="mb-4 space-y-3">
+          <div className="flex items-center justify-between gap-3 rounded-2xl border border-red-100 bg-white/80 p-3.5 shadow-[0_12px_30px_-18px_rgba(120,40,20,0.5)] ring-1 ring-red-100/60">
+            <div className="min-w-0">
+              <img src="/images/thesun.png" alt="theSun" className="h-5 w-auto" />
+              <p className="mt-1.5 text-[13px] font-bold leading-tight text-[#2b0a0e]">Subscribe to theSun</p>
+              <p className="mt-0.5 text-[11px] leading-snug text-[#6b4a4f]">
+                Get the latest headlines delivered to you daily
+              </p>
+            </div>
+            <button
+              onClick={() => setSubscribeMode('newsletter')}
+              className="shrink-0 rounded-full bg-gradient-to-r from-[#E30613] to-[#9f0710] px-4 py-2 text-xs font-bold text-white shadow-md shadow-[#E30613]/25 transition hover:brightness-110 active:scale-95"
+            >
+              Subscribe
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between gap-3 rounded-2xl border border-red-100 bg-white/80 p-3.5 shadow-[0_12px_30px_-18px_rgba(120,40,20,0.5)] ring-1 ring-red-100/60">
+            <div className="min-w-0">
+              <img src="/images/ipaper2.png" alt="iPaper" className="h-5 w-auto" />
+              <p className="mt-1.5 text-[13px] font-bold leading-tight text-[#2b0a0e]">Subscribe to iPaper</p>
+              <p className="mt-0.5 text-[11px] leading-snug text-[#6b4a4f]">
+                Receive instant notifications of our iPaper edition.
+              </p>
+            </div>
+            <button
+              onClick={() => setSubscribeMode('ipaper')}
+              className="shrink-0 rounded-full bg-gradient-to-r from-[#005321] to-[#013e1a] px-4 py-2 text-xs font-bold text-white shadow-md shadow-[#005321]/25 transition hover:brightness-110 active:scale-95"
+            >
+              Subscribe
+            </button>
+          </div>
+        </div>
+
         {/* Social media */}
         <div>
           <p className="mb-2 text-[10px] font-semibold uppercase tracking-[0.25em] text-red-600/60">
@@ -362,6 +330,12 @@ export default function SidebarMenu({
           </div>
         </div>
       </div>
+
+      <SubscribeModal
+        mode={subscribeMode ?? 'newsletter'}
+        isOpen={subscribeMode !== null}
+        onClose={() => setSubscribeMode(null)}
+      />
     </div>
   );
 }

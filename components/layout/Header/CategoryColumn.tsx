@@ -19,7 +19,7 @@ export default function CategoryColumn({
       style={{ animationDelay: `${animationDelay}ms` }}
     >
       <Link
-        href={category.name === 'Home' ? '/' : `/category/${category.slug}`}
+        href={category.name === 'Home' ? '/' : `/${category.slug}`}
         className="group block p-5 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 hover:from-red-600 hover:to-red-700 transition-all duration-500 transform hover:scale-105 border-2 border-slate-600 hover:border-red-400 hover:shadow-2xl hover:shadow-red-500/30 mb-4 relative overflow-hidden"
         onClick={onItemClick}
       >
@@ -60,7 +60,7 @@ export default function CategoryColumn({
           {category.subItems.map((subItem: any, index: number) => (
             <Link
               key={subItem.id}
-              href={`/category/${subItem.slug}`}
+              href={subItem.href || (subItem.slug.startsWith('/') ? subItem.slug : `/${subItem.slug}`)}
               className="group/sub block p-4 rounded-xl bg-slate-800/80 hover:bg-gradient-to-r hover:from-red-500/20 hover:to-red-600/10 transition-all duration-400 transform hover:scale-102 border border-slate-600/50 hover:border-red-400/50 hover:shadow-lg hover:shadow-red-400/20 animate-fadeInUp backdrop-blur-sm"
               style={{ animationDelay: `${animationDelay + (index * 80)}ms` }}
               onClick={onItemClick}

@@ -59,7 +59,7 @@ export default function CategoryLayout3({
             <p className="text-emerald-800/60 text-sm hidden sm:block">Curated stories for the modern lifestyle</p>
           </div>
           <Link
-            href={`/category/${slug}`}
+            href={`/${slug}`}
             className="text-sm font-semibold text-emerald-700 hover:text-emerald-900 transition-colors flex items-center gap-1 flex-shrink-0"
           >
             View All

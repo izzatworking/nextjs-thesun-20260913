@@ -30,7 +30,7 @@ export default function CategorySection({
           {name}
         </h2>
         <Link 
-          href={`/category/${slug}`}
+          href={`/${slug}`}
           className="text-red-600 hover:text-red-700 font-semibold text-sm"
         >
           View All →

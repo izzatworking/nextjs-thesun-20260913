@@ -59,7 +59,7 @@ export default function SpotlightSection({ posts, categories, isLast = false }: 
             <svg className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7"/></svg>
           </button>
           <Link
-            href="/category/spotlight"
+            href="/spotlight"
             className="text-xs sm:text-sm font-semibold text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg transition-all active:scale-95"
           >
             See All

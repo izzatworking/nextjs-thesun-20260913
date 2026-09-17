@@ -58,7 +58,7 @@ export default function Breadcrumb({ items = [], currentPage, categories = [], c
             if (parentCategory) {
               breadcrumbs.push({
                 label: parentCategory.name,
-                href: `/category/${parentCategory.slug}`
+                href: `/${parentCategory.slug}`
               });
             }
           }
@@ -66,7 +66,7 @@ export default function Breadcrumb({ items = [], currentPage, categories = [], c
           // Add current category
           breadcrumbs.push({
             label: category.name,
-            href: `/category/${category.slug}`
+            href: `/${category.slug}`
           });
         } else {
           // Fallback to slug-based name
@@ -74,7 +74,7 @@ export default function Breadcrumb({ items = [], currentPage, categories = [], c
             label: categorySlug.split('-').map(word => 
               word.charAt(0).toUpperCase() + word.slice(1)
             ).join(' '),
-            href: `/category/${categorySlug}`
+            href: `/${categorySlug}`
           });
         }
       }
@@ -124,7 +124,7 @@ export default function Breadcrumb({ items = [], currentPage, categories = [], c
             if (parentCategory) {
               breadcrumbs.push({
                 label: parentCategory.name,
-                href: `/category/${parentCategory.slug}`
+                href: `/${parentCategory.slug}`
               });
             }
           }
@@ -132,7 +132,7 @@ export default function Breadcrumb({ items = [], currentPage, categories = [], c
           // Add current category
           breadcrumbs.push({
             label: category.name,
-            href: `/category/${category.slug}`
+            href: `/${category.slug}`
           });
         } else {
           // Fallback to slug-based name
@@ -140,7 +140,7 @@ export default function Breadcrumb({ items = [], currentPage, categories = [], c
             label: categorySlug.split('-').map(word => 
               word.charAt(0).toUpperCase() + word.slice(1)
             ).join(' '),
-            href: `/category/${categorySlug}`
+            href: `/${categorySlug}`
           });
         }
         

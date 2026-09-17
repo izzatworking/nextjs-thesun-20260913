@@ -165,7 +165,7 @@ export default function OpinionSection({ posts, categories, isLast = false }: Op
                 </svg>
               </button>
             </div>
-            <Link href="/category/opinion"
+            <Link href="/opinion"
               className="inline-flex items-center gap-1.5 text-pink-400 hover:text-pink-600 text-xs font-medium transition-colors group">
               View all
               <svg className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -110,7 +110,7 @@ function TagInner({ tag, posts, categories, allTags }: TagPageProps) {
                       <div className="flex items-center gap-3 mb-3">
                         {category && (
                           <Link 
-                            href={`/category/${category.slug}`}
+                            href={`/${category.slug}`}
                             className="text-xs font-semibold text-red-600 hover:text-red-700 uppercase tracking-wide"
                           >
                              {cleanHtmlContent(category.name)}

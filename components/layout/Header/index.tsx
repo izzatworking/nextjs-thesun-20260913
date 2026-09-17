@@ -8,6 +8,13 @@ import SearchModal from './SearchModal';
 import type { CategoryItem, BreakingNews as BreakingNewsType } from './types';
 import type { WPCategory } from '../../../types/wordpress';
 import { getPostUrl } from '../../../lib/wordpress';
+import {
+  NEWS_SUB_ITEMS,
+  BUSINESS_SUB_ITEMS,
+  LIFESTYLE_SUB_ITEMS,
+  SPORTS_SUB_ITEMS,
+  MORE_SUB_ITEMS,
+} from './navConfig';
 
 interface HeaderProps {
   categories?: WPCategory[];
@@ -270,127 +277,19 @@ export default function Header({ categories = [], isSidebarOpen: externalIsOpen,
     };
   }, [isSidebarOpen]);
 
-  // Process categories to clean HTML entities
-  const cleanCategories = categories.map(cat => ({
-    ...cat,
-    name: cleanHtmlContent(cat.name)
-  }));
-
-  // Group categories by parent
-  const parentCategories = cleanCategories.filter(cat => cat.parent === 0);
-  const childCategories = cleanCategories.filter(cat => cat.parent !== 0);
-
-  // Function to get sub-categories for a parent
-  const getSubCategories = (parentId: number) => {
-    return childCategories.filter(cat => cat.parent === parentId);
-  };
-
-  // Helper function untuk mencari category ID berdasarkan nama
-  const findCategoryId = (categoryName: string): number => {
-    const category = parentCategories.find(cat => 
-      cat.name.toLowerCase() === categoryName.toLowerCase()
-    );
-    return category ? category.id : 0;
-  };
-
-  // Define main navbar items dengan sub-categories
+  // Define main navbar items dengan dropdown tetap mengikut rancangan editorial
   const mainNavItems: CategoryItem[] = [
     { name: 'Home', slug: '/', id: 0, hot: false },
-    { 
-      name: 'News', 
-      slug: 'news', 
-      id: 1, 
-      hot: true,
-      subItems: getSubCategories(findCategoryId('News'))
-    },
-    { 
-      name: 'Going Viral', 
-      slug: 'going-viral', 
-      id: 7, 
-      hot: true,
-      subItems: getSubCategories(findCategoryId('Going Viral'))
-    },
-    { 
-      name: 'Business', 
-      slug: 'business', 
-      id: 2, 
-      hot: false,
-      subItems: getSubCategories(findCategoryId('Business'))
-    },
-    { 
-      name: 'Opinion', 
-      slug: 'opinion', 
-      id: 8, 
-      hot: false,
-    },
-    { 
-      name: 'Lifestyle', 
-      slug: 'lifestyle', 
-      id: 3, 
-      hot: false,
-      subItems: getSubCategories(findCategoryId('Lifestyle'))
-    },
-    { 
-      name: 'Spotlight', 
-      slug: 'spotlight', 
-      id: 11, 
-      hot: false,
-    },
-    { 
-      name: 'Sports', 
-      slug: 'sports', 
-      id: 4, 
-      hot: true,
-      subItems: getSubCategories(findCategoryId('Sports'))
-    },
-    { 
-      name: 'More', 
-      slug: 'more', 
-      id: 9, 
-      hot: false,
-      subItems: [
-        { name: 'Berita', slug: 'berita', id: 5 },
-        { name: 'Motoring', slug: 'motoring', id: 6 },
-        { name: 'Most Viewed', slug: '/topstories', id: 16 },
-        { name: 'Videos', slug: '/videos', id: 17 },
-        { name: 'Classifieds', slug: 'classifieds', id: 10 },
-        { name: 'Education', slug: 'education', id: 12 },
-        { name: 'Our Team', slug: '/our-team', id: 14 }
-      ]
-    },
+    { name: 'News', slug: 'news', id: 1, hot: true, subItems: NEWS_SUB_ITEMS },
+    { name: 'Going Viral', slug: 'going-viral', id: 7, hot: true },
+    { name: 'Business', slug: 'business', id: 2, hot: false, subItems: BUSINESS_SUB_ITEMS },
+    { name: 'Opinion', slug: 'opinion', id: 8, hot: false },
+    { name: 'Lifestyle', slug: 'lifestyle', id: 3, hot: false, subItems: LIFESTYLE_SUB_ITEMS },
+    { name: 'Spotlight', slug: 'spotlight', id: 11, hot: false },
+    { name: 'Sports', slug: 'sports', id: 4, hot: true, subItems: SPORTS_SUB_ITEMS },
+    { name: 'More', slug: 'more', id: 9, hot: false, subItems: MORE_SUB_ITEMS },
     { name: 'ipaper', slug: 'https://thesun-ipaper.cld.bz/', id: 13, hot: false, external: true },
   ];
-  const canvasCategories = {
-    row1: [
-      { name: 'Home', slug: '/', id: 0, hot: false, subItems: [] },
-      { name: 'News', slug: 'news', id: 1, hot: true, subItems: getSubCategories(findCategoryId('News')) },
-      { name: 'Business', slug: 'business', id: 2, hot: false, subItems: getSubCategories(findCategoryId('Business')) },
-      { name: 'Lifestyle', slug: 'lifestyle', id: 3, hot: false, subItems: getSubCategories(findCategoryId('Lifestyle')) },
-      { name: 'Sports', slug: 'sports', id: 4, hot: true, subItems: getSubCategories(findCategoryId('Sports')) }
-    ],
-    row2: [
-      { name: 'Berita', slug: 'berita', id: 5, hot: true, subItems: getSubCategories(findCategoryId('Berita')) },
-      { name: 'Motoring', slug: 'motoring', id: 6, hot: false, subItems: getSubCategories(findCategoryId('Motoring')) },
-      { name: 'Going Viral', slug: 'going-viral', id: 7, hot: true, subItems: getSubCategories(findCategoryId('Going Viral')) },
-      { name: 'Opinion', slug: 'opinion', id: 8, hot: false, subItems: getSubCategories(findCategoryId('Opinion')) },
-      { 
-        name: 'More', 
-        slug: 'more', 
-        id: 9, 
-        hot: false, 
-        subItems: [
-          { name: 'Motoring', slug: 'motoring', id: 6 },
-          { name: 'Opinion', slug: 'opinion', id: 8 },
-          { name: 'Most Viewed', slug: '/topstories', id: 16 },
-          { name: 'Videos', slug: '/videos', id: 17 },
-          { name: 'Classifieds', slug: 'classifieds', id: 10 },
-          { name: 'Spotlight', slug: 'spotlight', id: 11 },
-          { name: 'Education', slug: 'education', id: 12 },
-          { name: 'Our Team', slug: '/our-team', id: 14 }
-        ]
-      }
-    ]
-  };
 
   const toggleDropdown = (categoryId: number) => {
     setActiveDropdown(activeDropdown === categoryId ? null : categoryId);

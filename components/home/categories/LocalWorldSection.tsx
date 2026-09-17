@@ -65,7 +65,7 @@ export default function LocalWorldSection({ malaysiaPosts, worldPosts, asiaPosts
             <div key={col.slug} className="min-w-0">
               <div className="flex items-center gap-3 mb-5">
                 <div className="w-0.5 h-5 bg-gray-900" />
-                <Link href={`/category/${col.slug}`}>
+                <Link href={`/${col.slug}`}>
                   <h3 className="text-4xl font-black text-gray-900 tracking-tight hover:text-gray-600 transition-colors">
                     {col.name}
                   </h3>
@@ -129,7 +129,7 @@ export default function LocalWorldSection({ malaysiaPosts, worldPosts, asiaPosts
 
               <div className="mt-5 pt-4 border-t border-gray-200">
                 <Link
-                  href={`/category/${col.slug}`}
+                  href={`/${col.slug}`}
                   className="inline-flex items-center text-xs font-medium text-gray-500 hover:text-red-600 transition-colors gap-1.5 group/link"
                 >
                   View all {col.name} stories

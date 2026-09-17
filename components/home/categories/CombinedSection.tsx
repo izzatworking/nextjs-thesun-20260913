@@ -78,7 +78,7 @@ export default function CombinedSection({
               <div key={col.slug} className="min-w-0">
                 <div className="flex items-center gap-3 mb-5">
                   <div className="w-0.5 h-5 bg-gray-900" />
-                  <Link href={`/category/${col.slug}`}>
+                  <Link href={`/${col.slug}`}>
                     <h3 className="text-2xl font-black text-gray-900 tracking-tight hover:text-red-600 transition-colors xl:text-3xl">
                       {col.name}
                     </h3>
@@ -142,7 +142,7 @@ export default function CombinedSection({
 
                 <div className="mt-5 pt-4 border-t border-gray-200">
                   <Link
-                    href={`/category/${col.slug}`}
+                    href={`/${col.slug}`}
                     className="inline-flex items-center text-xs font-medium text-gray-500 hover:text-red-600 transition-colors gap-1.5 group/link"
                   >
                     View all {col.name} stories
@@ -199,7 +199,7 @@ export default function CombinedSection({
                 {allCategories.map((cat) => (
                   <li key={cat.slug}>
                     <Link
-                      href={`/category/${cat.slug}`}
+                      href={`/${cat.slug}`}
                       className="group/cat flex h-full items-center justify-center rounded-xl border border-white/20 bg-white/[0.07] px-2 py-3.5 text-center transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#EEB3B5] hover:border-transparent hover:shadow-lg hover:shadow-black/10"
                     >
                       <span className="truncate text-xs font-semibold text-white transition-colors duration-300 group-hover/cat:text-[#8E0320]">

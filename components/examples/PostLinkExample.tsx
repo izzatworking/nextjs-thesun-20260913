@@ -115,7 +115,7 @@ export function PostCard({ post, categories, showCategory = true }: PostCardProp
       <div className="p-4">
         {showCategory && category && (
           <Link
-            href={`/category/${category.slug}`}
+            href={`/${category.slug}`}
             className="inline-block mb-2"
           >
             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">

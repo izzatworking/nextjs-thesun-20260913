@@ -64,7 +64,7 @@ export default function CategoryLayout5({ categoryColumns, categories, isLast = 
             <div key={column.slug} className="space-y-6">
               {/* Column Header */}
               <div className="pb-2 border-b-2 border-gray-800">
-                <Link href={`/category/${column.slug}`}>
+                <Link href={`/${column.slug}`}>
                   <h3 className="text-xl font-bold text-gray-900 hover:text-blue-600 transition-colors cursor-pointer">
                     {column.name}
                   </h3>
@@ -144,7 +144,7 @@ export default function CategoryLayout5({ categoryColumns, categories, isLast = 
               {/* View All Link */}
               <div className="pt-4">
                 <Link 
-                  href={`/category/${column.slug}`}
+                  href={`/${column.slug}`}
                   className="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
                 >
                   More {column.name} stories

@@ -116,7 +116,7 @@ export default function CategoryLayout2({
           </div>
 
           <Link
-            href={`/category/${slug}`}
+            href={`/${slug}`}
             className="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-white bg-gradient-to-r from-orange-500 to-red-600 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg hover:from-orange-600 hover:to-red-700 transition-all active:scale-95 shadow-md"
           >
             <span className="hidden xs:inline">All</span> Stories
@@ -188,7 +188,7 @@ export default function CategoryLayout2({
 
       <div className="flex sm:hidden justify-center mt-3 xs:mt-4">
         <Link
-          href={`/category/${slug}`}
+          href={`/${slug}`}
           className="inline-flex items-center gap-1 text-xs xs:text-sm font-semibold text-white bg-gradient-to-r from-orange-500 to-red-600 px-4 xs:px-5 py-2 xs:py-2.5 rounded-lg xs:rounded-xl hover:from-orange-600 hover:to-red-700 transition-all active:scale-95 shadow-md"
         >
           All Stories

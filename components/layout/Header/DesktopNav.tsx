@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { CategoryItem } from './types';
 import { useState, useEffect, useRef } from 'react';
-import { splitSports } from './sportsUtils';
 
 interface DesktopNavProps {
   mainNavItems: CategoryItem[];
@@ -22,7 +21,6 @@ export default function DesktopNav({
 }: DesktopNavProps) {
   const [hoverDropdown, setHoverDropdown] = useState<number | null>(null);
   const [dropdownHeights, setDropdownHeights] = useState<Record<number, number>>({});
-  const [openOtherSports, setOpenOtherSports] = useState(false);
   const dropdownRefs = useRef<Record<number, HTMLDivElement>>({});
   const enterTimer = useRef<number | null>(null);
   const leaveTimer = useRef<number | null>(null);
@@ -109,83 +107,17 @@ export default function DesktopNav({
               onMouseLeave={handleMouseLeave}
             >
               <div className="py-1.5">
-                <Link
-                  href={item.slug.startsWith('/') ? item.slug : `/category/${item.slug}`}
-                  className="flex items-center justify-between px-4 py-2.5 text-sm font-semibold text-gray-900 hover:bg-gray-50 transition-colors"
-                  onClick={() => setActiveDropdown(null)}
-                >
-                  <span>All {item.name}</span>
-                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </Link>
-                <div className="border-t border-gray-50 my-1"></div>
-                {item.slug === 'sports' ? (
-                  (() => {
-                    const { main, other } = splitSports(item.subItems || []);
-                    return (
-                      <>
-                        {main.map((subItem: any) => (
-                          <Link
-                            key={subItem.id}
-                            href={subItem.slug.startsWith('/') ? subItem.slug : `/category/${subItem.slug}`}
-                            className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
-                            onClick={() => setActiveDropdown(null)}
-                          >
-                            <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                            <span>{subItem.name}</span>
-                          </Link>
-                        ))}
-                        <div>
-                          <button
-                            onClick={() => setOpenOtherSports(!openOtherSports)}
-                            className="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors"
-                          >
-                            <span className="w-1 h-1 rounded-full bg-red-400"></span>
-                            <span>Other Sports</span>
-                            <svg
-                              className={`ml-auto w-3.5 h-3.5 transition-transform duration-200 ${
-                                openOtherSports ? 'rotate-180' : ''
-                              }`}
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
-                          </button>
-                          {openOtherSports && (
-                            <div className="py-0.5">
-                              {other.map((subItem: any) => (
-                                <Link
-                                  key={subItem.id}
-                                  href={subItem.slug.startsWith('/') ? subItem.slug : `/category/${subItem.slug}`}
-                                  className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
-                                  onClick={() => setActiveDropdown(null)}
-                                >
-                                  <span className="w-1 h-1 rounded-full bg-red-200"></span>
-                                  <span>{subItem.name}</span>
-                                </Link>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </>
-                    );
-                  })()
-                ) : (
-                  item.subItems.map((subItem: any) => (
-                    <Link
-                      key={subItem.id}
-                      href={subItem.slug.startsWith('/') ? subItem.slug : `/category/${subItem.slug}`}
-                      className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
-                      onClick={() => setActiveDropdown(null)}
-                    >
-                      <span className="w-1 h-1 rounded-full bg-gray-300"></span>
-                      <span>{subItem.name}</span>
-                    </Link>
-                  ))
-                )}
+                {item.subItems.map((subItem: any) => (
+                  <Link
+                    key={subItem.id}
+                    href={subItem.href || (subItem.slug.startsWith('/') ? subItem.slug : `/${subItem.slug}`)}
+                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+                    onClick={() => setActiveDropdown(null)}
+                  >
+                    <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+                    <span>{subItem.name}</span>
+                  </Link>
+                ))}
               </div>
             </div>
           )}
@@ -195,7 +127,7 @@ export default function DesktopNav({
 
     return (
       <Link
-        href={item.slug.startsWith('/') ? item.slug : item.name === 'Home' ? '/' : `/category/${item.slug}`}
+        href={item.slug.startsWith('/') ? item.slug : item.name === 'Home' ? '/' : `/${item.slug}`}
         className="flex items-center font-medium py-2 px-3 rounded-lg text-base text-gray-700 hover:text-red-600 hover:bg-gray-50 transition-colors"
         key={item.id}
         onMouseEnter={() => handleMouseEnter(item.id)}
@@ -247,7 +179,7 @@ export default function DesktopNav({
               {item.subItems.map((subItem: any) => (
                 <Link
                   key={subItem.id}
-                  href={subItem.slug.startsWith('/') ? subItem.slug : `/category/${subItem.slug}`}
+                  href={subItem.href || (subItem.slug.startsWith('/') ? subItem.slug : `/${subItem.slug}`)}
                   className="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-colors"
                   onClick={() => setActiveDropdown(null)}
                 >

@@ -57,7 +57,7 @@ export default function CategoryLayout1({
           <div className="w-20 h-1 bg-red-600 rounded-full mt-2"></div>
         </div>
         <Link 
-          href={`/category/${slug}`}
+          href={`/${slug}`}
           className="text-red-600 hover:text-red-700 font-semibold text-sm hover:underline transition-colors"
         >
          Explore More {name}  →

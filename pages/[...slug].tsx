@@ -11,6 +11,8 @@ import {
   categoryPathFromSlugs,
   getTopStoriesWithCategories,
   getPostsByCategoryWithChildren,
+  getShortenedCategorySlug,
+  getOriginalCategorySlug,
   setCategoryCache
 } from '@/lib/wordpress';
 import { GetStaticProps, GetStaticPaths } from 'next';
@@ -31,6 +33,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import TopStories from '@/components/layout/Header/TopStories';
+import CategoryPage from '@/components/category/CategoryPage';
+import { NAV_CATEGORY_MAP } from '@/components/layout/Header/navConfig';
 
 interface PostProps {
   post: WPPostWithMedia;
@@ -260,7 +264,7 @@ const PopularCategories = ({ categories }: { categories: WPCategory[] }) => {
             {allCategories.map((cat) => (
               <li key={cat.slug}>
                 <Link
-                  href={`/category/${cat.slug}`}
+                  href={`/${cat.slug}`}
                   className="group/cat flex h-full items-center justify-center rounded-xl border border-white/20 bg-white/[0.07] px-2 py-3.5 text-center transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#EEB3B5] hover:border-transparent hover:shadow-lg hover:shadow-black/10"
                 >
                   <span className="truncate text-xs font-semibold text-white transition-colors duration-300 group-hover/cat:text-[#8E0320]">
@@ -702,7 +706,7 @@ function Post({
                               {parentCategory && (
                                 <>
                                   <Link
-                                    href={`/category/${parentCategory.slug}`}
+                                    href={`/${parentCategory.slug}`}
                                     className="text-[11px] font-medium text-gray-400 hover:text-red-500 uppercase tracking-wider transition-colors"
                                   >
                                     {cleanTextContent(parentCategory.name)}
@@ -713,7 +717,7 @@ function Post({
                                 </>
                               )}
                               <Link
-                                href={`/category/${category.slug || 'news'}`}
+                                href={`/${category.slug || 'news'}`}
                                 className="inline-flex items-center gap-1 px-2.5 py-1.5 bg-red-600 hover:bg-red-700 text-white text-[11px] font-semibold uppercase tracking-wider rounded-md transition-colors"
                               >
                                 {cleanTextContent(category.name)}
@@ -840,6 +844,7 @@ export default function ArticleRoute(ssgProps: Partial<PostProps> = {}) {
 
   useEffect(() => {
     if (!router.isReady) return;
+    if ((ssgProps as any)?.categorySlug) return;
 
     const asPath = router.asPath.split('?')[0].replace(/\/+$/, '');
     const slugArray = asPath.split('/').filter(Boolean);
@@ -947,6 +952,11 @@ export default function ArticleRoute(ssgProps: Partial<PostProps> = {}) {
   const showSSG = ssgPost && (!currentSlug || currentSlug === ssgPost.slug);
   const resolvedData = data ?? (showSSG ? (ssgProps as PostProps) : null);
 
+  const categorySlug = (ssgProps as any)?.categorySlug as string | undefined;
+  if (categorySlug) {
+    return <CategoryPage slug={categorySlug} />;
+  }
+
   if (notFound) {
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
@@ -979,6 +989,31 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   // function). Keep it as a pure client-side shell — no server data.
   if (urlSlug === 'article-shell') {
     return { props: {} };
+  }
+
+  // Clean category URLs (no /category/ prefix) are handled category-first:
+  // nav paths like /news/malaysia map via NAV_CATEGORY_MAP, and flat paths
+  // like /going-viral or /education resolve against the WP category tree.
+  const pathKey = segments.join('/');
+  let categorySlug: string | undefined = NAV_CATEGORY_MAP[`/${pathKey}`];
+  if (!categorySlug) {
+    try {
+      const categories = await getCategories();
+      if (segments.length === 1) {
+        const seg = segments[0];
+        const flat =
+          categories.find(c => c.slug === seg) ||
+          categories.find(c => c.slug.toLowerCase() === seg.toLowerCase()) ||
+          categories.find(c => getShortenedCategorySlug(c.slug) === seg) ||
+          categories.find(c => getOriginalCategorySlug(seg) === c.slug);
+        if (flat) categorySlug = flat.slug;
+      }
+    } catch {
+      // ignore; fall back to article lookup below
+    }
+  }
+  if (categorySlug) {
+    return { props: { categorySlug } };
   }
 
   try {
@@ -1058,6 +1093,15 @@ function getSharedBuildData() {
 export const getStaticPaths: GetStaticPaths = async () => {
   const paths: { params: { slug: string[] } }[] = [];
   const uniquePaths = new Set<string>();
+  const categoryKey = new Set<string>();
+
+  const addCategory = (segments: string[]) => {
+    const key = segments.join('/');
+    if (!key || categoryKey.has(key)) return;
+    categoryKey.add(key);
+    uniquePaths.add(key);
+    paths.push({ params: { slug: segments } });
+  };
 
   const addPost = (post: WPPostWithMedia) => {
     if (!post || !post.slug) return;
@@ -1068,7 +1112,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
       .filter(Boolean);
     if (segments.length < 2) return;
     const key = segments.join('/');
-    if (uniquePaths.has(key)) return;
+    if (categoryKey.has(key) || uniquePaths.has(key)) return;
     uniquePaths.add(key);
     paths.push({ params: { slug: segments } });
   };
@@ -1081,7 +1125,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
       .filter(Boolean);
     if (segments.length < 2) return;
     const key = segments.join('/');
-    if (uniquePaths.has(key)) return;
+    if (categoryKey.has(key) || uniquePaths.has(key)) return;
     uniquePaths.add(key);
     paths.push({ params: { slug: segments } });
   };
@@ -1089,6 +1133,18 @@ export const getStaticPaths: GetStaticPaths = async () => {
   try {
     const categories = await getCategories();
     setCategoryCache(categories);
+
+    // Clean category URLs (category-first, no /category/ prefix): every
+    // category as a flat /{slug} page plus the nested nav paths like
+    // /news/malaysia. Article paths below are kept out of these keys.
+    categories.forEach((cat) => {
+      if (!cat?.slug) return;
+      addCategory([getShortenedCategorySlug(cat.slug)]);
+    });
+    Object.keys(NAV_CATEGORY_MAP).forEach((navPath) => {
+      const segments = navPath.replace(/^\/+|\/+$/g, '').split('/').filter(Boolean);
+      if (segments.length >= 1) addCategory(segments);
+    });
 
     const [posts, topStories] = await Promise.all([
       getPosts(100),

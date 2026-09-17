@@ -51,14 +51,14 @@ export default function NewsBeritaSection({ newsPosts, beritaPosts, categories, 
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-2.5">
                 <span className={`w-1.5 h-5 rounded-full ${col.accent}`} />
-                <Link href={`/category/${col.slug}`}>
+                <Link href={`/${col.slug}`}>
                   <h3 className="text-3xl font-black text-gray-900 tracking-tight hover:text-red-600 transition-colors">
                     {col.name}
                   </h3>
                 </Link>
               </div>
               <Link
-                href={`/category/${col.slug}`}
+                href={`/${col.slug}`}
                 className="inline-flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-red-600 transition-colors"
               >
                 View all

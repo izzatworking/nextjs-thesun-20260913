@@ -7,6 +7,13 @@ import FloatingTopStories from './FloatingTopStories';
 import Footer from './Footer';
 import { WPCategory } from '../../types/wordpress';
 import { CategoryItem } from './Header/types';
+import {
+  NEWS_SUB_ITEMS,
+  BUSINESS_SUB_ITEMS,
+  LIFESTYLE_SUB_ITEMS,
+  SPORTS_SUB_ITEMS,
+  MORE_SUB_ITEMS,
+} from './Header/navConfig';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -55,46 +62,19 @@ const Layout: React.FC<LayoutProps> = ({
 
   const mainNavItems: CategoryItem[] = [
     { name: 'Home', slug: '/', id: 0, hot: false },
-    { name: 'News', slug: 'news', id: 1, hot: true },
+    { name: 'News', slug: 'news', id: 1, hot: true, subItems: NEWS_SUB_ITEMS },
     { name: 'Going Viral', slug: 'going-viral', id: 7, hot: true },
-    { name: 'Business', slug: 'business', id: 2, hot: false },
+    { name: 'Business', slug: 'business', id: 2, hot: false, subItems: BUSINESS_SUB_ITEMS },
     { name: 'Opinion', slug: 'opinion', id: 8, hot: false },
-    { name: 'Lifestyle', slug: 'lifestyle', id: 3, hot: false },
+    { name: 'Lifestyle', slug: 'lifestyle', id: 3, hot: false, subItems: LIFESTYLE_SUB_ITEMS },
     { name: 'Spotlight', slug: 'spotlight', id: 11, hot: false },
-    { name: 'Sports', slug: 'sports', id: 4, hot: true },
-    { name: 'ipaper', slug: 'https://thesun-ipaper.cld.bz/', id: 13, hot: false, external: true },
+    { name: 'Sports', slug: 'sports', id: 4, hot: true, subItems: SPORTS_SUB_ITEMS },
     { name: 'Berita', slug: 'berita', id: 5, hot: true },
-    { name: 'Motoring', slug: 'motoring', id: 6, hot: false },
-    { name: 'Most Viewed', slug: '/topstories', id: 16, hot: false },
     { name: 'Videos', slug: '/videos', id: 17, hot: false },
+    { name: 'More', slug: 'more', id: 9, hot: false, subItems: MORE_SUB_ITEMS },
+    { name: 'ipaper', slug: 'https://thesun-ipaper.cld.bz/', id: 13, hot: false, external: true },
     { name: 'Classifieds', slug: 'https://sunmedia.com.my/', id: 10, hot: false, external: true },
-    { name: 'Education', slug: 'education', id: 12, hot: false },
-    { name: 'Our Team', slug: '/our-team', id: 14, hot: false },
-    { name: 'World Cup 2026', slug: '/wcpage', id: 15, hot: true },
   ];
-
-  const canvasCategories = {
-    row1: [
-      { name: 'Home', slug: '/', id: 0, hot: false, subItems: [] },
-      { name: 'News', slug: 'news', id: 1, hot: true, subItems: [] },
-      { name: 'Berita', slug: 'berita', id: 5, hot: true, subItems: [] },
-      { name: 'Business', slug: 'business', id: 2, hot: false, subItems: [] },
-      { name: 'Going Viral', slug: 'going-viral', id: 7, hot: true, subItems: [] },
-    ],
-    row2: [
-      { name: 'Lifestyle', slug: 'lifestyle', id: 3, hot: false, subItems: [] },
-      { name: 'Sports', slug: 'sports', id: 4, hot: true, subItems: [] },
-      { name: 'Motoring', slug: 'motoring', id: 6, hot: false, subItems: [] },
-      { name: 'Opinion', slug: 'opinion', id: 8, hot: false, subItems: [] },
-      { name: 'Our Team', slug: '/our-team', id: 14, hot: false, subItems: [] },
-    ],
-    row3: [
-      { name: 'World Cup 2026', slug: '/wcpage', id: 15, hot: true, subItems: [] },
-      { name: 'Classifieds', slug: 'https://sunmedia.com.my/', id: 10, hot: false, external: true, subItems: [] },
-      { name: 'Spotlight', slug: 'spotlight', id: 11, hot: false, subItems: [] },
-      { name: 'Education', slug: 'education', id: 12, hot: false, subItems: [] },
-    ]
-  };
 
   return (
     <>
