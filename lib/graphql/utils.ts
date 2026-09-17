@@ -16,7 +16,8 @@ function decodeBase64Id(encoded: string): number {
 
 export function graphqlToWpPost(graphqlPost: GraphQLPost): WPPostWithMedia {
   // Convert categories
-  const categories = graphqlPost.categories?.nodes.map(cat => decodeBase64Id(cat.id)) || [];
+  const categoryNodes = graphqlPost.categories?.nodes || [];
+  const categories = categoryNodes.map(cat => decodeBase64Id(cat.id)) || [];
   
   // Convert tags
   const tags = graphqlPost.tags?.nodes.map(tag => decodeBase64Id(tag.id)) || [];
@@ -78,6 +79,12 @@ export function graphqlToWpPost(graphqlPost: GraphQLPost): WPPostWithMedia {
     tags,
     authors,
   };
+
+  // Keep raw category slugs from GraphQL so URL generation works on the
+  // client too (where the global category list is not available).
+  if (categoryNodes.length > 0) {
+    wpPost.category_slugs = categoryNodes.map(cat => cat.slug).filter(Boolean);
+  }
   
   // Add featured media properties
   if (graphqlPost.featuredImage) {

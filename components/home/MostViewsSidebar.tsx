@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getTopStories } from '@/lib/queries';
+import { categoryPathFromSlugs } from '@/lib/wordpress';
 
 interface TopStory {
   id: string;
@@ -22,9 +23,10 @@ interface TopStory {
 }
 
 function getPostPath(article: TopStory): string {
-  const catSlug = article.categories?.nodes?.[0]?.slug;
-  if (catSlug) {
-    return `/${catSlug}/${article.slug}`;
+  const catSlugs = (article.categories?.nodes || []).map(node => node.slug);
+  const path = categoryPathFromSlugs(catSlugs);
+  if (path) {
+    return `/${path}/${article.slug}`;
   }
   return `/posts/${article.slug}`;
 }

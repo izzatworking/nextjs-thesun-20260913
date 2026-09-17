@@ -5,10 +5,15 @@ import {
   getPosts,
   getPost,
   getCategories,
+  getTags,
   getTagsByIds,
   generatePostUrl,
+  categoryPathFromSlugs,
+  getTopStoriesWithCategories,
+  getPostsByCategoryWithChildren,
   setCategoryCache
 } from '@/lib/wordpress';
+import { GetStaticProps, GetStaticPaths } from 'next';
 import he from 'he';
 import {
   WPPost,
@@ -24,7 +29,7 @@ import { TimeAgo } from '@/components/common/TimeAgo';
 import { AdWidget } from '@/components/ads/AdWidget';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useState, useEffect, type JSX } from 'react';
+import { useState, useEffect } from 'react';
 import TopStories from '@/components/layout/Header/TopStories';
 
 interface PostProps {
@@ -202,83 +207,71 @@ const LatestStories = ({ posts }: { posts: WPPostWithMedia[] }) => {
   );
 };
 
-// Component untuk Popular Categories
+// Component untuk Browse Categories (red card, sama macam di homepage)
 const PopularCategories = ({ categories }: { categories: WPCategory[] }) => {
-  const popularCategories = categories.filter(cat =>
-    ['News', 'Going Viral', 'Lifestyle', 'Sports', 'Business', 'Berita']
-      .includes(cat.name)
-  );
-
-  const categoryIcons: Record<string, JSX.Element> = {
-    'News': (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2" />
-      </svg>
-    ),
-    'Going Viral': (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
-      </svg>
-    ),
-    'Lifestyle': (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-      </svg>
-    ),
-    'Sports': (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
-    'Business': (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-      </svg>
-    ),
-    'Berita': (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
-  };
+  const allCategories = (categories || [])
+    .filter((cat) => cat.parent === 0 && cat.name && cat.slug)
+    .slice(0, 16)
+    .map((cat) => ({
+      name: cleanTextContent(cat.name),
+      slug: cat.slug,
+    }));
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 overflow-hidden mt-6">
-      <div className="px-5 py-4 border-b border-gray-100">
-        <h2 className="text-base font-bold text-gray-900 tracking-wide flex items-center gap-2">
-          <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-          Popular Categories
-        </h2>
-      </div>
-      <div className="p-4 space-y-1.5">
-        {popularCategories.map((category) => (
-          <Link
-            key={category.id}
-            href={`/category/${category.slug}`}
-            className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 hover:bg-red-50 border border-gray-100 hover:border-red-100 transition-all duration-200 group"
-          >
-            <span className="text-gray-400 group-hover:text-red-500 transition-colors">
-              {categoryIcons[category.name] || (
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              )}
-            </span>
-            <span className="text-sm font-medium text-gray-700 group-hover:text-red-600 transition-colors flex-1">
-              {cleanTextContent(category.name)}
-            </span>
-            <svg
-              className="w-4 h-4 text-gray-300 group-hover:text-red-400 transition-colors"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
-        ))}
-      </div>
+    <div className="mt-6">
+      <aside className="relative w-full overflow-hidden rounded-[28px] bg-gradient-to-br from-[#CB3534] via-[#a91f2a] to-[#8E0320] shadow-[0_28px_70px_-35px_rgba(142,3,32,0.85)] flex flex-col">
+        {/* Top green → red hairline */}
+        <div className="pointer-events-none absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#005321] via-[#CB3534] to-transparent" />
+
+        {/* Decorative arcs */}
+        <svg className="pointer-events-none absolute -top-10 -right-10 h-48 w-48 text-[#8E0320]/60" viewBox="0 0 100 100" fill="none">
+          <circle cx="90" cy="10" r="60" stroke="currentColor" strokeWidth="10" strokeLinecap="round" strokeDasharray="160 240" />
+        </svg>
+        <svg className="pointer-events-none absolute -bottom-14 -left-12 h-52 w-52 text-white/5" viewBox="0 0 100 100" fill="none">
+          <circle cx="10" cy="90" r="60" stroke="currentColor" strokeWidth="12" strokeLinecap="round" strokeDasharray="110 270" />
+        </svg>
+
+        {/* Gradient blobs */}
+        <div className="pointer-events-none absolute -top-16 left-1/3 h-56 w-56 rounded-full bg-[#8E0320]/50 blur-2xl" />
+        <div className="pointer-events-none absolute -bottom-20 -right-16 h-64 w-64 rounded-full bg-[#005321]/15 blur-3xl" />
+
+        <div className="relative z-10 flex flex-1 flex-col p-7">
+          {/* Overline */}
+          <div className="flex items-center gap-3 mb-6">
+            <span className="h-0.5 w-8 bg-[#005321]" />
+            <span className="h-0.5 w-8 bg-[#005321]/50" />
+            <p className="text-[11px] font-semibold text-white/70 uppercase tracking-[0.25em]">
+              Explore More
+            </p>
+          </div>
+
+          {/* Heading */}
+          <h3 className="text-4xl font-black leading-none text-white">
+            Browse
+            <span className="block text-white/90">Categories</span>
+          </h3>
+
+          <p className="mt-4 mb-8 text-sm leading-relaxed text-white/70">
+            Discover in-depth coverage across every section of The Sun.
+          </p>
+
+          {/* All categories — 2 per row */}
+          <ul className="grid grid-cols-2 gap-3">
+            {allCategories.map((cat) => (
+              <li key={cat.slug}>
+                <Link
+                  href={`/category/${cat.slug}`}
+                  className="group/cat flex h-full items-center justify-center rounded-xl border border-white/20 bg-white/[0.07] px-2 py-3.5 text-center transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#EEB3B5] hover:border-transparent hover:shadow-lg hover:shadow-black/10"
+                >
+                  <span className="truncate text-xs font-semibold text-white transition-colors duration-300 group-hover/cat:text-[#8E0320]">
+                    {cat.name}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </aside>
     </div>
   );
 };
@@ -837,10 +830,13 @@ function Post({
    );
 }
 
-export default function ArticleRoute() {
+export default function ArticleRoute(ssgProps: Partial<PostProps> = {}) {
   const router = useRouter();
   const [data, setData] = useState<PostProps | null>(null);
   const [notFound, setNotFound] = useState(false);
+  const [currentSlug, setCurrentSlug] = useState<string | null>(null);
+
+  const ssgPost = ssgProps?.post || null;
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -855,6 +851,19 @@ export default function ArticleRoute() {
 
     const urlSlug = slugArray[slugArray.length - 1];
     const cleanUrlSlug = urlSlug.toLowerCase().replace(/[^\w\-]/g, '').trim();
+    setCurrentSlug(urlSlug);
+
+    // If this path was statically pre-rendered (SSG data available for the
+    // exact slug), skip the client fetch to avoid a duplicate request.
+    if (ssgPost && (urlSlug === ssgPost.slug || cleanUrlSlug === ssgPost.slug)) {
+      setData(null);
+      setNotFound(false);
+      return;
+    }
+
+    setData(null);
+    setNotFound(false);
+
     let active = true;
     let attempt = 0;
 
@@ -932,7 +941,11 @@ export default function ArticleRoute() {
 
     load();
     return () => { active = false; };
-  }, [router.isReady, router.asPath]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router.isReady, router.asPath, ssgPost]);
+
+  const showSSG = ssgPost && (!currentSlug || currentSlug === ssgPost.slug);
+  const resolvedData = data ?? (showSSG ? (ssgProps as PostProps) : null);
 
   if (notFound) {
     return (
@@ -946,7 +959,7 @@ export default function ArticleRoute() {
     );
   }
 
-  if (!data) {
+  if (!resolvedData) {
     return (
       <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
         <div className="w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
@@ -955,16 +968,173 @@ export default function ArticleRoute() {
     );
   }
 
-  return <Post {...data} />;
+  return <Post {...resolvedData} />;
 }
 
-export const getStaticProps = async () => {
-  return { props: {} };
+export const getStaticProps: GetStaticProps = async ({ params }) => {
+  const segments = (params?.slug as string[]) || [];
+  const urlSlug = segments[segments.length - 1] || '';
+
+  // The catch-all shell used by the SPA fallback (.htaccess / Cloudflare Pages
+  // function). Keep it as a pure client-side shell — no server data.
+  if (urlSlug === 'article-shell') {
+    return { props: {} };
+  }
+
+  try {
+    const post = await getPost(urlSlug);
+
+    if (!post) {
+      return { notFound: true };
+    }
+
+    // Auxiliary data (categories, latest posts, all tags) is identical for
+    // every article page, so memoise it for the whole build instead of
+    // re-fetching it hundreds of times.
+    const { categories, allPosts, allTags } = await getSharedBuildData();
+
+    setCategoryCache(categories);
+
+    const postTagIds = post.tags || [];
+    const postTags = postTagIds.length > 0
+      ? allTags.filter((tag: WPTag) => postTagIds.includes(tag.id))
+      : [];
+
+    const firstCategoryId = post.categories?.[0];
+    let currentCategory = categories[0];
+
+    if (firstCategoryId) {
+      const foundCategory = categories.find((cat) => cat.id === firstCategoryId);
+      if (foundCategory) {
+        currentCategory = foundCategory;
+      }
+    }
+
+    const latestPosts = allPosts
+      .filter((p: WPPostWithMedia) => p.id !== post.id)
+      .slice(0, 5);
+
+    const initialMorePosts = allPosts
+      .filter((p: WPPostWithMedia) => p.id !== post.id)
+      .slice(0, 24);
+
+    return {
+      props: {
+        post,
+        latestPosts,
+        categories,
+        allTags: postTags,
+        initialMorePosts,
+        currentCategory,
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching post for /[...slug] SSG:', error);
+    return { notFound: true };
+  }
 };
 
-export const getStaticPaths = async () => {
+let sharedBuildDataPromise: Promise<{
+  categories: WPCategory[];
+  allPosts: WPPostWithMedia[];
+  allTags: WPTag[];
+}> | null = null;
+
+function getSharedBuildData() {
+  if (!sharedBuildDataPromise) {
+    sharedBuildDataPromise = Promise.all([
+      getCategories(),
+      getPosts(50),
+      getTags(),
+    ]).then(([categories, allPosts, allTags]) => ({
+      categories,
+      allPosts,
+      allTags,
+    }));
+  }
+  return sharedBuildDataPromise;
+}
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  const paths: { params: { slug: string[] } }[] = [];
+  const uniquePaths = new Set<string>();
+
+  const addPost = (post: WPPostWithMedia) => {
+    if (!post || !post.slug) return;
+    const url = generatePostUrl(post);
+    const segments = url
+      .replace(/^\/+|\/+$/g, '')
+      .split('/')
+      .filter(Boolean);
+    if (segments.length < 2) return;
+    const key = segments.join('/');
+    if (uniquePaths.has(key)) return;
+    uniquePaths.add(key);
+    paths.push({ params: { slug: segments } });
+  };
+
+  const addPostBySegments = (categoryPath: string, postSlug: string) => {
+    if (!categoryPath || !postSlug) return;
+    const segments = `${categoryPath}/${postSlug}`
+      .replace(/^\/+|\/+$/g, '')
+      .split('/')
+      .filter(Boolean);
+    if (segments.length < 2) return;
+    const key = segments.join('/');
+    if (uniquePaths.has(key)) return;
+    uniquePaths.add(key);
+    paths.push({ params: { slug: segments } });
+  };
+
+  try {
+    const categories = await getCategories();
+    setCategoryCache(categories);
+
+    const [posts, topStories] = await Promise.all([
+      getPosts(100),
+      getTopStoriesWithCategories().catch(() => [] as WPPostWithMedia[]),
+    ]);
+
+    posts.forEach(addPost);
+    topStories.forEach(addPost);
+
+    // The header/most-viewed widgets fetch top stories from GraphQL directly
+    // (lib/queries), so pre-render those URLs too.
+    try {
+      const { getTopStories } = await import('@/lib/queries');
+      const graphTopStories: { slug: string; categories?: { nodes: { slug: string }[] } }[] =
+        (await getTopStories().catch(() => [])) as { slug: string; categories?: { nodes: { slug: string }[] } }[];
+      graphTopStories.forEach((t) => {
+        if (!t?.slug) return;
+        const slugs = (t.categories?.nodes || []).map((n) => n.slug);
+        addPostBySegments(categoryPathFromSlugs(slugs), t.slug);
+      });
+    } catch {
+      // ignore GraphQL top-stories failures
+    }
+
+    // Cover the homepage's per-section rails (opinion, asia, motoring,
+    // education, etc.). Include child categories (e.g. asia/football) whose
+    // posts are also linked from the homepage.
+    await Promise.all(categories.map(async (cat) => {
+      try {
+        const perPage = /opinion|pendapat/i.test(cat.name + ' ' + cat.slug) ? 60 : 20;
+        const sectionPosts = await getPostsByCategoryWithChildren(cat.id, perPage);
+        sectionPosts.forEach(addPost);
+      } catch {
+        // ignore section fetch failures
+      }
+    }));
+  } catch (error) {
+    console.error('Error generating paths for /[...slug]:', error);
+  }
+
+  // Keep the catch-all shell path for the SPA fallback (Cloudflare function /
+  // .htaccess both rewrite unknown article URLs to this shell).
+  paths.push({ params: { slug: ['article-shell'] } });
+
   return {
-    paths: [{ params: { slug: ['article-shell'] } }],
+    paths,
     fallback: false,
   };
 };

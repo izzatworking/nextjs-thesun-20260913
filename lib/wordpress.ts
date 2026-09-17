@@ -58,6 +58,23 @@ export function getCategoryCache(): WPCategory[] | null {
   return cachedCategories;
 }
 
+const UMBRELLA_CATEGORY_SLUGS = new Set(['news', 'national', 'local', 'berita', 'berita-nasional']);
+
+export function categoryPathFromSlugs(slugs: string[]): string {
+  const cleaned = (slugs || [])
+    .map(slug => getShortenedCategorySlug(slug));
+  const meaningful = cleaned.filter(slug => !UMBRELLA_CATEGORY_SLUGS.has(slug));
+  const chosen = meaningful.length > 0 ? meaningful : cleaned;
+  const path = chosen
+    .map(slug =>
+      slug.toLowerCase()
+        .replace(/[^\w\-]/g, '')
+        .replace(/^-+|-+$/g, '') || 'news'
+    )
+    .join('/');
+  return path || 'news';
+}
+
 function resolvePostCategoryPath(post: WPPostWithMedia | WPPost, allCategories?: WPCategory[]): string {
   const postCategoryIds = (post as WPPost).categories || [];
   const categories = allCategories || cachedCategories;
@@ -67,6 +84,10 @@ function resolvePostCategoryPath(post: WPPostWithMedia | WPPost, allCategories?:
       const sorted = sortCategoriesByHierarchy(postCategories);
       return sorted.map(cat => getShortenedCategorySlug(cat.slug)).join('/');
     }
+  }
+  const ownSlugs = (post as WPPostWithMedia).category_slugs;
+  if (ownSlugs && ownSlugs.length > 0) {
+    return categoryPathFromSlugs(ownSlugs);
   }
   if ((post as WPPostWithMedia)._embedded?.['wp:term']?.[0]) {
     const categoryTerms = (post as WPPostWithMedia)._embedded!['wp:term']![0] as WPCategory[];
@@ -108,6 +129,11 @@ function processRESTPost(post: WPPost): WPPostWithMedia {
     tags,
     authors: post.authors || post._embedded?.author || []
   };
+
+  const embeddedTerms = _embedded?.['wp:term']?.[0] as WPCategory[] | undefined;
+  if (embeddedTerms && embeddedTerms.length > 0) {
+    postWithMedia.category_slugs = embeddedTerms.map(cat => cat.slug).filter(Boolean);
+  }
 
   if (featured_media_url) postWithMedia.featured_media_url = featured_media_url;
   if (featured_media_alt) postWithMedia.featured_media_alt = featured_media_alt;
@@ -1081,6 +1107,14 @@ export async function getTopStoriesWithCategories(): Promise<WPPostWithMedia[]> 
       }
       const { _embedded: _emb, ...restPost } = post;
       const postWithMedia: WPPostWithMedia = { ...restPost, categories, tags, authors: post.authors || _emb?.author || [] };
+      const topStoriesEmbeddedTerms = _emb?.['wp:term']?.[0] as WPCategory[] | undefined;
+      if (topStoriesEmbeddedTerms && topStoriesEmbeddedTerms.length > 0) {
+        postWithMedia.category_slugs = topStoriesEmbeddedTerms.map(cat => cat.slug).filter(Boolean);
+      } else if (Array.isArray(post.categories)) {
+        postWithMedia.category_slugs = post.categories
+          .map(cat => (typeof cat === 'object' && cat !== null ? (cat as any).slug : ''))
+          .filter(Boolean) as string[];
+      }
       if (featured_media_url) postWithMedia.featured_media_url = featured_media_url;
       if (featured_media_alt) postWithMedia.featured_media_alt = featured_media_alt;
       if (process.env.NODE_ENV === 'development' && categories.length > 0) {

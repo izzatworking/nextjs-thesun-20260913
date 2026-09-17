@@ -106,6 +106,7 @@ export interface WPPostWithMedia extends WPPost {
   featured_media_alt?: string | null;
   featured_media_width?: number | null;
   featured_media_height?: number | null;
+  category_slugs?: string[];
 }
 
 export interface WPPage {
