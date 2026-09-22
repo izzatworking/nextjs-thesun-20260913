@@ -35,17 +35,17 @@ export default function CombinedSection({
 
   const columns = [
     {
-      name: motoringCategory?.name || 'Motoring',
+      name: cleanTextContent(motoringCategory?.name || 'Motoring'),
       slug: motoringCategory?.slug || 'motoring',
       posts: motoringPosts,
     },
     {
-      name: educationCategory?.name || 'Education',
+      name: cleanTextContent(educationCategory?.name || 'Education'),
       slug: educationCategory?.slug || 'education',
       posts: educationPosts,
     },
     {
-      name: peopleIssuesCategory?.name || 'People & Issues',
+      name: cleanTextContent(peopleIssuesCategory?.name || 'People & Issues'),
       slug: peopleIssuesCategory?.slug || 'people-issues',
       posts: peopleIssuesPosts,
     },
@@ -55,7 +55,7 @@ export default function CombinedSection({
     .filter((cat) => cat.parent === 0 && cat.name && cat.slug)
     .slice(0, 30)
     .map((cat) => ({
-      name: cat.name,
+      name: cleanTextContent(cat.name),
       slug: cat.slug,
     }));
 
@@ -75,24 +75,31 @@ export default function CombinedSection({
             const featured = col.posts[0];
             const list = col.posts.slice(1, 4);
             return (
-              <div key={col.slug} className="min-w-0">
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="w-0.5 h-5 bg-gray-900" />
-                  <Link href={`/${col.slug}`}>
-                    <h3 className="text-2xl font-black text-gray-900 tracking-tight hover:text-red-600 transition-colors xl:text-3xl">
-                      {col.name}
-                    </h3>
+              <div key={col.slug} className="min-w-0 flex flex-col">
+                {/* Section header — red container, white text */}
+                <div className="mb-4 flex items-center justify-between gap-2 rounded-lg bg-[#e30613] px-3 py-2 shadow-sm">
+                  <h3 className="min-w-0 truncate text-sm font-black uppercase tracking-wide text-white">
+                    {col.name}
+                  </h3>
+                  <Link
+                    href={`/${col.slug}`}
+                    className="shrink-0 inline-flex items-center gap-0.5 text-[10px] font-bold uppercase tracking-wider text-white/80 transition-colors hover:text-white"
+                  >
+                    More
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                    </svg>
                   </Link>
                 </div>
 
                 {featured && (
-                  <Link href={getPostUrl(featured)} className="group block mb-6">
-                    <div className="aspect-[16/9] bg-gray-100 overflow-hidden mb-4 rounded">
+                  <Link href={getPostUrl(featured)} className="group block mb-4">
+                    <div className="relative aspect-[16/9] bg-gray-100 overflow-hidden rounded-xl mb-3">
                       {featured.featured_media_url ? (
                         <img
                           src={featured.featured_media_url}
                           alt={cleanTextContent(featured.featured_media_alt || featured.title.rendered)}
-                          className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-200">
@@ -101,55 +108,40 @@ export default function CombinedSection({
                           </svg>
                         </div>
                       )}
-                    </div>
-                    <div className="space-y-1.5">
-                      <span className="text-[11px] text-gray-400 uppercase tracking-wider">
-                        {formatRelativeTime(featured.date)}
+                      <span className="absolute top-2 left-2 rounded bg-[#e30613] px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white">
+                        {col.name}
                       </span>
-                      <h4 className="text-base font-bold text-gray-900 group-hover:text-red-600 transition-colors leading-snug">
-                        {cleanTextContent(featured.title.rendered)}
-                      </h4>
-                      {featured.excerpt?.rendered && (
-                        <p className="text-sm text-gray-500 leading-relaxed line-clamp-2">
-                          {cleanTextContent(featured.excerpt.rendered)}
-                        </p>
-                      )}
+                    </div>
+                    <h4 className="text-base font-bold text-gray-900 group-hover:text-[#e30613] transition-colors leading-snug line-clamp-3">
+                      {cleanTextContent(featured.title.rendered)}
+                    </h4>
+                    <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-gray-400">
+                      <span className="h-1 w-1 rounded-full bg-[#e30613]" />
+                      {formatRelativeTime(featured.date)}
                     </div>
                   </Link>
                 )}
 
-                <div className="space-y-0">
+                <div className="mt-auto divide-y divide-gray-100 border-t border-gray-100">
                   {list.map((post, i) => (
                     <Link
                       key={post.id}
                       href={getPostUrl(post)}
-                      className="group flex items-start gap-4 py-3.5 border-t border-gray-100 hover:border-gray-200 transition-colors"
+                      className="group flex items-start gap-3 py-3"
                     >
-                      <span className="text-xs font-mono text-gray-300 tabular-nums mt-0.5 w-4 flex-shrink-0">
+                      <span className="w-5 shrink-0 text-sm font-black leading-tight tabular-nums text-[#e30613]/60 transition-colors group-hover:text-[#e30613]">
                         {String(i + 2).padStart(2, '0')}
                       </span>
                       <div className="flex-1 min-w-0">
-                        <h5 className="text-sm font-medium text-gray-900 group-hover:text-red-600 transition-colors leading-snug line-clamp-2">
+                        <h5 className="text-sm font-semibold text-gray-800 group-hover:text-[#e30613] transition-colors leading-snug line-clamp-2">
                           {cleanTextContent(post.title.rendered)}
                         </h5>
-                        <span className="text-[11px] text-gray-400 mt-1 block">
+                        <span className="mt-1 block text-[10px] text-gray-400">
                           {formatRelativeTime(post.date)}
                         </span>
                       </div>
                     </Link>
                   ))}
-                </div>
-
-                <div className="mt-5 pt-4 border-t border-gray-200">
-                  <Link
-                    href={`/${col.slug}`}
-                    className="inline-flex items-center text-xs font-medium text-gray-500 hover:text-red-600 transition-colors gap-1.5 group/link"
-                  >
-                    View all {col.name} stories
-                    <svg className="w-3.5 h-3.5 group-hover/link:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
-                  </Link>
                 </div>
               </div>
             );

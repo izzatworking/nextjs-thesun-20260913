@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import SubscribeModal, { SubscribeMode } from '../common/SubscribeModal';
 import {
   FaInstagram,
   FaFacebookF,
@@ -26,7 +27,7 @@ const socialLinks = [
 
 interface FooterColumn {
   title: string;
-  links: { label: string; href: string; external?: boolean }[];
+  links: { label: string; href: string; external?: boolean; action?: SubscribeMode }[];
 }
 
 const columns: FooterColumn[] = [
@@ -63,30 +64,36 @@ const columns: FooterColumn[] = [
       { label: 'Contact', href: '/contact-us' },
       { label: 'Privacy Policy', href: '/privacy-policy' },
       { label: 'Disclaimer', href: '/disclaimer' },
-      { label: 'Advertising', href: '/advertise' },
+      
     ],
   },
   {
     title: 'Subscriptions',
     links: [
-      { label: 'Newspaper', href: '/subscriptions' },
-      { label: 'Subscribe Now', href: '/subscribe-now' },
-      { label: 'iPaper', href: '/ipaper' },
-      { label: 'iPaper Digital', href: 'https://thesun-ipaper.cld.bz/', external: true },
+      { label: 'Newspaper', href: '/subscribe-now' },
+      { label: 'Newsletter', href: '#', action: 'newsletter' },
+      { label: 'iPaper', href: '#', action: 'ipaper' },
     ],
   },
   {
     title: 'Advertise',
     links: [
-      { label: 'Advertising', href: '/advertise' },
+      { label: 'Print & Digital', href: '/advertise' },
       { label: 'Classifieds', href: 'https://sunmedia.com.my/', external: true },
     ],
   },
 ];
 
-function FooterLink({ label, href, external }: { label: string; href: string; external?: boolean }) {
+function FooterLink({ label, href, external, onClick }: { label: string; href: string; external?: boolean; onClick?: () => void }) {
   const className =
     'inline-flex items-center gap-1 text-[13px] text-[#525252] py-1 transition-colors duration-200 hover:text-[#E30613] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E30613]/40 focus-visible:rounded';
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className={className}>
+        {label}
+      </button>
+    );
+  }
   if (external) {
     return (
       <a href={href} target="_blank" rel="noopener noreferrer" className={className} aria-label={`${label} (opens in a new tab)`}>
@@ -103,6 +110,7 @@ function FooterLink({ label, href, external }: { label: string; href: string; ex
 
 export default function Footer() {
   const [openCol, setOpenCol] = useState<number | null>(null);
+  const [subscribeMode, setSubscribeMode] = useState<SubscribeMode | null>(null);
 
   const toggleCol = (i: number) => setOpenCol(openCol === i ? null : i);
 
@@ -148,7 +156,12 @@ export default function Footer() {
                   <ul className="mt-3 space-y-0.5">
                     {col.links.map((link) => (
                       <li key={link.label}>
-                        <FooterLink label={link.label} href={link.href} external={link.external} />
+                        <FooterLink
+                          label={link.label}
+                          href={link.href}
+                          external={link.external}
+                          onClick={link.action ? () => setSubscribeMode(link.action as SubscribeMode) : undefined}
+                        />
                       </li>
                     ))}
                   </ul>
@@ -186,7 +199,18 @@ export default function Footer() {
                         <ul className="space-y-1">
                           {col.links.map((link) => (
                             <li key={link.label}>
-                              {link.external ? (
+                              {link.action ? (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSubscribeMode(link.action as SubscribeMode);
+                                    setOpenCol(null);
+                                  }}
+                                  className="inline-flex items-center gap-1 text-[13px] text-[#525252] py-1 transition-colors duration-200 hover:text-[#E30613]"
+                                >
+                                  {link.label}
+                                </button>
+                              ) : link.external ? (
                                 <a
                                   href={link.href}
                                   target="_blank"
@@ -255,6 +279,12 @@ export default function Footer() {
           </p>
         </div>
       </div>
+
+      <SubscribeModal
+        mode={subscribeMode ?? 'newsletter'}
+        isOpen={subscribeMode !== null}
+        onClose={() => setSubscribeMode(null)}
+      />
     </footer>
   );
 }

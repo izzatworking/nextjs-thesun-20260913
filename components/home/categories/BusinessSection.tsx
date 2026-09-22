@@ -3,6 +3,7 @@ import { WPPostWithMedia, WPCategory } from '../../../types/wordpress';
 import { cleanTextContent } from '../utils/contentCleaner';
 import { formatRelativeTime } from '../utils/timeFormatter';
 import Link from 'next/link';
+import MostViewsSidebar from '../MostViewsSidebar';
 
 interface BusinessSectionProps {
   categories: WPCategory[];
@@ -119,15 +120,19 @@ export default function BusinessSection({ categories, corporatePosts, globalPost
           </div>
         </div>
 
-        {/* 40% — Follow Us on Social Media (image) */}
-        <div className="lg:col-span-2 min-w-0">
-          <Link href="/follow-us" className="block relative overflow-hidden rounded-xl h-full min-h-[240px] bg-gray-100 group">
-            <img
-              src="/images/follow-us.png"
-              alt="Follow Us on Social Media"
-              className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
-            />
-            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+        {/* 40% — Most Viewed (modern) + Follow Us image */}
+        <div className="lg:col-span-2 min-w-0 flex flex-col gap-4">
+          <MostViewsSidebar />
+
+          {/* Follow Us image */}
+          <Link href="/follow-us" className="group block">
+            <div className="relative overflow-hidden rounded-xl aspect-[12/5] bg-gray-100">
+              <img
+                src="/images/follow-us-2.png"
+                alt="Follow Us on Social Media"
+                className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
+              />
+            </div>
           </Link>
         </div>
       </div>

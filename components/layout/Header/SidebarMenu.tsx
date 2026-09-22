@@ -273,35 +273,25 @@ export default function SidebarMenu({
           </div>
         )}
 
-        {/* Subscribe cards */}
-        <div className="mb-4 space-y-3">
-          <div className="flex items-center justify-between gap-3 rounded-2xl border border-red-100 bg-white/80 p-3.5 shadow-[0_12px_30px_-18px_rgba(120,40,20,0.5)] ring-1 ring-red-100/60">
-            <div className="min-w-0">
-              <img src="/images/thesun.png" alt="theSun" className="h-5 w-auto" />
-              <p className="mt-1.5 text-[13px] font-bold leading-tight text-[#2b0a0e]">Subscribe to theSun</p>
-              <p className="mt-0.5 text-[11px] leading-snug text-[#6b4a4f]">
-                Get the latest headlines delivered to you daily
-              </p>
-            </div>
+        {/* Subscribe cards — 2 per row */}
+        <div className="mb-4 grid grid-cols-2 gap-3">
+          <div className="flex flex-col rounded-2xl border border-red-100 bg-white/80 p-3.5 shadow-[0_12px_30px_-18px_rgba(120,40,20,0.5)] ring-1 ring-red-100/60">
+            <img src="/images/thesun.png" alt="theSun" className="h-5 w-auto self-start object-contain" />
+            <p className="mb-3 mt-2 text-[13px] font-bold leading-tight text-[#2b0a0e]">Subscribe to theSun</p>
             <button
               onClick={() => setSubscribeMode('newsletter')}
-              className="shrink-0 rounded-full bg-gradient-to-r from-[#E30613] to-[#9f0710] px-4 py-2 text-xs font-bold text-white shadow-md shadow-[#E30613]/25 transition hover:brightness-110 active:scale-95"
+              className="mt-auto w-full rounded-full bg-gradient-to-r from-[#E30613] to-[#9f0710] px-3 py-2 text-xs font-bold text-white shadow-md shadow-[#E30613]/25 transition hover:brightness-110 active:scale-95"
             >
               Subscribe
             </button>
           </div>
 
-          <div className="flex items-center justify-between gap-3 rounded-2xl border border-red-100 bg-white/80 p-3.5 shadow-[0_12px_30px_-18px_rgba(120,40,20,0.5)] ring-1 ring-red-100/60">
-            <div className="min-w-0">
-              <img src="/images/ipaper2.png" alt="iPaper" className="h-5 w-auto" />
-              <p className="mt-1.5 text-[13px] font-bold leading-tight text-[#2b0a0e]">Subscribe to iPaper</p>
-              <p className="mt-0.5 text-[11px] leading-snug text-[#6b4a4f]">
-                Receive instant notifications of our iPaper edition.
-              </p>
-            </div>
+          <div className="flex flex-col rounded-2xl border border-red-100 bg-white/80 p-3.5 shadow-[0_12px_30px_-18px_rgba(120,40,20,0.5)] ring-1 ring-red-100/60">
+            <img src="/images/ipaper2.png" alt="iPaper" className="h-5 w-auto self-start object-contain" />
+            <p className="mb-3 mt-2 text-[13px] font-bold leading-tight text-[#2b0a0e]">Subscribe to iPaper</p>
             <button
               onClick={() => setSubscribeMode('ipaper')}
-              className="shrink-0 rounded-full bg-gradient-to-r from-[#005321] to-[#013e1a] px-4 py-2 text-xs font-bold text-white shadow-md shadow-[#005321]/25 transition hover:brightness-110 active:scale-95"
+              className="mt-auto w-full rounded-full bg-gradient-to-r from-[#005321] to-[#013e1a] px-3 py-2 text-xs font-bold text-white shadow-md shadow-[#005321]/25 transition hover:brightness-110 active:scale-95"
             >
               Subscribe
             </button>

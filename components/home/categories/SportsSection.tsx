@@ -24,8 +24,8 @@ export default function SportsSection({ posts, categories, isLast = false }: Spo
       </div>
 
       {/* 40% - Newsletter subscription */}
-      <div className="lg:col-span-2 min-w-0 h-auto">
-        <NewsletterSubscribe className="h-full" />
+      <div className="lg:col-span-2 min-w-0 flex items-center">
+        <NewsletterSubscribe />
       </div>
 
       {!isLast && <div className="col-span-full border-t border-gray-300 my-6 sm:mt-4" />}

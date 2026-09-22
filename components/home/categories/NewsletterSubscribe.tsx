@@ -2,11 +2,8 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import {
-  FiBell,
   FiMail,
   FiArrowRight,
-  FiZap,
-  FiPhone,
   FiCheck,
   FiLoader,
 } from 'react-icons/fi';
@@ -18,11 +15,6 @@ interface NewsletterSubscribeProps {
 }
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-const FEATURES = [
-  { icon: FiZap, title: 'Breaking News', desc: 'As it happens', accent: 'bg-[#e30613]/10 text-[#e30613]' },
-  { icon: FiPhone, title: 'Phone Alerts', desc: 'Straight to your inbox', accent: 'bg-[#005321]/10 text-[#005321]' },
-];
 
 export default function NewsletterSubscribe({ className = '' }: NewsletterSubscribeProps) {
   const [email, setEmail] = useState('');
@@ -82,80 +74,59 @@ export default function NewsletterSubscribe({ className = '' }: NewsletterSubscr
   const loading = status === 'loading';
 
   return (
-    <div ref={cardRef} className={className}>
-      <div className="relative h-full overflow-hidden rounded-[28px] border border-[#005321]/10 bg-gradient-to-br from-white via-[#fdfcfb] to-[#f1f6f2] p-5 sm:p-7 shadow-[0_24px_70px_-30px_rgba(0,83,33,0.3)] flex flex-col">
-        {/* Editorial top line */}
-        <div className="pointer-events-none absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#005321] via-[#e30613] to-[#005321]" />
+    <div ref={cardRef} className={`w-full ${className}`}>
+      <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-[0_24px_70px_-35px_rgba(0,0,0,0.35)] flex flex-col">
+        {/* Editorial top accent */}
+        <div className="pointer-events-none absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#e30613] via-[#e30613] to-[#9f0710]" />
+        {/* Subtle background texture */}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(227,6,19,0.06),transparent_55%)]" />
 
-        {/* Decorative arcs */}
-        <svg className="pointer-events-none absolute -top-8 -right-8 h-36 w-36 text-[#e30613]/10" viewBox="0 0 100 100" fill="none">
-          <circle cx="90" cy="10" r="60" stroke="currentColor" strokeWidth="12" strokeLinecap="round" strokeDasharray="140 240" />
-        </svg>
-        <svg className="pointer-events-none absolute -bottom-10 -left-10 h-44 w-44 text-[#005321]/10" viewBox="0 0 100 100" fill="none">
-          <circle cx="10" cy="90" r="60" stroke="currentColor" strokeWidth="12" strokeLinecap="round" strokeDasharray="120 260" />
-        </svg>
+        <div className="relative z-10 flex flex-col items-center justify-center px-6 py-6 text-center sm:px-8">
+          {/* Logo */}
+          <img
+            src="/images/thesun.png"
+            alt="theSun"
+            className={`${reveal(0)} h-6 w-auto sm:h-7`}
+            style={{ transitionDelay: '0ms' }}
+          />
 
-        {/* Gradient blobs */}
-        <div className="pointer-events-none absolute -top-16 -right-10 h-48 w-48 rounded-full bg-gradient-to-br from-[#e30613]/10 to-transparent blur-2xl" />
-        <div className="pointer-events-none absolute -bottom-16 -left-12 h-52 w-52 rounded-full bg-gradient-to-tr from-[#005321]/10 to-transparent blur-2xl" />
-
-        {/* Editorial dots */}
-        <div className="pointer-events-none absolute right-4 top-4 flex gap-1">
-          <span className="h-1 w-1 rounded-full bg-[#005321]/20" />
-          <span className="h-1 w-1 rounded-full bg-[#e30613]/20" />
-          <span className="h-1 w-1 rounded-full bg-[#005321]/20" />
-        </div>
-
-        <div className="relative z-10 flex flex-1 flex-col">
-          {/* Top: logo + badge */}
-          <div className={`${reveal(0)} mb-5 flex items-center justify-between`} style={{ transitionDelay: '0ms' }}>
-            <img src="/images/thesun.png" alt="theSun" className="h-6 w-auto sm:h-7" />
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-[#005321]/15 bg-white/70 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#005321]">
-              <FiBell className="h-3 w-3" aria-hidden="true" />
-              Stay Informed
-            </span>
-          </div>
+          {/* Eyebrow */}
+          <span
+            className={`${reveal(1)} mt-4 inline-flex items-center gap-1.5 rounded-full border border-[#e30613]/15 bg-[#e30613]/5 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#e30613]`}
+            style={{ transitionDelay: '60ms' }}
+          >
+            The Sun Newsletter
+          </span>
 
           {/* Heading */}
-          <h2 className={`${reveal(1)} text-3xl font-black leading-none text-gray-900 xl:text-4xl`} style={{ transitionDelay: '70ms' }}>
+          <h2
+            className={`${reveal(2)} mt-3 text-2xl font-black leading-[1.05] tracking-tight text-gray-900 sm:text-3xl`}
+            style={{ transitionDelay: '120ms' }}
+          >
             Subscribe to our
-            <span className="block whitespace-nowrap bg-gradient-to-r from-[#e30613] to-[#005321] bg-clip-text text-transparent">
-              Top Stories
-            </span>
+            <span className="block text-[#e30613]">Top Stories</span>
           </h2>
 
           {/* Subtext */}
-          <p className={`${reveal(2)} mb-5 mt-3 text-sm leading-relaxed text-black-600`} style={{ transitionDelay: '140ms' }}>
-            Get the latest breaking news, trending stories and important updates delivered straight to your inbox.
+          <p
+            className={`${reveal(3)} mx-auto mt-2 max-w-xs text-sm leading-relaxed text-gray-500`}
+            style={{ transitionDelay: '180ms' }}
+          >
+            The latest breaking news and trending stories, delivered straight to your inbox.
           </p>
 
-          {/* Feature icons */}
-          <ul className={`${reveal(3)} mb-6 flex flex-col gap-3`} style={{ transitionDelay: '210ms' }}>
-            {FEATURES.map((feature) => (
-              <li key={feature.title} className="flex items-center gap-3">
-                <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${feature.accent}`}>
-                  <feature.icon className="h-5 w-5" aria-hidden="true" />
-                </span>
-                <div>
-                  <p className="text-sm font-bold leading-tight text-gray-900">{feature.title}</p>
-                  <p className="text-xs text-gray-500">{feature.desc}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
-
           {/* Form / success state */}
-          <div className={`${reveal(4)}`} style={{ transitionDelay: '280ms' }}>
+          <div className={`${reveal(4)} mt-5 w-full max-w-sm`} style={{ transitionDelay: '240ms' }}>
             {status === 'success' ? (
-              <div role="status" aria-live="polite" className="mb-5 rounded-2xl border border-[#005321]/15 bg-[#005321]/5 p-5 text-center">
+              <div role="status" aria-live="polite" className="rounded-2xl border border-[#005321]/15 bg-[#005321]/5 p-5">
                 <span className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-[#005321] text-white">
                   <FiCheck className="h-5 w-5" aria-hidden="true" />
                 </span>
                 <p className="text-sm font-bold text-[#005321]">You&apos;re subscribed!</p>
-                <p className="mt-1 text-xs text-gray-600">The Sun&apos;s top stories are on their way to your inbox.</p>
+                <p className="mt-1 text-xs text-gray-600">Top stories are on their way to your inbox.</p>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} noValidate className="mb-5">
+              <form onSubmit={handleSubmit} noValidate>
                 <div className="flex flex-col gap-3">
                   <div className="relative w-full">
                     <FiMail className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" aria-hidden="true" />
@@ -177,7 +148,7 @@ export default function NewsletterSubscribe({ className = '' }: NewsletterSubscr
                       disabled={loading}
                       aria-invalid={!!error}
                       aria-describedby={error ? 'newsletter-error' : undefined}
-                      className="w-full rounded-full border border-gray-200 bg-white py-3 pl-11 pr-4 text-sm text-gray-900 shadow-sm placeholder-gray-400 transition-all duration-200 focus:border-[#005321] focus:outline-none focus:ring-2 focus:ring-[#005321]/25 disabled:opacity-60"
+                      className="w-full rounded-full border border-gray-200 bg-white py-3 pl-11 pr-4 text-sm text-gray-900 shadow-sm placeholder-gray-400 transition-all duration-200 focus:border-[#e30613] focus:outline-none focus:ring-2 focus:ring-[#e30613]/20 disabled:opacity-60"
                     />
                   </div>
                   <button
@@ -209,8 +180,20 @@ export default function NewsletterSubscribe({ className = '' }: NewsletterSubscr
             )}
           </div>
 
+          {/* Trust row */}
+          <div
+            className={`${reveal(5)} mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-gray-400`}
+            style={{ transitionDelay: '300ms' }}
+          >
+            <span>Breaking News</span>
+            <span className="h-1 w-1 rounded-full bg-gray-300" />
+            <span>Daily Digest</span>
+            <span className="h-1 w-1 rounded-full bg-gray-300" />
+            <span>No Spam</span>
+          </div>
+
           {/* Privacy */}
-          <p className={`${reveal(5)} text-xs text-gray-500`} style={{ transitionDelay: '350ms' }}>
+          <p className={`${reveal(6)} mt-2 text-[11px] text-gray-400`} style={{ transitionDelay: '340ms' }}>
             By subscribing, you agree to our{' '}
             <Link href="/privacy-policy" className="font-medium text-[#e30613] underline underline-offset-2 transition-colors hover:text-[#9f0710]">
               Privacy Policy

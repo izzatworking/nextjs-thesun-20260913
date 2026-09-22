@@ -15,8 +15,6 @@ import { WPCategory } from '../types/wordpress';
 import Layout from '../components/layout/Layout';
 import FeaturedStory from '../components/home/FeaturedStory';
 import LatestNews from '../components/home/LatestNews';
-import MostViewsSidebar from '../components/home/MostViewsSidebar';
-import MostViewedSection from '../components/home/MostViewedSection';
 import SpecialSection from '../components/home/SpecialSection';
 import SportsSection from '../components/home/categories/SportsSection';
 import LifestyleSection from '../components/home/categories/LifestyleSection';
@@ -166,9 +164,9 @@ function HomeInner({
               </div>
             )}
 
-            {/* 4 stories — gambar kiri + text kanan, gambar pendek di mobile/tablet */}
+            {/* 4 stories — mobile 2 per row (gambar atas, tag + title + masa bawah), desktop gambar kiri + text kanan */}
             {bottomPosts.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
+              <div className="grid grid-cols-2 gap-3 mt-4">
                 {bottomPosts.map((post) => {
                   const catId = typeof post.categories?.[0] === 'number' ? post.categories[0] : (post.categories?.[0] as any)?.id;
                   const catName = catId ? cleanHtmlContent(categories.find(c => c.id === catId)?.name || '') : '';
@@ -176,8 +174,8 @@ function HomeInner({
                   const postDate = new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
                   return (
                     <Link key={post.id} href={getPostUrl(post, categories)} className="block group">
-                      <div className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 border border-gray-100 flex items-stretch h-full">
-                        <div className="w-28 sm:w-32 lg:w-36 h-20 sm:h-24 lg:h-28 shrink-0 relative bg-gray-100 overflow-hidden">
+                      <div className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 border border-gray-100 flex flex-col sm:flex-row items-stretch h-full">
+                        <div className="w-full sm:w-32 lg:w-36 aspect-[16/10] sm:aspect-auto sm:h-24 lg:h-28 shrink-0 relative bg-gray-100 overflow-hidden">
                           {(post as any).featured_media_url ? (
                             <img src={(post as any).featured_media_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                           ) : (
@@ -186,14 +184,12 @@ function HomeInner({
                             </div>
                           )}
                         </div>
-                        <div className="p-3 flex-1 min-w-0 flex flex-col justify-center">
-                          <div className="flex items-center gap-2 mb-1 flex-wrap">
-                            {catName && (
-                              <span className="text-[10px] font-semibold text-red-600 uppercase tracking-wider whitespace-nowrap">{catName}</span>
-                            )}
-                            <span className="text-[10px] text-gray-400 whitespace-nowrap">{postDate}</span>
-                          </div>
+                        <div className="p-2 sm:p-3 flex-1 min-w-0 flex flex-col">
+                          {catName && (
+                            <span className="text-[10px] font-semibold text-red-600 uppercase tracking-wider whitespace-nowrap mb-1">{catName}</span>
+                          )}
                           <h3 className="font-bold text-gray-900 group-hover:text-red-600 transition-colors line-clamp-2 text-sm leading-snug">{cleanTitle}</h3>
+                          <span className="text-[10px] text-gray-400 whitespace-nowrap mt-auto pt-1">{postDate}</span>
                         </div>
                       </div>
                     </Link>
@@ -205,8 +201,13 @@ function HomeInner({
 
           <div className="lg:col-span-1 mt-4 lg:mt-0">
             <LatestNews posts={latestPosts} categories={categories} />
-            <div className="mt-8 pt-6 border-t border-gray-100">
-              <MostViewsSidebar />
+            {/* Ganti Most Viewed dengan ads — tidak terlalu panjang, align dengan 4 top stories */}
+            <div className="mt-6">
+              <AdvertisementBanner
+                desktopWidth={300} desktopHeight={250}
+                mobileWidth={320} mobileHeight={100}
+                color="#e30613" rate="RM 1,500 / week"
+              />
             </div>
           </div>
         </div>
@@ -254,6 +255,14 @@ function HomeInner({
         {/* Sports — 60/40 with subscribe box */}
         <SportsSection posts={sportsPosts} categories={categories} />
 
+        {/* Motoring / Education / People & Issues — before Local, World & Asia */}
+        <CombinedSection
+          motoringPosts={motoringPosts}
+          educationPosts={educationPosts}
+          peopleIssuesPosts={peopleIssuesPosts}
+          categories={categories}
+        />
+
         {/* Local, World & Asia — 3 columns */}
         <LocalWorldSection
           malaysiaPosts={malaysiaPosts}
@@ -262,16 +271,14 @@ function HomeInner({
           categories={categories}
         />
 
-        <CombinedSection
-          motoringPosts={motoringPosts}
-          educationPosts={educationPosts}
-          peopleIssuesPosts={peopleIssuesPosts}
-          categories={categories}
+        {/* Ads (970×90) — under Local, World & Asia */}
+        <AdvertisementBanner
+          desktopWidth={970} desktopHeight={90}
+          mobileWidth={320} mobileHeight={100}
+          color="#ca8a04" rate="RM 6,000 / week"
         />
 
-      
         <NewsBeritaSection
-          newsPosts={newsPosts}
           beritaPosts={beritaPosts}
           categories={categories}
         />
