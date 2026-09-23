@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, ChangeEvent, DragEvent } from 'react';
 import { useRouter } from 'next/router';
-import { GetStaticProps } from 'next';
+import { GetServerSideProps } from 'next';
 import Layout from '../../components/layout/Layout';
 import Breadcrumb from '../../components/common/Breadcrumb';
 import { PDFData } from '@/types/ipaper';
@@ -352,7 +352,11 @@ export default function IPaperAdminPage({ categories }: Props) {
   );
 }
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  context.res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=300, stale-while-revalidate=600'
+  );
   const categories = await getCategories();
   return {
     props: {

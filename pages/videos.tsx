@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { GetServerSideProps } from 'next';
 import Layout from '../components/layout/Layout';
 import VideoPlayerModal from '../components/home/categories/VideoPlayerModal';
 import { getCategories } from '../lib/wordpress';
@@ -114,37 +115,30 @@ function SectionHeading({
   );
 }
 
-export default function VideosPage() {
-  const [categories, setCategories] = useState<WPCategory[]>([]);
-  const [videos, setVideos] = useState<YouTubeVideo[]>([]);
-  const [mostViewed, setMostViewed] = useState<TopStory[]>([]);
-  const [loading, setLoading] = useState(true);
+interface VideosPageProps {
+  categories: WPCategory[];
+  videos: YouTubeVideo[];
+  mostViewed: TopStory[];
+}
+
+export async function fetchYouTubeVideos(): Promise<YouTubeVideo[]> {
+  try {
+    const res = await fetch(
+      `https://www.googleapis.com/youtube/v3/search?key=${YOUTUBE_API_KEY}&q=the+sun+malaysia&type=video&part=snippet,id&order=date&maxResults=24`
+    );
+    const data = await res.json();
+    return Array.isArray(data.items) ? data.items : [];
+  } catch (e) {
+    console.error('Failed to load videos:', e);
+    return [];
+  }
+}
+
+export default function VideosPage({ categories, videos, mostViewed }: VideosPageProps) {
+  const loading = false;
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<Tab>('home');
-
-  useEffect(() => {
-    getCategories().then(setCategories).catch(() => {});
-    getTopStories().then(setMostViewed).catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    setLoading(true);
-    const fetchVideos = async () => {
-      try {
-        const res = await fetch(
-          `https://www.googleapis.com/youtube/v3/search?key=${YOUTUBE_API_KEY}&q=the+sun+malaysia&type=video&part=snippet,id&order=date&maxResults=24`
-        );
-        const data = await res.json();
-        if (data.items) setVideos(data.items);
-      } catch (e) {
-        console.error('Failed to load videos:', e);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchVideos();
-  }, []);
 
   const nextCarousel = useCallback(() => {
     setCarouselIndex(prev => (prev + 1) % Math.min(videos.length, 10));
@@ -466,3 +460,18 @@ export default function VideosPage() {
     </Layout>
   );
 }
+
+export const getServerSideProps: GetServerSideProps<VideosPageProps> = async (context) => {
+  context.res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=300, stale-while-revalidate=600'
+  );
+
+  const [categories, videos, mostViewed] = await Promise.all([
+    getCategories().catch(() => [] as WPCategory[]),
+    fetchYouTubeVideos(),
+    getTopStories().catch(() => [] as TopStory[]),
+  ]);
+
+  return { props: { categories, videos, mostViewed } };
+};

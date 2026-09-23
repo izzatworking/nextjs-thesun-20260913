@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import Layout from '@/components/layout/Layout';
 import NetworkImage from '@/components/common/NetworkImage';
@@ -163,40 +163,30 @@ function TopStoriesPageInner({ articles, categories }: TopStoriesPageProps) {
   );
 }
 
-export default function TopStoriesPage() {
-  const [data, setData] = useState<TopStoriesPageProps | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      try {
-        const [articles, categories] = await Promise.all([
-          getTopStories(),
-          getCategories(),
-        ]);
-
-        const result: TopStoriesPageProps = {
-          articles: (articles || []).slice(0, 15),
-          categories: categories || [],
-        };
-        if (active) setData(result);
-      } catch (error) {
-        console.error('Error fetching top stories:', error);
-      }
-    })();
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  if (!data) {
-    return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
-        <div className="w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
-        <p className="mt-4 text-sm text-gray-500">Loading…</p>
-      </div>
-    );
-  }
-
-  return <TopStoriesPageInner {...data} />;
+export default function TopStoriesPage(props: TopStoriesPageProps) {
+  return <TopStoriesPageInner {...props} />;
 }
+
+export const getServerSideProps: GetServerSideProps<TopStoriesPageProps> = async (context) => {
+  context.res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=120, stale-while-revalidate=600'
+  );
+
+  try {
+    const [articles, categories] = await Promise.all([
+      getTopStories(),
+      getCategories(),
+    ]);
+
+    return {
+      props: {
+        articles: (articles || []).slice(0, 15),
+        categories: categories || [],
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching top stories:', error);
+    return { props: { articles: [], categories: [] } };
+  }
+};

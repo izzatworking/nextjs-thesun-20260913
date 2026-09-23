@@ -1,4 +1,4 @@
-import { GetStaticProps } from 'next';
+import { GetServerSideProps } from 'next';
 import Script from 'next/script';
 import Layout from '../components/layout/Layout';
 import Breadcrumb from '../components/common/Breadcrumb';
@@ -74,7 +74,11 @@ export default function SubscribeNow({ categories }: Props) {
   );
 }
 
-export const getStaticProps: GetStaticProps<Props> = async () => {
+export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+  context.res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=300, stale-while-revalidate=600'
+  );
   const categories = await getCategories();
   return {
     props: {

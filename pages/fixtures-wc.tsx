@@ -1,4 +1,4 @@
-import { GetStaticProps } from 'next';
+import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { getCategories, getPostsByCategory, getPostUrl } from '../lib/wordpress';
 import { getWCFixtures, getWCStandings } from '../lib/football';
@@ -86,7 +86,11 @@ export default function FixturesWC({ categories, fixtures, sportsPosts }: Props)
   );
 }
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  context.res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=60, stale-while-revalidate=300'
+  );
   const categories = await getCategories();
   const sportsCat = categories.find((c) => c.slug === 'sports' || c.name.toLowerCase() === 'sports');
   const sportsPosts = sportsCat ? await getPostsByCategory(sportsCat.id, 10) : [];

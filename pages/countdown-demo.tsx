@@ -1,4 +1,4 @@
-import { GetStaticProps } from 'next';
+import { GetServerSideProps } from 'next';
 import Layout from '../components/layout/Layout';
 import Breadcrumb from '../components/common/Breadcrumb';
 import { WPCategory } from '../types/wordpress';
@@ -52,7 +52,11 @@ export default function CountdownDemo({ categories }: Props) {
   );
 }
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  context.res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=300, stale-while-revalidate=600'
+  );
   const categories = await getCategories();
   return {
     props: {

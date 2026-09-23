@@ -1,7 +1,7 @@
 // pages/tag/[slug].tsx
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-import { getPostsByTagSlug, getTags, getCategories, getPostUrl, setCategoryCache } from '../../lib/wordpress';
+import { useState } from 'react';
+import { GetServerSideProps } from 'next';
+import { getPostsByTagSlug, getTagBySlug, getTags, getCategories, getPostUrl, setCategoryCache } from '../../lib/wordpress';
 import { WPPostWithMedia, WPCategory, WPTag } from '../../types/wordpress';
 import Layout from '../../components/layout/Layout';
 import Breadcrumb from '../../components/common/Breadcrumb';
@@ -208,104 +208,39 @@ function TagInner({ tag, posts, categories, allTags }: TagPageProps) {
   );
 }
 
-export default function Tag() {
-  const { query } = useRouter();
-  const slug = String(Array.isArray(query.slug) ? query.slug[0] : query.slug) || '';
-  const [data, setData] = useState<TagPageProps | null>(null);
-
-  useEffect(() => {
-    let active = true;
-
-    (async () => {
-      try {
-        console.log(`🏷️ Loading tag page for slug: ${slug}`);
-        
-        // Try to fetch tag directly from API first
-        let tag: WPTag | null = null;
-        let posts: WPPostWithMedia[] = [];
-        let categories: WPCategory[] = [];
-        let allTags: WPTag[] = [];
-        
-        try {
-          // Fetch tag by slug
-          const tagRes = await fetch(`https://thesun.my/wp-json/wp/v2/tags?slug=${slug}`);
-          if (tagRes.ok) {
-            const tagData = await tagRes.json();
-            if (tagData && tagData.length > 0) {
-              tag = {
-                id: tagData[0].id,
-                name: tagData[0].name,
-                slug: tagData[0].slug,
-              };
-              console.log(`✅ Found tag: ${tag.name} (ID: ${tag.id})`);
-            }
-          }
-        } catch (err) {
-          console.error('Error fetching tag by slug:', err);
-        }
-        
-        // If tag not found, show not-found state
-        if (!tag) {
-          console.log(`❌ Tag not found: ${slug}`);
-          const result: TagPageProps = { tag: null, posts: [], categories: [], allTags: [] };
-          if (active) setData(result);
-          return;
-        }
-        
-        // Fetch posts for this tag
-        try {
-          posts = await getPostsByTagSlug(slug, 100);
-          console.log(`✅ Fetched ${posts.length} posts for tag: ${slug}`);
-        } catch (err) {
-          console.error('Error fetching posts by tag:', err);
-          posts = [];
-        }
-        
-        // Fetch categories and all tags in parallel
-        try {
-          const [catsData, tagsData] = await Promise.all([
-            getCategories(),
-            getTags(),
-          ]);
-          categories = catsData || [];
-          allTags = tagsData || [];
-          setCategoryCache(categories);
-        } catch (err) {
-          console.error('Error fetching categories/tags:', err);
-        }
-
-        const result: TagPageProps = {
-          tag,
-          posts: posts || [],
-          categories: categories || [],
-          allTags: allTags || [],
-        };
-        if (active) setData(result);
-      } catch (error) {
-        console.error('Error in getStaticProps for tag page:', error);
-      }
-    })();
-
-    return () => {
-      active = false;
-    };
-  }, [slug]);
-
-  if (!data) {
-    return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
-        <div className="w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
-        <p className="mt-4 text-sm text-gray-500">Loading…</p>
-      </div>
-    );
-  }
-
-  return <TagInner {...data} />;
+export default function Tag(props: TagPageProps) {
+  return <TagInner {...props} />;
 }
 
-export const getStaticProps = async () => ({ props: {} });
+export const getServerSideProps: GetServerSideProps<TagPageProps> = async (context) => {
+  context.res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=120, stale-while-revalidate=600'
+  );
 
-export const getStaticPaths = async () => {
-  const tags = await getTags();
-  return { paths: tags.filter(t => t.slug).map(t => ({ params: { slug: t.slug } })), fallback: false };
+  const rawSlug = context.params?.slug;
+  const slug = String(Array.isArray(rawSlug) ? rawSlug[0] : rawSlug) || '';
+
+  const tag = await getTagBySlug(slug);
+
+  if (!tag) {
+    return { props: { tag: null, posts: [], categories: [], allTags: [] } };
+  }
+
+  const [posts, categories, allTags] = await Promise.all([
+    getPostsByTagSlug(slug, 100).catch(() => [] as WPPostWithMedia[]),
+    getCategories().catch(() => [] as WPCategory[]),
+    getTags().catch(() => [] as WPTag[]),
+  ]);
+
+  setCategoryCache(categories);
+
+  return {
+    props: {
+      tag,
+      posts: posts || [],
+      categories: categories || [],
+      allTags: allTags || [],
+    },
+  };
 };

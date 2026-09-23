@@ -1,4 +1,4 @@
-import { GetStaticProps } from 'next';
+import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { getPostsByCategory, getCategories, getPostUrl, setCategoryCache } from '../lib/wordpress';
@@ -295,7 +295,11 @@ export default function WCPage({ sportsPosts, categories, fixtures, standings }:
   );
 }
 
-export const getStaticProps: GetStaticProps = async () => {
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  context.res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=60, stale-while-revalidate=300'
+  );
   const categories = await getCategories();
   setCategoryCache(categories);
   const sportsCat = categories.find((c) => c.slug === 'sports' || c.name.toLowerCase() === 'sports');

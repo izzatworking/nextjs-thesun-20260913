@@ -1,8 +1,8 @@
 'use client';
 
+import { GetServerSideProps } from 'next';
 import Layout from '../components/layout/Layout';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
 import { getCategories } from '../lib/wordpress';
 import type { WPCategory } from '../types/wordpress';
 import {
@@ -76,13 +76,11 @@ const socials: Social[] = [
   },
 ];
 
-export default function FollowUsPage() {
-  const [categories, setCategories] = useState<WPCategory[]>([]);
+interface FollowUsPageProps {
+  categories: WPCategory[];
+}
 
-  useEffect(() => {
-    getCategories().then(setCategories).catch(() => {});
-  }, []);
-
+export default function FollowUsPage({ categories }: FollowUsPageProps) {
   return (
     <Layout categories={categories} title="Follow Us | The Sun Malaysia">
       <div className="min-h-screen bg-gradient-to-br from-[#F9FAFB] via-white to-[#F3F4F6]">
@@ -169,3 +167,12 @@ export default function FollowUsPage() {
     </Layout>
   );
 }
+
+export const getServerSideProps: GetServerSideProps<FollowUsPageProps> = async (context) => {
+  context.res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=300, stale-while-revalidate=600'
+  );
+  const categories = await getCategories().catch(() => [] as WPCategory[]);
+  return { props: { categories } };
+};

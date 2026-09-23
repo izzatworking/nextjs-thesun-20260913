@@ -1,4 +1,4 @@
-import { GetStaticProps } from 'next';
+import { GetServerSideProps } from 'next';
 import Layout from '../components/layout/Layout';
 import Breadcrumb from '../components/common/Breadcrumb';
 import { WPCategory } from '../types/wordpress';
@@ -87,7 +87,11 @@ export default function Subscriptions({ categories }: Props) {
   );
 }
 
-export const getStaticProps: GetStaticProps<Props> = async () => {
+export const getServerSideProps: GetServerSideProps<Props> = async (context) => {
+  context.res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=300, stale-while-revalidate=600'
+  );
   return {
     props: {
       categories: []

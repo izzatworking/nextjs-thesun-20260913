@@ -34,7 +34,7 @@ const GRAPHQL_URL = process.env.NEXT_PUBLIC_WORDPRESS_GRAPHQL_URL || 'https://th
 // Prevent build-time requests from hanging indefinitely (Vercel static generation).
 const FETCH_TIMEOUT_MS = Number(process.env.WP_FETCH_TIMEOUT_MS || 20000);
 
-async function fetchWithTimeout(
+export async function fetchWithTimeout(
   input: RequestInfo | URL,
   init: (RequestInit & Record<string, any>) = {},
   timeoutMs = FETCH_TIMEOUT_MS
@@ -738,6 +738,19 @@ export async function getPostsByTag(tagId: number, perPage = 10): Promise<WPPost
       console.error('REST fallback also failed:', restError);
       return [];
     }
+  }
+}
+
+export async function getTagBySlug(tagSlug: string): Promise<WPTag | null> {
+  try {
+    const res = await fetchWithTimeout(`${WORDPRESS_API_URL}/tags?slug=${encodeURIComponent(tagSlug)}`);
+    if (!res.ok) return null;
+    const tags = await res.json();
+    if (!Array.isArray(tags) || tags.length === 0) return null;
+    return { id: tags[0].id, name: tags[0].name, slug: tags[0].slug };
+  } catch (error) {
+    console.error(`Error fetching tag by slug ${tagSlug}:`, error);
+    return null;
   }
 }
 

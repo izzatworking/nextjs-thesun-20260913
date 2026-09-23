@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import type { GetServerSidePropsContext } from 'next';
 import Link from 'next/link';
 import {
   getPosts,
@@ -457,75 +457,22 @@ const EMPTY_HOME_PROPS: HomeProps = {
   smePosts: [],
 };
 
-const HOME_KEYS: (keyof HomeProps)[] = [
-  'posts', 'categories', 'exclusivePost', 'pinnedPost', 'pinnedPosts', 'topStoriesPosts',
-  'newsPosts', 'beritaPosts', 'lifestylePosts', 'goingViralPosts', 'sportsPosts',
-  'malaysiaPosts', 'worldPosts', 'asiaPosts', 'businessPosts', 'prnPosts',
-  'palestinePosts', 'chinaPosts', 'spotlightPosts', 'videoPosts', 'opinionPosts',
-  'motoringPosts', 'educationPosts', 'peopleIssuesPosts', 'corporatePosts',
-  'globalPosts', 'localPosts', 'smePosts',
-];
+export const config = { maxDuration: 60 };
 
-function mergeHomeProps(prev: HomeProps, next: HomeProps): HomeProps {
-  const merged: Record<string, unknown> = {};
-  for (const key of HOME_KEYS) {
-    const nv = next[key];
-    const pv = prev[key];
-    merged[key] = Array.isArray(nv) ? (nv.length > 0 ? nv : pv) : (nv ?? pv);
-  }
-  return merged as unknown as HomeProps;
-}
-
-export async function getStaticProps() {
+export async function getServerSideProps(context: GetServerSidePropsContext) {
+  context.res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=60, stale-while-revalidate=300'
+  );
   try {
     const data = await fetchAllHomeData();
     return { props: data };
   } catch (error) {
-    console.error('Build-time home fetch failed:', error);
+    console.error('Home fetch failed:', error);
     return { props: EMPTY_HOME_PROPS };
   }
 }
 
-export default function Home(bakedProps: HomeProps) {
-  const [data, setData] = useState<HomeProps | null>(bakedProps || null);
-  const dataRef = useRef<HomeProps | null>(bakedProps || null);
-  useEffect(() => { dataRef.current = data; }, [data]);
-
-  useEffect(() => {
-    let active = true;
-
-    const load = async (attempt: number) => {
-      try {
-        const homeProps = await fetchAllHomeData();
-        const merged = dataRef.current ? mergeHomeProps(dataRef.current, homeProps) : homeProps;
-        if (active) {
-          setData(merged);
-          dataRef.current = merged;
-        }
-        const isEmpty = merged.posts.length === 0 && merged.categories.length === 0;
-        if (isEmpty && attempt < 3) {
-          setTimeout(() => { if (active) load(attempt + 1); }, 1500 * (attempt + 1));
-        }
-      } catch (error) {
-        console.error('Error refetching home data:', error);
-        if (attempt < 3) {
-          setTimeout(() => { if (active) load(attempt + 1); }, 1500 * (attempt + 1));
-        }
-      }
-    };
-
-    load(0);
-    return () => { active = false; };
-  }, []);
-
-  if (!data) {
-    return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
-        <div className="w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
-        <p className="mt-4 text-sm text-gray-500">Loading The Sun…</p>
-      </div>
-    );
-  }
-
-  return <HomeInner {...data} />;
+export default function Home(props: HomeProps) {
+  return <HomeInner {...props} />;
 }

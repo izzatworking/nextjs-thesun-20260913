@@ -8,14 +8,11 @@ import {
   getTags,
   getTagsByIds,
   generatePostUrl,
-  categoryPathFromSlugs,
-  getTopStoriesWithCategories,
-  getPostsByCategoryWithChildren,
   getShortenedCategorySlug,
   getOriginalCategorySlug,
   setCategoryCache
 } from '@/lib/wordpress';
-import { GetStaticProps, GetStaticPaths } from 'next';
+import { GetServerSideProps } from 'next';
 import he from 'he';
 import {
   WPPost,
@@ -983,15 +980,15 @@ export default function ArticleRoute(ssgProps: Partial<PostProps> = {}) {
   return <Post {...resolvedData} />;
 }
 
-export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const segments = (params?.slug as string[]) || [];
-  const urlSlug = segments[segments.length - 1] || '';
+export const config = { maxDuration: 60 };
 
-  // The catch-all shell used by the SPA fallback (.htaccess / Cloudflare Pages
-  // function). Keep it as a pure client-side shell — no server data.
-  if (urlSlug === 'article-shell') {
-    return { props: {} };
-  }
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  context.res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=120, stale-while-revalidate=600'
+  );
+  const segments = (context.params?.slug as string[]) || [];
+  const urlSlug = segments[segments.length - 1] || '';
 
   // Clean category URLs (no /category/ prefix) are handled category-first:
   // nav paths like /news/malaysia map via NAV_CATEGORY_MAP, and flat paths
@@ -1027,9 +1024,9 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     }
 
     // Auxiliary data (categories, latest posts, all tags) is identical for
-    // every article page, so memoise it for the whole build instead of
-    // re-fetching it hundreds of times.
-    const { categories, allPosts, allTags } = await getSharedBuildData();
+    // every article page, so cache it briefly to avoid re-fetching on every
+    // request.
+    const { categories, allPosts, allTags } = await getSharedData();
 
     setCategoryCache(categories);
 
@@ -1067,133 +1064,32 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
       },
     };
   } catch (error) {
-    console.error('Error fetching post for /[...slug] SSG:', error);
+    console.error('Error fetching post for /[...slug] SSR:', error);
     return { notFound: true };
   }
 };
 
-let sharedBuildDataPromise: Promise<{
-  categories: WPCategory[];
-  allPosts: WPPostWithMedia[];
-  allTags: WPTag[];
-}> | null = null;
+let sharedDataCache: {
+  data: {
+    categories: WPCategory[];
+    allPosts: WPPostWithMedia[];
+    allTags: WPTag[];
+  };
+  expires: number;
+} | null = null;
 
-function getSharedBuildData() {
-  if (!sharedBuildDataPromise) {
-    sharedBuildDataPromise = Promise.all([
-      getCategories(),
-      getPosts(50),
-      getTags(),
-    ]).then(([categories, allPosts, allTags]) => ({
-      categories,
-      allPosts,
-      allTags,
-    }));
+async function getSharedData() {
+  const now = Date.now();
+  if (sharedDataCache && sharedDataCache.expires > now) {
+    return sharedDataCache.data;
   }
-  return sharedBuildDataPromise;
+  const [categories, allPosts, allTags] = await Promise.all([
+    getCategories(),
+    getPosts(50),
+    getTags(),
+  ]);
+  const data = { categories, allPosts, allTags };
+  sharedDataCache = { data, expires: now + 60_000 };
+  return data;
 }
 
-export const getStaticPaths: GetStaticPaths = async () => {
-  const paths: { params: { slug: string[] } }[] = [];
-  const uniquePaths = new Set<string>();
-  const categoryKey = new Set<string>();
-
-  const addCategory = (segments: string[]) => {
-    const key = segments.join('/');
-    if (!key || categoryKey.has(key)) return;
-    categoryKey.add(key);
-    uniquePaths.add(key);
-    paths.push({ params: { slug: segments } });
-  };
-
-  const addPost = (post: WPPostWithMedia) => {
-    if (!post || !post.slug) return;
-    const url = generatePostUrl(post);
-    const segments = url
-      .replace(/^\/+|\/+$/g, '')
-      .split('/')
-      .filter(Boolean);
-    if (segments.length < 2) return;
-    const key = segments.join('/');
-    if (categoryKey.has(key) || uniquePaths.has(key)) return;
-    uniquePaths.add(key);
-    paths.push({ params: { slug: segments } });
-  };
-
-  const addPostBySegments = (categoryPath: string, postSlug: string) => {
-    if (!categoryPath || !postSlug) return;
-    const segments = `${categoryPath}/${postSlug}`
-      .replace(/^\/+|\/+$/g, '')
-      .split('/')
-      .filter(Boolean);
-    if (segments.length < 2) return;
-    const key = segments.join('/');
-    if (categoryKey.has(key) || uniquePaths.has(key)) return;
-    uniquePaths.add(key);
-    paths.push({ params: { slug: segments } });
-  };
-
-  try {
-    const categories = await getCategories();
-    setCategoryCache(categories);
-
-    // Clean category URLs (category-first, no /category/ prefix): every
-    // category as a flat /{slug} page plus the nested nav paths like
-    // /news/malaysia. Article paths below are kept out of these keys.
-    categories.forEach((cat) => {
-      if (!cat?.slug) return;
-      addCategory([getShortenedCategorySlug(cat.slug)]);
-    });
-    Object.keys(NAV_CATEGORY_MAP).forEach((navPath) => {
-      const segments = navPath.replace(/^\/+|\/+$/g, '').split('/').filter(Boolean);
-      if (segments.length >= 1) addCategory(segments);
-    });
-
-    const [posts, topStories] = await Promise.all([
-      getPosts(100),
-      getTopStoriesWithCategories().catch(() => [] as WPPostWithMedia[]),
-    ]);
-
-    posts.forEach(addPost);
-    topStories.forEach(addPost);
-
-    // The header/most-viewed widgets fetch top stories from GraphQL directly
-    // (lib/queries), so pre-render those URLs too.
-    try {
-      const { getTopStories } = await import('@/lib/queries');
-      const graphTopStories: { slug: string; categories?: { nodes: { slug: string }[] } }[] =
-        (await getTopStories().catch(() => [])) as { slug: string; categories?: { nodes: { slug: string }[] } }[];
-      graphTopStories.forEach((t) => {
-        if (!t?.slug) return;
-        const slugs = (t.categories?.nodes || []).map((n) => n.slug);
-        addPostBySegments(categoryPathFromSlugs(slugs), t.slug);
-      });
-    } catch {
-      // ignore GraphQL top-stories failures
-    }
-
-    // Cover the homepage's per-section rails (opinion, asia, motoring,
-    // education, etc.). Include child categories (e.g. asia/football) whose
-    // posts are also linked from the homepage.
-    await Promise.all(categories.map(async (cat) => {
-      try {
-        const perPage = /opinion|pendapat/i.test(cat.name + ' ' + cat.slug) ? 60 : 20;
-        const sectionPosts = await getPostsByCategoryWithChildren(cat.id, perPage);
-        sectionPosts.forEach(addPost);
-      } catch {
-        // ignore section fetch failures
-      }
-    }));
-  } catch (error) {
-    console.error('Error generating paths for /[...slug]:', error);
-  }
-
-  // Keep the catch-all shell path for the SPA fallback (Cloudflare function /
-  // .htaccess both rewrite unknown article URLs to this shell).
-  paths.push({ params: { slug: ['article-shell'] } });
-
-  return {
-    paths,
-    fallback: false,
-  };
-};

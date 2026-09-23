@@ -1,4 +1,4 @@
-import { getCategories, getShortenedCategorySlug } from '../../lib/wordpress';
+import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import CategoryPage, { getCategoryContent } from '../../components/category/CategoryPage';
 import type { CategoryProps } from '../../components/category/CategoryPage';
@@ -13,17 +13,15 @@ export default function Category({ categoryData }: LegacyCategoryPageProps) {
   return <CategoryPage slug={slug} initialData={categoryData} />;
 }
 
-export const getStaticProps = async (context: { params?: Record<string, string | string[]> }) => {
+export const getServerSideProps: GetServerSideProps<LegacyCategoryPageProps> = async (context) => {
+  context.res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=120, stale-while-revalidate=600'
+  );
   const rawSlug = context.params?.slug;
   const slug = String(Array.isArray(rawSlug) ? rawSlug[0] : rawSlug) || '';
   const categoryData = await getCategoryContent(slug);
   return { props: { categoryData } };
-};
-
-export const getStaticPaths = async () => {
-  const cats = await getCategories();
-  const paths = cats.filter(c => c.slug).map(c => ({ params: { slug: getShortenedCategorySlug(c.slug) } }));
-  return { paths, fallback: false };
 };
 
 export const getCategoryContentExport = getCategoryContent;

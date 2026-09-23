@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { getPosts, getCategories, getPostUrl, setCategoryCache } from '../lib/wordpress';
 import { WPPostWithMedia, WPCategory } from '../types/wordpress';
@@ -91,39 +91,24 @@ function LatestNewsPageInner({ posts, categories }: LatestNewsPageProps) {
   );
 }
 
-export default function LatestNewsPage() {
-  const [data, setData] = useState<LatestNewsPageProps | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      try {
-        const categories = await getCategories();
-        setCategoryCache(categories);
-        const posts = await getPosts(20);
-
-        const result: LatestNewsPageProps = {
-          posts,
-          categories,
-        };
-        if (active) setData(result);
-      } catch (error) {
-        console.error(error);
-      }
-    })();
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  if (!data) {
-    return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
-        <div className="w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
-        <p className="mt-4 text-sm text-gray-500">Loading…</p>
-      </div>
-    );
-  }
-
-  return <LatestNewsPageInner {...data} />;
+export default function LatestNewsPage(props: LatestNewsPageProps) {
+  return <LatestNewsPageInner {...props} />;
 }
+
+export const getServerSideProps: GetServerSideProps<LatestNewsPageProps> = async (context) => {
+  context.res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=60, stale-while-revalidate=300'
+  );
+
+  try {
+    const categories = await getCategories();
+    setCategoryCache(categories);
+    const posts = await getPosts(20);
+
+    return { props: { posts, categories } };
+  } catch (error) {
+    console.error(error);
+    return { props: { posts: [], categories: [] } };
+  }
+};

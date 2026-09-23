@@ -1,17 +1,5 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ],
   "regions": ["sin1"],
   "env": {
     "NEXT_PUBLIC_SITE_URL": "https://thesun-next.vercel.app"
