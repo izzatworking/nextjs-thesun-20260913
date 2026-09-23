@@ -31,8 +31,25 @@ import type {
 const WORDPRESS_API_URL = process.env.NEXT_PUBLIC_WORDPRESS_REST_URL || 'https://thesun.my/wp-json/wp/v2';
 const GRAPHQL_URL = process.env.NEXT_PUBLIC_WORDPRESS_GRAPHQL_URL || 'https://thesun.my/thesun-api';
 
+// Prevent build-time requests from hanging indefinitely (Vercel static generation).
+const FETCH_TIMEOUT_MS = Number(process.env.WP_FETCH_TIMEOUT_MS || 20000);
+
+async function fetchWithTimeout(
+  input: RequestInfo | URL,
+  init: (RequestInit & Record<string, any>) = {},
+  timeoutMs = FETCH_TIMEOUT_MS
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export async function fetchAPI(query: string, variables: Record<string, any> = {}) {
-  const res = await fetch(GRAPHQL_URL, {
+  const res = await fetchWithTimeout(GRAPHQL_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -144,7 +161,7 @@ function processRESTPost(post: WPPost): WPPostWithMedia {
 }
 
 async function fetchRESTPosts(url: string): Promise<WPPostWithMedia[]> {
-  const res = await fetch(url, {
+  const res = await fetchWithTimeout(url, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -464,7 +481,9 @@ export async function getPostsByCategory(categoryId: number, perPage = 20): Prom
 
 export async function getPostsByCategoryWithChildren(parentCategoryId: number, perPage = 50): Promise<WPPostWithMedia[]> {
   try {
-    const allCategories = await getCategories();
+    const allCategories = (cachedCategories && cachedCategories.length > 0)
+      ? cachedCategories
+      : await getCategories();
     const childCategories = allCategories.filter(cat => cat.parent === parentCategoryId);
     const allCategoryIds = [parentCategoryId, ...childCategories.map(cat => cat.id)];
     const perCategory = Math.max(1, Math.ceil(perPage / allCategoryIds.length));
@@ -741,11 +760,10 @@ export async function getExclusivePosts(perPage = 10): Promise<WPPostWithMedia[]
   try {
     console.log('Fetching exclusive posts...');
     const possibleTagSlugs = ['exclusive', 'exclusive-story', 'exclusive-news', 'the-sun-exclusive', 'sun-exclusive'];
-    let exclusivePosts: WPPostWithMedia[] = [];
-    for (const tagSlug of possibleTagSlugs) {
-      const posts = await getPostsByTagSlug(tagSlug, perPage);
-      if (posts.length > 0) { exclusivePosts = posts; break; }
-    }
+    const tagResults = await Promise.all(
+      possibleTagSlugs.map((tagSlug) => getPostsByTagSlug(tagSlug, perPage))
+    );
+    let exclusivePosts: WPPostWithMedia[] = tagResults.find((posts) => posts.length > 0) || [];
     if (exclusivePosts.length === 0) {
       const allTags = await getTags();
       const exclusiveTags = allTags.filter(tag =>

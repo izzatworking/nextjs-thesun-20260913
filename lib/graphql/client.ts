@@ -20,8 +20,11 @@ const httpLink = new HttpLink({
     const url = typeof uri === 'string' ? uri : uri.toString();
     const cacheBuster = url.includes('?') ? '&_=' + Date.now() : '?_=' + Date.now();
     const finalUri = typeof uri === 'string' ? url + cacheBuster : uri;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 20000);
     return fetch(finalUri, {
       ...options,
+      signal: controller.signal,
       next: { revalidate: 0 },
       headers: {
         ...(options?.headers as Record<string, string>),
@@ -31,7 +34,7 @@ const httpLink = new HttpLink({
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',
       },
-    });
+    }).finally(() => clearTimeout(timeout));
   },
 });
 
