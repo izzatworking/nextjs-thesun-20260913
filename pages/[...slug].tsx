@@ -34,6 +34,8 @@ import CategoryPage, { getCategoryContent } from '@/components/category/Category
 import type { CategoryProps } from '@/components/category/CategoryPage';
 import { NAV_CATEGORY_MAP } from '@/components/layout/Header/navConfig';
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://thesun.my';
+
 interface PostProps {
   post: WPPostWithMedia;
   latestPosts: WPPostWithMedia[];
@@ -410,7 +412,7 @@ const MoreStoriesSection = ({
 // Social Share Component - minimal and modern
 const SocialShare = ({ title, post }: { title: string, post: WPPostWithMedia }) => {
   const articlePath = generatePostUrl(post);
-  const articleUrl = `https://thesun.my${articlePath}`;
+  const articleUrl = `${SITE_URL}${articlePath}`;
 
   const encodedTitle = encodeURIComponent(title);
   const encodedUrl = encodeURIComponent(articleUrl);
@@ -545,7 +547,7 @@ function Post({
   const [content, setContent] = useState('');
   
   const articlePath = generatePostUrl(post, categories);
-  const articleUrl = `https://thesun.my${articlePath}`;
+  const articleUrl = `${SITE_URL}${articlePath}`;
 
   useEffect(() => {
     if (post.content.rendered) {

@@ -178,7 +178,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (context) => 
 
   const rawSlug = context.params?.slug;
   const slug = String(Array.isArray(rawSlug) ? rawSlug[0] : rawSlug) || '';
-  const WORDPRESS_API_URL = 'https://thesun.my/wp-json/wp/v2';
+  const WORDPRESS_API_URL = process.env.NEXT_PUBLIC_WORDPRESS_REST_URL || 'https://thesun.my/wp-json/wp/v2';
 
   try {
     if (!slug) {

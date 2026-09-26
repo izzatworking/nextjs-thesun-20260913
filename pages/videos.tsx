@@ -33,7 +33,7 @@ interface TopStory {
   featuredImage?: { node: { sourceUrl: string; altText: string } };
 }
 
-const YOUTUBE_API_KEY = 'AIzaSyCexcmkW5KuyPUttlLqK91-l0yZo-NI6iM';
+const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY || '';
 
 type Tab = 'home' | 'videos' | 'shorts';
 

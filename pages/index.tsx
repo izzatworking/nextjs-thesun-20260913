@@ -29,6 +29,8 @@ import OpinionSection from '../components/home/categories/OpinionSection';
 import { cleanHtmlContent } from '../components/home/utils/contentCleaner';
 import AdvertisementBanner from '../components/home/AdvertisementBanner';
 
+const PINNED_TAG_ID = Number(process.env.PINNED_TAG_ID || 50048);
+
 interface HomeProps {
   posts: WPPost[];
   categories: WPCategory[];
@@ -323,7 +325,7 @@ async function fetchAllHomeData(): Promise<HomeProps> {
     getCategories(),
     getLatestExclusivePost(),
     getTags(),
-    getPostsByTag(50048, 5),
+    getPostsByTag(PINNED_TAG_ID, 5),
   ]);
 
   setCategoryCache(categories);

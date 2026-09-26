@@ -30,6 +30,14 @@ import type {
 
 const WORDPRESS_API_URL = process.env.NEXT_PUBLIC_WORDPRESS_REST_URL || 'https://thesun.my/wp-json/wp/v2';
 const GRAPHQL_URL = process.env.NEXT_PUBLIC_WORDPRESS_GRAPHQL_URL || 'https://thesun.my/thesun-api';
+const WORDPRESS_REST_ROOT = process.env.NEXT_PUBLIC_WORDPRESS_REST_ROOT || WORDPRESS_API_URL.replace(/\/wp\/v2\/?$/, '');
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://thesun.my';
+let WORDPRESS_ORIGIN = SITE_URL;
+try {
+  WORDPRESS_ORIGIN = new URL(WORDPRESS_API_URL).origin;
+} catch {
+  // keep fallback
+}
 
 // Prevent build-time requests from hanging indefinitely (Vercel static generation).
 const FETCH_TIMEOUT_MS = Number(process.env.WP_FETCH_TIMEOUT_MS || 20000);
@@ -167,7 +175,7 @@ async function fetchRESTPosts(url: string): Promise<WPPostWithMedia[]> {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
-      'Referer': 'https://thesun.my/',
+      'Referer': `${WORDPRESS_ORIGIN}/`,
       'Accept-Language': 'en-US,en;q=0.9',
       'Cache-Control': 'no-cache',
     },
@@ -521,7 +529,7 @@ export async function getMediaById(mediaId: number): Promise<WPMedia | null> {
 export async function getTopStories(): Promise<WPPostWithMedia[]> {
   try {
     console.log('Fetching top stories from custom API...');
-    const res = await fetch('https://thesun.my/wp-json/thesun/v1/top-stories', {
+    const res = await fetch(`${WORDPRESS_REST_ROOT}/thesun/v1/top-stories`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
       next: { revalidate: 60 }
@@ -1105,7 +1113,7 @@ export function getPostUrl(post: WPPostWithMedia | WPPost, allCategories?: WPCat
 export async function getTopStoriesWithCategories(): Promise<WPPostWithMedia[]> {
   try {
     console.log('Fetching top stories with categories...');
-    const res = await fetch('https://thesun.my/wp-json/thesun/v1/top-stories', {
+    const res = await fetch(`${WORDPRESS_REST_ROOT}/thesun/v1/top-stories`, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
       next: { revalidate: 60 }
@@ -1260,7 +1268,7 @@ export async function getAllAuthors(): Promise<WPAuthor[]> {
     while (hasMore && page <= 10) {
       try {
         const postsRes = await fetch(
-          `https://thesun.my/wp-json/wp/v2/posts?page=${page}&per_page=${perPage}`,
+          `${WORDPRESS_API_URL}/posts?page=${page}&per_page=${perPage}`,
           {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
@@ -1376,7 +1384,7 @@ export async function getAuthorPostCount(authorId: number, authorSlug?: string):
     const methods = [
       async () => {
         const res = await fetch(
-          `https://thesun.my/wp-json/wp/v2/posts?ppma_author=${authorId}&per_page=1`,
+          `${WORDPRESS_API_URL}/posts?ppma_author=${authorId}&per_page=1`,
           { method: 'GET', headers: { 'Content-Type': 'application/json' }, next: { revalidate: 300 } }
         );
         if (res.ok) {
@@ -1387,7 +1395,7 @@ export async function getAuthorPostCount(authorId: number, authorSlug?: string):
       },
       async () => {
         const res = await fetch(
-          `https://thesun.my/wp-json/wp/v2/posts?author=${authorId}&per_page=1`,
+          `${WORDPRESS_API_URL}/posts?author=${authorId}&per_page=1`,
           { method: 'GET', headers: { 'Content-Type': 'application/json' }, next: { revalidate: 300 } }
         );
         if (res.ok) {
@@ -1399,7 +1407,7 @@ export async function getAuthorPostCount(authorId: number, authorSlug?: string):
       async () => {
         if (!authorSlug) return 0;
         const res = await fetch(
-          `https://thesun.my/wp-json/wp/v2/posts?author_slug=${authorSlug}&per_page=1`,
+          `${WORDPRESS_API_URL}/posts?author_slug=${authorSlug}&per_page=1`,
           { method: 'GET', headers: { 'Content-Type': 'application/json' }, next: { revalidate: 300 } }
         );
         if (res.ok) {

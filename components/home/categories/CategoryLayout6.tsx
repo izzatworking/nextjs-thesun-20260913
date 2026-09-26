@@ -44,13 +44,10 @@ export default function CategoryLayout6({
 
   useEffect(() => {
     const fetchVideos = async () => {
-      const apiKey = 'AIzaSyCexcmkW5KuyPUttlLqK91-l0yZo-NI6iM';
       try {
-        const response = await fetch(
-          `https://www.googleapis.com/youtube/v3/search?key=${apiKey}&q=the+sun+malaysia&type=video&part=snippet,id&order=date&maxResults=10`
-        );
+        const response = await fetch('/api/youtube/videos?maxResults=10');
         const data = await response.json();
-        if (data.items) setVideos(data.items);
+        if (Array.isArray(data.items) && data.items.length > 0) setVideos(data.items);
       } catch (error) {
         console.error('Error fetching videos:', error);
       } finally {

@@ -1,5 +1,7 @@
 import Layout from '../components/layout/Layout';
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://thesun.my';
+
 export default function Advertise() {
   return (
     <Layout 
@@ -35,7 +37,7 @@ export default function Advertise() {
               <h2 className="text-3xl font-bold text-gray-900 mt-12 mb-8 text-center">Rate Cards</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
                 <a 
-                  href="https://thesun.my/wp-content/uploads/2025/10/theSun-RateCard-PRINT.pdf" 
+                  href={`${SITE_URL}/wp-content/uploads/2025/10/theSun-RateCard-PRINT.pdf`} 
                   target="_blank" 
                   rel="noopener noreferrer nofollow"
                   className="group block"
@@ -60,7 +62,7 @@ export default function Advertise() {
                 </a>
 
                 <a 
-                  href="https://thesun.my/wp-content/uploads/2025/10/theSun-Rate-Card-DIGITAL-2025.pdf" 
+                  href={`${SITE_URL}/wp-content/uploads/2025/10/theSun-Rate-Card-DIGITAL-2025.pdf`} 
                   target="_blank" 
                   rel="noopener noreferrer nofollow"
                   className="group block"

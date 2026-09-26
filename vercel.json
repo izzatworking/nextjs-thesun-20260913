@@ -2,6 +2,10 @@
   "version": 2,
   "regions": ["sin1"],
   "env": {
-    "NEXT_PUBLIC_SITE_URL": "https://thesun-next.vercel.app"
+    "NEXT_PUBLIC_SITE_URL": "https://thesun.my",
+    "NEXT_PUBLIC_WORDPRESS_REST_URL": "https://thesun.my/wp-json/wp/v2",
+    "NEXT_PUBLIC_WORDPRESS_GRAPHQL_URL": "https://thesun.my/thesun-api",
+    "NEXT_PUBLIC_WORDPRESS_REST_ROOT": "https://thesun.my/wp-json",
+    "PINNED_TAG_ID": "50048"
   }
 }

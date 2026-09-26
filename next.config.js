@@ -6,8 +6,6 @@ const nextConfig = {
     domains: [
       'localhost',
       'sunmedia-local.local',
-      '190.254.4.127',
-      '190.254.2.223',
       'thesun.my',
       'www.thesun.my',
     ],

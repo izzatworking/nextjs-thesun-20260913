@@ -52,8 +52,9 @@ export default function Header({ categories = [], isSidebarOpen: externalIsOpen,
     try {
       setIsLoading(true);
 
-      // Use only the public API - remove internal IP address
-      const apiUrl = 'https://thesun.my/wp-json/wp/v2/posts';
+      // Use the public REST API (configurable via env)
+      const restBase = process.env.NEXT_PUBLIC_WORDPRESS_REST_URL || 'https://thesun.my/wp-json/wp/v2';
+      const apiUrl = `${restBase}/posts`;
       console.log('📡 Fetching breaking news from API:', apiUrl);
 
       let response;

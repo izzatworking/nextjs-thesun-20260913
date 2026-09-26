@@ -6,6 +6,14 @@ const DEFAULT_GRAPHQL_URL = 'https://thesun.my/thesun-api';
 // Get GraphQL URL from environment variable or use default
 const graphqlUrl = process.env.NEXT_PUBLIC_WORDPRESS_GRAPHQL_URL || DEFAULT_GRAPHQL_URL;
 
+// Referer should match the WordPress origin
+let graphqlOrigin = 'https://thesun.my';
+try {
+  graphqlOrigin = new URL(graphqlUrl).origin;
+} catch {
+  // keep fallback
+}
+
 console.log('🔗 GraphQL URL:', graphqlUrl);
 
 // Create HTTP link
@@ -29,7 +37,7 @@ const httpLink = new HttpLink({
       headers: {
         ...(options?.headers as Record<string, string>),
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
-        'Referer': 'https://thesun.my/',
+        'Referer': `${graphqlOrigin}/`,
         'Accept-Language': 'en-US,en;q=0.9,ms;q=0.8',
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'Pragma': 'no-cache',

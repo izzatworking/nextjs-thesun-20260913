@@ -9,6 +9,8 @@ interface Props {
   categories: WPCategory[];
 }
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://thesun.my';
+
 export default function CountdownDemo({ categories }: Props) {
   const targetDate = new Date();
   targetDate.setDate(targetDate.getDate() + 15);
@@ -30,7 +32,7 @@ export default function CountdownDemo({ categories }: Props) {
         <CountdownBanner
           targetDate={targetDate}
           backgroundImage="/images/banner-wc-cd.png"
-          link="https://thesun.my"
+          link={SITE_URL}
         />
 
         <div className="mt-12 p-6 bg-gray-50 rounded-lg border border-gray-200">

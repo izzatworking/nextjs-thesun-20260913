@@ -1,7 +1,7 @@
-const API_HOST = 'v3.football.api-sports.io';
-const API_KEY = '454f2142ee0f7b3f31fd4d40a9dab2e2';
-const LEAGUE_ID = 1;
-const SEASON = 2022;
+const API_HOST = process.env.FOOTBALL_API_HOST || 'v3.football.api-sports.io';
+const API_KEY = process.env.FOOTBALL_API_KEY || '';
+const LEAGUE_ID = Number(process.env.FOOTBALL_LEAGUE_ID || 1);
+const SEASON = Number(process.env.FOOTBALL_SEASON || 2022);
 
 interface FootballTeam {
   id: number;
